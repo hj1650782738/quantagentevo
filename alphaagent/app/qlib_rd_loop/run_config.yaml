@@ -53,7 +53,7 @@ execution:
   use_local: true
   # Whether to run branches in parallel using multiprocessing
   # 是否使用多进程并行运行分支
-  parallel_execution: true
+  parallel_execution: false
   # Branch log root directory: effective only when parallel planning enabled with >1 branches
   # 分支日志根目录：仅在启用并行规划且分支数>1时有效
   branch_log_root: log
@@ -92,6 +92,20 @@ evolution:
   # crossover_n: 每轮交叉生成的组合数量（决定交叉后的并行度）
   crossover_n: 2
   
+  # Enable parallel execution within each evolution phase
+  # When true:
+  #   - Original round: all n directions run in parallel
+  #   - Mutation round: all mutation tasks run in parallel
+  #   - Crossover round: after selecting parent combinations, all combinations run in parallel
+  # When false: tasks run sequentially one by one
+  # 启用进化阶段内的并行执行
+  # 当为true时：
+  #   - 原始轮：所有n个方向并行运行
+  #   - 变异轮：所有变异任务并行运行
+  #   - 交叉轮：选择父代组合后，所有组合并行运行
+  # 当为false时：任务按顺序逐一运行
+  parallel_enabled: false
+  
   # Whether to prefer diverse crossover combinations
   # true: Prioritize combinations from different directions and phases
   # false: Random parent combination selection
@@ -112,7 +126,7 @@ evolution:
   # weighted: 性能加权采样（性能越低权重越高，鼓励探索）
   # best: 优先选择表现最好的轨迹
   # random: 随机选择
-  parent_selection_strategy: weighted
+  parent_selection_strategy: best
 
 
 # ============================================================

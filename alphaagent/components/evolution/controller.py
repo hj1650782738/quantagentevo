@@ -40,6 +40,10 @@ class EvolutionConfig:
     # Whether to prefer diverse crossover combinations
     prefer_diverse_crossover: bool = True
     
+    # Whether to enable parallel execution within each round
+    # 是否启用轮次内并行执行
+    parallel_enabled: bool = False
+    
     # Path to save trajectory pool
     pool_save_path: Optional[str] = None
     
@@ -145,6 +149,144 @@ class EvolutionController:
             return self._get_crossover_task()
         
         return None
+    
+    def get_all_tasks_for_current_phase(self) -> list[dict[str, Any]]:
+        """
+        Get all remaining tasks for the current phase.
+        
+        This is used for parallel execution - returns all tasks that can
+        be executed in parallel within the current round/phase.
+        
+        Returns:
+            List of task dictionaries, or empty list if phase is complete
+        """
+        # Check if we've reached max rounds
+        if self._current_round >= self.config.max_rounds:
+            return []
+        
+        tasks = []
+        
+        # Phase: ORIGINAL - collect all remaining original tasks
+        if self._current_phase == RoundPhase.ORIGINAL:
+            for d in range(self.config.num_directions):
+                if d not in self._directions_completed:
+                    tasks.append({
+                        "phase": RoundPhase.ORIGINAL,
+                        "direction_id": d,
+                        "parent_trajectories": [],
+                        "strategy_suffix": "",
+                        "round_idx": self._current_round,
+                    })
+            
+            # If no tasks, transition phase for next call
+            if not tasks:
+                self._current_phase = RoundPhase.MUTATION
+                self._current_round += 1
+                return self.get_all_tasks_for_current_phase()
+        
+        # Phase: MUTATION - collect all remaining mutation tasks
+        elif self._current_phase == RoundPhase.MUTATION:
+            # Prepare mutation targets if needed
+            if not self._mutation_targets:
+                self._prepare_mutation_targets()
+            
+            for idx, parent in enumerate(self._mutation_targets):
+                if idx < self._mutation_idx:
+                    continue  # Skip already processed
+                
+                # Check if this mutation already exists
+                existing = [t for t in self.pool.get_all()
+                           if t.round_idx == self._current_round 
+                           and t.phase == RoundPhase.MUTATION
+                           and parent.trajectory_id in t.parent_ids]
+                if existing:
+                    continue
+                
+                suffix = self.mutation_op.generate_mutation_prompt_suffix(parent)
+                tasks.append({
+                    "phase": RoundPhase.MUTATION,
+                    "direction_id": idx,
+                    "parent_trajectories": [parent],
+                    "strategy_suffix": suffix,
+                    "round_idx": self._current_round,
+                })
+            
+            # If no tasks, transition phase for next call
+            if not tasks:
+                self._prepare_crossover_groups()
+                self._current_phase = RoundPhase.CROSSOVER
+                self._current_round += 1
+                self._mutation_targets = []
+                self._mutation_idx = 0
+                return self.get_all_tasks_for_current_phase()
+        
+        # Phase: CROSSOVER - collect all remaining crossover tasks
+        elif self._current_phase == RoundPhase.CROSSOVER:
+            for idx in range(self._crossover_idx, len(self._crossover_groups)):
+                parents = self._crossover_groups[idx]
+                suffix = self.crossover_op.generate_crossover_prompt_suffix(parents)
+                tasks.append({
+                    "phase": RoundPhase.CROSSOVER,
+                    "direction_id": idx,
+                    "parent_trajectories": parents,
+                    "strategy_suffix": suffix,
+                    "round_idx": self._current_round,
+                })
+            
+            # If no tasks, transition phase for next call
+            if not tasks:
+                self._current_phase = RoundPhase.MUTATION
+                self._current_round += 1
+                return self.get_all_tasks_for_current_phase()
+        
+        return tasks
+    
+    def advance_phase_after_parallel_completion(self, completed_tasks: list[dict[str, Any]]):
+        """
+        Update controller state after parallel tasks complete.
+        
+        Called after all parallel tasks in a phase complete to 
+        advance the controller to the next phase.
+        
+        Args:
+            completed_tasks: List of completed task dictionaries
+        """
+        if not completed_tasks:
+            return
+        
+        phase = completed_tasks[0]["phase"]
+        
+        if phase == RoundPhase.ORIGINAL:
+            # Mark all directions as completed
+            for task in completed_tasks:
+                self._directions_completed.add(task["direction_id"])
+            
+            # Transition to mutation
+            if len(self._directions_completed) >= self.config.num_directions:
+                self._current_phase = RoundPhase.MUTATION
+                self._current_round += 1
+                logger.info(f"All original rounds complete, transitioning to mutation (round {self._current_round})")
+        
+        elif phase == RoundPhase.MUTATION:
+            # Update mutation index to skip completed
+            self._mutation_idx = len(self._mutation_targets)
+            
+            # Transition to crossover
+            self._prepare_crossover_groups()
+            self._current_phase = RoundPhase.CROSSOVER
+            self._current_round += 1
+            self._mutation_targets = []
+            self._mutation_idx = 0
+            logger.info(f"All mutation rounds complete, transitioning to crossover (round {self._current_round})")
+        
+        elif phase == RoundPhase.CROSSOVER:
+            # Update crossover index
+            self._crossover_idx = len(self._crossover_groups)
+            
+            # Transition to mutation
+            self._current_phase = RoundPhase.MUTATION
+            self._current_round += 1
+            logger.info(f"All crossover rounds complete, transitioning to mutation (round {self._current_round})")
     
     def _get_original_task(self) -> Optional[dict[str, Any]]:
         """Get next original round task."""

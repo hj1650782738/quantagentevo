@@ -57,12 +57,18 @@ def STD(df:pd.DataFrame):
 @datatype_adapter
 def SKEW(df:pd.DataFrame):
     """计算横截面偏度"""
-    return df.groupby('datetime').skew()
+    from scipy.stats import skew as scipy_skew
+    return df.groupby('datetime').transform(lambda x: scipy_skew(x.dropna(), nan_policy='omit') if len(x.dropna()) >= 3 else np.nan)
 
 @datatype_adapter
 def KURT(df:pd.DataFrame):
     """计算横截面峰度"""
-    return df.groupby('datetime').kurt()
+    from scipy.stats import kurtosis
+    # 使用 transform 保持原始索引结构
+    def calc_kurt(group):
+        k = kurtosis(group.dropna(), fisher=True, nan_policy='omit')
+        return pd.Series(k, index=group.index)
+    return df.groupby('datetime').transform(lambda x: kurtosis(x.dropna(), fisher=True, nan_policy='omit') if len(x.dropna()) >= 4 else np.nan)
 
 @datatype_adapter
 def MAX(df:pd.DataFrame):
@@ -79,6 +85,28 @@ def MEDIAN(df:pd.DataFrame):
     """计算横截面中位数"""
     return df.groupby('datetime').median()
 
+
+@datatype_adapter
+def TS_KURT(df:pd.DataFrame, p:int=5):
+    """计算时间序列的滚动峰度 (Rolling Kurtosis)"""
+    from scipy.stats import kurtosis
+    def rolling_kurt(x):
+        return x.rolling(p, min_periods=min(4, p)).apply(
+            lambda arr: kurtosis(arr, fisher=True, nan_policy='omit') if len(arr.dropna()) >= 4 else np.nan,
+            raw=False
+        )
+    return df.groupby('instrument').transform(rolling_kurt)
+
+@datatype_adapter
+def TS_SKEW(df:pd.DataFrame, p:int=5):
+    """计算时间序列的滚动偏度 (Rolling Skewness)"""
+    from scipy.stats import skew as scipy_skew
+    def rolling_skew(x):
+        return x.rolling(p, min_periods=min(3, p)).apply(
+            lambda arr: scipy_skew(arr, nan_policy='omit') if len(arr.dropna()) >= 3 else np.nan,
+            raw=False
+        )
+    return df.groupby('instrument').transform(rolling_skew)
 
 @datatype_adapter
 def TS_RANK(df:pd.DataFrame, p:int=5):

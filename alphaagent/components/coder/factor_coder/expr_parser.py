@@ -322,9 +322,88 @@ def check_parentheses_balance(expr):
 expr.setParseAction(parse_entire_expression) # check_parentheses_balance, 
 # expr.setDebug()
 
+def preprocess_unary_minus(factor_expression):
+    """
+    预处理表达式中的一元负号，将其转换为 (-1 * ...) 的形式。
+    
+    处理模式：
+    - "A * -B" -> "A * (-1 * B)"
+    - "A * -(B)" -> "A * (-1 * (B))"
+    - "A / -B" -> "A / (-1 * B)"
+    
+    这样可以让解析器正确处理一元负号。
+    """
+    import re
+    
+    # 模式1: 处理 "* -(" 或 "/ -(" -> "* (-1 * (" 或 "/ (-1 * ("
+    # 例如: "A * -(B + C)" -> "A * (-1 * (B + C))"
+    factor_expression = re.sub(
+        r'(\*\s*)-(\s*\()',
+        r'\1(-1 * \2',
+        factor_expression
+    )
+    factor_expression = re.sub(
+        r'(/\s*)-(\s*\()',
+        r'\1(-1 * \2',
+        factor_expression
+    )
+    
+    # 模式2: 处理 "* -函数名(" 或 "/ -函数名("
+    # 例如: "A * -DELAY($close, 1)" -> "A * (-1 * DELAY($close, 1))"
+    factor_expression = re.sub(
+        r'(\*\s*)-(\s*[A-Za-z_][A-Za-z0-9_]*\s*\()',
+        r'\1(-1 * \2',
+        factor_expression
+    )
+    factor_expression = re.sub(
+        r'(/\s*)-(\s*[A-Za-z_][A-Za-z0-9_]*\s*\()',
+        r'\1(-1 * \2',
+        factor_expression
+    )
+    
+    # 模式3: 处理 "* -$变量" 或 "/ -$变量"
+    # 例如: "A * -$close" -> "A * (-1 * $close)"
+    factor_expression = re.sub(
+        r'(\*\s*)-(\s*\$[A-Za-z_][A-Za-z0-9_]*)',
+        r'\1(-1 * \2)',
+        factor_expression
+    )
+    factor_expression = re.sub(
+        r'(/\s*)-(\s*\$[A-Za-z_][A-Za-z0-9_]*)',
+        r'\1(-1 * \2)',
+        factor_expression
+    )
+    
+    # 模式4: 处理 "+ -(" 或 "- -(" (加减法后的一元负号)
+    factor_expression = re.sub(
+        r'(\+\s*)-(\s*\()',
+        r'\1(-1 * \2',
+        factor_expression
+    )
+    factor_expression = re.sub(
+        r'(-\s*)-(\s*\()',
+        r'\1(-1 * \2',
+        factor_expression
+    )
+    
+    # 确保括号平衡：为上面添加的 (-1 * 补充闭合括号
+    # 统计添加的开括号数量
+    # 这里采用简单方法：检查是否有未闭合的括号
+    open_count = factor_expression.count('(')
+    close_count = factor_expression.count(')')
+    if open_count > close_count:
+        factor_expression += ')' * (open_count - close_count)
+    
+    return factor_expression
+
+
 def parse_expression(factor_expression):
     check_parentheses_balance(factor_expression)
     check_for_invalid_operators(factor_expression)
+    
+    # 预处理一元负号
+    factor_expression = preprocess_unary_minus(factor_expression)
+    
     print("factor_expression: ", factor_expression)
     
     parsed_data_function = expr.parseString(factor_expression)[0]
