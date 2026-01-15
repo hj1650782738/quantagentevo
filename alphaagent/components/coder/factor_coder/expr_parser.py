@@ -176,8 +176,51 @@ def parse_conditional_expression(s, loc, tokens):
     B = ''.join(flatten_nested_tokens(B))
     C = ''.join(flatten_nested_tokens(C))
 
-    # 将结果转换为带有datetime和instrument双重索引的Series
-    return f"pd.Series(np.where({A}, {B}, {C}), index=({A}).index)"
+    # 使用 WHERE 函数处理索引对齐
+    # 优先使用条件 A 的索引，如果 A 不是 DataFrame/Series，则使用 B 或 C 的索引
+    return f"WHERE({A}, {B}, {C})"
+
+# 定义比较运算符的解析函数
+def parse_comparison_op(s, loc, tokens):
+    """解析比较操作符，转换为函数调用以处理索引对齐"""
+    def recursive_build_comparison(tokens):
+        if len(tokens) == 3:
+            A, op, B = tokens
+            return build_comparison(A, op, B)
+        else:
+            left = tokens[:-2]
+            op = tokens[-2]
+            right = tokens[-1]
+            left_expr = recursive_build_comparison(left)
+            return build_comparison(left_expr, op, right)
+    
+    def build_comparison(A, op, B):
+        A = ''.join(flatten_nested_tokens([A]))
+        B = ''.join(flatten_nested_tokens([B]))
+        A_is_number = is_number(A)
+        B_is_number = is_number(B)
+        
+        # 如果都是数字，直接比较
+        if A_is_number and B_is_number:
+            return f"{A}{op}{B}"
+        
+        # 映射操作符到函数名
+        op_map = {
+            '>': 'GT',
+            '<': 'LT',
+            '>=': 'GE',
+            '<=': 'LE',
+            '==': 'EQ',
+            '!=': 'NE'
+        }
+        
+        func_name = op_map.get(op)
+        if func_name:
+            return f"{func_name}({A}, {B})"
+        else:
+            raise NotImplementedError(f"比较操作符 '{op}' 未实现")
+    
+    return recursive_build_comparison(tokens[0])
 
 # 定义逻辑运算符的解析函数
 def parse_logical_expression(s, loc, tokens):
@@ -264,7 +307,7 @@ expr <<= infixNotation(operand,
     [
         (mul_div, 2, opAssoc.LEFT, parse_arith_op),
         (add_minus, 2, opAssoc.LEFT, parse_arith_op),
-        (comparison_op, 2, opAssoc.LEFT),
+        (comparison_op, 2, opAssoc.LEFT, parse_comparison_op),
         (logical_and, 2, opAssoc.LEFT, parse_logical_expression),
         (logical_or, 2, opAssoc.LEFT, parse_logical_expression),
         (conditional_op, 3, opAssoc.RIGHT, parse_conditional_expression)

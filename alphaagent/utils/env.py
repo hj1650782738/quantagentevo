@@ -118,12 +118,19 @@ class LocalEnv(Env[LocalConf]):
 class QlibLocalEnv(LocalEnv):
     """本地运行Qlib环境，替代Docker容器"""
     
-    def __init__(self):
+    def __init__(self, timeout: int = 3600):
+        """
+        初始化本地Qlib环境
+        
+        Args:
+            timeout: 命令执行超时时间（秒），默认3600秒（1小时）
+        """
         conf = LocalConf(
             py_bin="python",
             default_entry="qrun conf.yaml"
         )
         super().__init__(conf)
+        self.timeout = timeout
     
     def prepare(self):
         """确保本地环境已准备就绪"""
@@ -138,11 +145,27 @@ class QlibLocalEnv(LocalEnv):
         entry: str | None = None, 
         local_path: Optional[str] = None, 
         env: dict | None = None,
+        timeout: Optional[int] = None,
         **kwargs
     ) -> str:
-        """在本地运行命令"""
+        """
+        在本地运行命令
+        
+        Args:
+            entry: 要执行的命令
+            local_path: 工作目录
+            env: 环境变量
+            timeout: 超时时间（秒），如果为None则使用实例的timeout属性
+            **kwargs: 其他参数
+            
+        Returns:
+            命令的标准输出
+        """
         if env is None:
             env = {}
+        
+        # 使用传入的timeout或实例的timeout
+        exec_timeout = timeout if timeout is not None else self.timeout
             
         if entry is None:
             entry = self.conf.default_entry
@@ -153,6 +176,7 @@ class QlibLocalEnv(LocalEnv):
         table.add_column("Value", style="bold magenta")
         table.add_row("Entry", entry)
         table.add_row("Working Directory", local_path)
+        table.add_row("Timeout", f"{exec_timeout} seconds")
         table.add_row("Environment Variables", "\n".join(f"{k}:{v}" for k, v in env.items()))
         print(table)
         
@@ -166,38 +190,36 @@ class QlibLocalEnv(LocalEnv):
             
         print(Rule("[bold green]开始本地执行[/bold green]", style="dark_orange"))
         
-        # 运行命令
-        result = subprocess.run(
-            command, 
-            cwd=cwd, 
-            env={**os.environ, **env}, 
-            capture_output=True, 
-            text=True
-        )
-        
-        # 输出结果
-        output = result.stdout
-        print(output)
-        
-        if result.stderr:
-            # 转义特殊字符以避免Rich markdown解析错误
-            # 使用markup=False避免解析markdown中的特殊字符（如[/<m>]）
-            console = Console()
-            # 判断是否为真正的错误（返回码非0）还是正常的日志输出
+        try:
+            # 运行命令，添加超时
+            result = subprocess.run(
+                command, 
+                cwd=cwd, 
+                env={**os.environ, **env}, 
+                capture_output=True, 
+                text=True,
+                timeout=exec_timeout
+            )
+            
+            # 输出结果
+            output = result.stdout
+            print(output)
+            
+            if result.stderr:
+                print(f"[stderr]: {result.stderr}")
+            
             if result.returncode != 0:
-                console.print("[bold red]错误输出:[/bold red]")
-                console.print(result.stderr, markup=False)
-            else:
-                # 返回码为0时，stderr通常是正常的日志输出（如qlib的INFO日志）
-                console.print("[dim]日志输出:[/dim]")
-                console.print(result.stderr, markup=False)
+                error_msg = f"Command failed with return code {result.returncode}"
+                if result.stderr:
+                    error_msg += f"\nError: {result.stderr}"
+                logger.error(error_msg)
+                raise RuntimeError(error_msg)
             
-        print(Rule("[bold green]本地执行结束[/bold green]", style="dark_orange"))
-        
-        if result.returncode != 0:
-            logger.error(f"命令执行失败: {result.stderr}")
-            
-        return output
+            return output
+        except subprocess.TimeoutExpired:
+            error_msg = f"Command execution timeout after {exec_timeout} seconds"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
 
 ## Docker Environment -----
@@ -482,21 +504,48 @@ class DockerEnv(Env[DockerConf]):
 class QTDockerEnv(DockerEnv):
     """Qlib运行环境，可选择Docker或本地环境"""
 
-    def __init__(self, conf: DockerConf = QlibDockerConf(), is_local=False):
+    def __init__(self, conf: DockerConf = QlibDockerConf(), is_local=False, timeout: Optional[int] = None):
+        """
+        初始化Qlib运行环境
+        
+        Args:
+            conf: Docker配置（仅用于Docker模式）
+            is_local: 是否使用本地环境（True）还是Docker（False）
+            timeout: 超时时间（秒），如果为None则使用默认值（本地：3600秒，Docker：使用conf.running_timeout_period）
+        """
         self.is_local = is_local
         if is_local:
-            self.env = QlibLocalEnv()
+            # 本地环境：使用传入的timeout或默认3600秒
+            local_timeout = timeout if timeout is not None else 3600
+            self.env = QlibLocalEnv(timeout=local_timeout)
         else:
+            # Docker环境：如果传入了timeout，更新conf
+            if timeout is not None:
+                conf.running_timeout_period = timeout
             self.env = DockerEnv(conf)
 
     def prepare(self):
         """准备环境"""
         self.env.prepare()
 
-    def run(self, local_path=None, entry=None, env=None, running_extra_volume=None):
-        """运行命令"""
-        return self.env.run(entry=entry, local_path=local_path, env=env, 
-                          running_extra_volume=running_extra_volume if not self.is_local else None)
+    def run(self, local_path=None, entry=None, env=None, running_extra_volume=None, timeout: Optional[int] = None):
+        """
+        运行命令
+        
+        Args:
+            local_path: 工作目录
+            entry: 要执行的命令
+            env: 环境变量
+            running_extra_volume: Docker额外卷（仅用于Docker模式）
+            timeout: 超时时间（秒），如果为None则使用初始化时的timeout
+        """
+        if self.is_local:
+            # 本地环境：传递timeout参数
+            return self.env.run(entry=entry, local_path=local_path, env=env, timeout=timeout)
+        else:
+            # Docker环境：timeout已经在初始化时设置到conf中
+            return self.env.run(entry=entry, local_path=local_path, env=env, 
+                              running_extra_volume=running_extra_volume)
 
 
 class DMDockerEnv(DockerEnv):

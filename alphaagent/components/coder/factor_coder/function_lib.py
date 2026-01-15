@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import operator
 from joblib import Parallel, delayed
 
 
@@ -821,23 +822,325 @@ def TS_PCTCHANGE(df: pd.DataFrame, p: int = 1):
 
 
 def ADD(df1, df2):
-    return np.add(df1, df2)
-        
-        
+    """加法运算，自动处理索引对齐"""
+    return _arithmetic_with_alignment(df1, df2, np.add)
+
 def SUBTRACT(df1, df2):
-    return np.subtract(df1, df2)
-    
+    """减法运算，自动处理索引对齐"""
+    return _arithmetic_with_alignment(df1, df2, np.subtract)
+
 def MULTIPLY(df1, df2):
-    return np.multiply(df1, df2)
-    
+    """乘法运算，自动处理索引对齐"""
+    return _arithmetic_with_alignment(df1, df2, np.multiply)
+
 def DIVIDE(df1, df2):
-    return np.divide(df1, df2)
+    """除法运算，自动处理索引对齐"""
+    return _arithmetic_with_alignment(df1, df2, np.divide)
+
+def _arithmetic_with_alignment(df1, df2, op_func):
+    """
+    算术运算，自动处理索引对齐
+    
+    参数:
+        df1: 第一个操作数
+        df2: 第二个操作数
+        op_func: 算术操作函数（np.add, np.subtract 等）
+    
+    返回:
+        运算结果的 Series/DataFrame
+    """
+    # 如果都是标量，直接运算
+    if not isinstance(df1, (pd.DataFrame, pd.Series)) and not isinstance(df2, (pd.DataFrame, pd.Series)):
+        return op_func(df1, df2)
+    
+    # 如果一个是标量，另一个是 DataFrame/Series，numpy 会自动广播
+    if not isinstance(df1, (pd.DataFrame, pd.Series)):
+        return op_func(df1, df2)
+    if not isinstance(df2, (pd.DataFrame, pd.Series)):
+        return op_func(df1, df2)
+    
+    # 两个都是 DataFrame/Series，需要处理索引对齐
+    # 如果 df1 是 MultiIndex 而 df2 不是，需要将 df2 广播到与 df1 相同的结构
+    if isinstance(df1.index, pd.MultiIndex) and not isinstance(df2.index, pd.MultiIndex):
+        # df2 只有 datetime 索引（来自截面函数如 MEAN, MEDIAN），需要广播到 (datetime, instrument) MultiIndex
+        datetime_level = df1.index.get_level_values('datetime')
+        # 将 df2 的索引对齐到 df1 的 datetime 层级
+        if isinstance(df2, pd.DataFrame):
+            df2_aligned = df2.reindex(datetime_level, method='ffill')
+        else:  # Series
+            df2_aligned = df2.reindex(datetime_level, method='ffill')
+        # 创建与 df1 相同的 MultiIndex
+        df2_aligned.index = df1.index
+        df2 = df2_aligned
+    elif not isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+        # df1 只有 datetime 索引，df2 是 MultiIndex，需要将 df1 广播
+        datetime_level = df2.index.get_level_values('datetime')
+        if isinstance(df1, pd.DataFrame):
+            df1_aligned = df1.reindex(datetime_level, method='ffill')
+        else:  # Series
+            df1_aligned = df1.reindex(datetime_level, method='ffill')
+        df1_aligned.index = df2.index
+        df1 = df1_aligned
+    elif not df1.index.equals(df2.index):
+        # 两个索引结构不同，尝试对齐
+        try:
+            if isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+                # 两个都是 MultiIndex，尝试对齐
+                df2 = df2.reindex(df1.index)
+            else:
+                # 尝试直接对齐
+                df2 = df2.reindex(df1.index)
+        except Exception:
+            # 如果对齐失败，尝试使用 pandas 的自动对齐
+            pass
+    
+    # 执行算术运算
+    try:
+        result = op_func(df1, df2)
+    except (ValueError, TypeError) as e:
+        # 如果还是失败，强制对齐索引
+        if 'identically-labeled' in str(e) or 'Can only compare' in str(e) or 'index' in str(e).lower():
+            # 强制对齐索引
+            if isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+                df2 = df2.reindex(df1.index, fill_value=0)
+            elif isinstance(df1.index, pd.MultiIndex):
+                datetime_level = df1.index.get_level_values('datetime')
+                df2 = df2.reindex(datetime_level, method='ffill')
+                df2.index = df1.index
+            result = op_func(df1, df2)
+        else:
+            raise
+    
+    return result
     
 def AND(df1, df2):
-    return np.bitwise_and(df1.astype(np.bool_), df2.astype(np.bool_))
+    """逻辑与运算，自动处理索引对齐"""
+    df1_aligned, df2_aligned = _align_for_operation(df1, df2)
+    return np.bitwise_and(df1_aligned.astype(np.bool_), df2_aligned.astype(np.bool_))
 
 def OR(df1, df2):
-    return np.bitwise_or(df1.astype(np.bool_), df2.astype(np.bool_))
+    """逻辑或运算，自动处理索引对齐"""
+    df1_aligned, df2_aligned = _align_for_operation(df1, df2)
+    return np.bitwise_or(df1_aligned.astype(np.bool_), df2_aligned.astype(np.bool_))
+
+def WHERE(condition, true_value, false_value):
+    """
+    条件表达式，自动处理索引对齐
+    
+    参数:
+        condition: 条件表达式（布尔值）
+        true_value: 条件为真时的值
+        false_value: 条件为假时的值
+    
+    返回:
+        根据条件选择的值
+    """
+    
+    # 对齐所有三个参数的索引
+    # 确定目标索引（优先使用 condition 的索引）
+    if isinstance(condition, (pd.DataFrame, pd.Series)):
+        target_index = condition.index
+    elif isinstance(true_value, (pd.DataFrame, pd.Series)):
+        target_index = true_value.index
+    elif isinstance(false_value, (pd.DataFrame, pd.Series)):
+        target_index = false_value.index
+    else:
+        # 都是标量，直接使用 np.where
+        return np.where(condition, true_value, false_value)
+    
+    # 对齐 true_value 和 false_value 到 target_index
+    if isinstance(true_value, (pd.DataFrame, pd.Series)) and not true_value.index.equals(target_index):
+        if isinstance(target_index, pd.MultiIndex) and not isinstance(true_value.index, pd.MultiIndex):
+            datetime_level = target_index.get_level_values('datetime')
+            true_value = true_value.reindex(datetime_level, method='ffill')
+            true_value.index = target_index
+        else:
+            true_value = true_value.reindex(target_index, fill_value=0)
+    
+    if isinstance(false_value, (pd.DataFrame, pd.Series)) and not false_value.index.equals(target_index):
+        if isinstance(target_index, pd.MultiIndex) and not isinstance(false_value.index, pd.MultiIndex):
+            datetime_level = target_index.get_level_values('datetime')
+            false_value = false_value.reindex(datetime_level, method='ffill')
+            false_value.index = target_index
+        else:
+            false_value = false_value.reindex(target_index, fill_value=0)
+    
+    # 对齐 condition
+    if isinstance(condition, (pd.DataFrame, pd.Series)) and not condition.index.equals(target_index):
+        condition = condition.reindex(target_index, fill_value=False)
+    
+    # 执行条件选择
+    result = np.where(condition, true_value, false_value)
+    
+    # 如果结果是数组，转换为 Series
+    if isinstance(result, np.ndarray) and isinstance(target_index, pd.MultiIndex):
+        result = pd.Series(result, index=target_index)
+    elif isinstance(result, np.ndarray) and isinstance(target_index, pd.Index):
+        result = pd.Series(result, index=target_index)
+    
+    return result
+
+def _align_for_operation(df1, df2):
+    """
+    对齐两个 DataFrame/Series 的索引，用于二元运算
+    
+    参数:
+        df1: 第一个操作数
+        df2: 第二个操作数
+    
+    返回:
+        (df1_aligned, df2_aligned): 对齐后的两个操作数
+    """
+    # 如果都是标量，直接返回
+    if not isinstance(df1, (pd.DataFrame, pd.Series)) and not isinstance(df2, (pd.DataFrame, pd.Series)):
+        return df1, df2
+    
+    # 如果一个是标量，另一个是 DataFrame/Series，直接返回（numpy 会自动广播）
+    if not isinstance(df1, (pd.DataFrame, pd.Series)):
+        return df1, df2
+    if not isinstance(df2, (pd.DataFrame, pd.Series)):
+        return df1, df2
+    
+    # 两个都是 DataFrame/Series，需要处理索引对齐
+    # 如果 df1 是 MultiIndex 而 df2 不是，需要将 df2 广播到与 df1 相同的结构
+    if isinstance(df1.index, pd.MultiIndex) and not isinstance(df2.index, pd.MultiIndex):
+        # df2 只有 datetime 索引（来自截面函数如 MEAN, MEDIAN），需要广播到 (datetime, instrument) MultiIndex
+        datetime_level = df1.index.get_level_values('datetime')
+        # 将 df2 的索引对齐到 df1 的 datetime 层级
+        if isinstance(df2, pd.DataFrame):
+            df2_aligned = df2.reindex(datetime_level, method='ffill')
+        else:  # Series
+            df2_aligned = df2.reindex(datetime_level, method='ffill')
+        # 创建与 df1 相同的 MultiIndex
+        df2_aligned.index = df1.index
+        return df1, df2_aligned
+    elif not isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+        # df1 只有 datetime 索引，df2 是 MultiIndex，需要将 df1 广播
+        datetime_level = df2.index.get_level_values('datetime')
+        if isinstance(df1, pd.DataFrame):
+            df1_aligned = df1.reindex(datetime_level, method='ffill')
+        else:  # Series
+            df1_aligned = df1.reindex(datetime_level, method='ffill')
+        df1_aligned.index = df2.index
+        return df1_aligned, df2
+    elif not df1.index.equals(df2.index):
+        # 两个索引结构不同，尝试对齐
+        try:
+            if isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+                # 两个都是 MultiIndex，尝试对齐
+                df2_aligned = df2.reindex(df1.index)
+                return df1, df2_aligned
+            else:
+                # 尝试直接对齐
+                df2_aligned = df2.reindex(df1.index)
+                return df1, df2_aligned
+        except Exception:
+            # 如果对齐失败，返回原值（让调用者处理）
+            return df1, df2
+    
+    # 索引已经对齐
+    return df1, df2
+
+def GT(df1, df2):
+    """大于比较，自动处理索引对齐"""
+    return _compare_with_alignment(df1, df2, operator.gt)
+
+def LT(df1, df2):
+    """小于比较，自动处理索引对齐"""
+    return _compare_with_alignment(df1, df2, operator.lt)
+
+def GE(df1, df2):
+    """大于等于比较，自动处理索引对齐"""
+    return _compare_with_alignment(df1, df2, operator.ge)
+
+def LE(df1, df2):
+    """小于等于比较，自动处理索引对齐"""
+    return _compare_with_alignment(df1, df2, operator.le)
+
+def EQ(df1, df2):
+    """等于比较，自动处理索引对齐"""
+    return _compare_with_alignment(df1, df2, operator.eq)
+
+def NE(df1, df2):
+    """不等于比较，自动处理索引对齐"""
+    return _compare_with_alignment(df1, df2, operator.ne)
+
+def _compare_with_alignment(df1, df2, op_func):
+    """
+    比较两个 DataFrame/Series，自动处理索引对齐
+    
+    参数:
+        df1: 第一个操作数
+        df2: 第二个操作数
+        op_func: 比较操作函数（operator.gt, operator.lt 等）
+    
+    返回:
+        比较结果的 Series/DataFrame
+    """
+    
+    # 如果都是标量，直接比较
+    if not isinstance(df1, (pd.DataFrame, pd.Series)) and not isinstance(df2, (pd.DataFrame, pd.Series)):
+        return op_func(df1, df2)
+    
+    # 如果一个是标量，另一个是 DataFrame/Series
+    if not isinstance(df1, (pd.DataFrame, pd.Series)):
+        return op_func(df2, df1) if op_func in [operator.lt, operator.le] else op_func(df1, df2)
+    if not isinstance(df2, (pd.DataFrame, pd.Series)):
+        return op_func(df1, df2)
+    
+    # 两个都是 DataFrame/Series，需要处理索引对齐
+    # 如果 df1 是 MultiIndex 而 df2 不是，需要将 df2 广播到与 df1 相同的结构
+    if isinstance(df1.index, pd.MultiIndex) and not isinstance(df2.index, pd.MultiIndex):
+        # df2 只有 datetime 索引（来自截面函数如 MEAN, MEDIAN），需要广播到 (datetime, instrument) MultiIndex
+        datetime_level = df1.index.get_level_values('datetime')
+        # 将 df2 的索引对齐到 df1 的 datetime 层级
+        if isinstance(df2, pd.DataFrame):
+            df2_aligned = df2.reindex(datetime_level, method='ffill')
+        else:  # Series
+            df2_aligned = df2.reindex(datetime_level, method='ffill')
+        # 创建与 df1 相同的 MultiIndex
+        df2_aligned.index = df1.index
+        df2 = df2_aligned
+    elif not isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+        # df1 只有 datetime 索引，df2 是 MultiIndex，需要将 df1 广播
+        datetime_level = df2.index.get_level_values('datetime')
+        if isinstance(df1, pd.DataFrame):
+            df1_aligned = df1.reindex(datetime_level, method='ffill')
+        else:  # Series
+            df1_aligned = df1.reindex(datetime_level, method='ffill')
+        df1_aligned.index = df2.index
+        df1 = df1_aligned
+    elif not df1.index.equals(df2.index):
+        # 两个索引结构不同，尝试对齐
+        try:
+            if isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+                # 两个都是 MultiIndex，尝试对齐
+                df2 = df2.reindex(df1.index)
+            else:
+                # 尝试直接对齐
+                df2 = df2.reindex(df1.index)
+        except Exception:
+            # 如果对齐失败，尝试使用 pandas 的自动对齐
+            pass
+    
+    # 执行比较操作
+    try:
+        result = op_func(df1, df2)
+    except (ValueError, TypeError) as e:
+        # 如果还是失败，尝试使用 numpy 的比较
+        if 'identically-labeled' in str(e) or 'Can only compare' in str(e):
+            # 强制对齐索引
+            if isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+                df2 = df2.reindex(df1.index, fill_value=0)
+            elif isinstance(df1.index, pd.MultiIndex):
+                datetime_level = df1.index.get_level_values('datetime')
+                df2 = df2.reindex(datetime_level, method='ffill')
+                df2.index = df1.index
+            result = op_func(df1, df2)
+        else:
+            raise
+    
+    return result
 
 
 
