@@ -180,7 +180,17 @@ class QlibLocalEnv(LocalEnv):
         print(output)
         
         if result.stderr:
-            print(f"[bold red]错误输出:[/bold red] {result.stderr}")
+            # 转义特殊字符以避免Rich markdown解析错误
+            # 使用markup=False避免解析markdown中的特殊字符（如[/<m>]）
+            console = Console()
+            # 判断是否为真正的错误（返回码非0）还是正常的日志输出
+            if result.returncode != 0:
+                console.print("[bold red]错误输出:[/bold red]")
+                console.print(result.stderr, markup=False)
+            else:
+                # 返回码为0时，stderr通常是正常的日志输出（如qlib的INFO日志）
+                console.print("[dim]日志输出:[/dim]")
+                console.print(result.stderr, markup=False)
             
         print(Rule("[bold green]本地执行结束[/bold green]", style="dark_orange"))
         

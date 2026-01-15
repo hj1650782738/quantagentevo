@@ -47,13 +47,13 @@ def force_timeout():
 
 
 @force_timeout()
-def main(path=None, step_n=None, direction=None, stop_event=None):
+def main(path=None, step_n=100, direction=None, stop_event=None):
     """
     Autonomous alpha factor mining. 
 
     Args:
         path: 会话路径
-        step_n: 步骤数
+        step_n: 步骤数，默认100（20个循环 * 5个步骤/循环）
         direction: 初始方向
         stop_event: 停止事件
 

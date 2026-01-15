@@ -82,8 +82,9 @@ class Graph(KnowledgeBase):
     @staticmethod
     def batch_embedding(nodes: list[Node]) -> list[Node]:
         contents = [node.content for node in nodes]
-        # openai create embedding API input's max length is 16
-        size = 16
+        # 使用配置的批次大小，避免硬编码
+        from alphaagent.oai.llm_conf import LLM_SETTINGS
+        size = LLM_SETTINGS.embedding_max_str_num
         embeddings = []
         for i in range(0, len(contents), size):
             embeddings.extend(

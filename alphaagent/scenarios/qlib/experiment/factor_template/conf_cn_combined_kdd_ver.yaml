@@ -1,13 +1,13 @@
 qlib_init:
-    provider_uri: "~/.qlib/qlib_data/cn_data"
+    provider_uri: "/home/tjxy/.qlib/qlib_data/cn_data"
     region: cn
 
-market: &market csi500
-benchmark: &benchmark SH000905
+market: &market csi300
+benchmark: &benchmark SH000300
 
 data_handler_config: &data_handler_config
-    start_time: 2015-01-01
-    end_time: 2025-03-31
+    start_time: 2016-01-01
+    end_time: 2025-12-26
     instruments: *market
     data_loader:
         class: NestedDataLoader
@@ -30,21 +30,23 @@ data_handler_config: &data_handler_config
         - class: Fillna
           kwargs:
               fields_group: feature
+        - class: ProcessInf
         - class: DropnaLabel
-        - class: CSZScoreNorm
+        - class: CSRankNorm
           kwargs:
               fields_group: feature
-        - class: CSZScoreNorm
+        - class: CSRankNorm
           kwargs:
               fields_group: label
     infer_processors: 
         - class: Fillna
           kwargs:
               fields_group: feature
-        - class: CSZScoreNorm
+        - class: ProcessInf
+        - class: CSRankNorm
           kwargs:
               fields_group: feature
-        - class: CSZScoreNorm
+        - class: CSRankNorm
           kwargs:
               fields_group: label
 
@@ -58,12 +60,11 @@ port_analysis_config: &port_analysis_config
             n_drop: 5
     backtest:
         start_time: 2021-01-01
-        end_time: 2024-12-30
-        # start_time: 2020-01-01
-        # end_time: 2024-12-30
+        end_time: 2021-12-31
         account: 100000000
         benchmark: *benchmark
         exchange_kwargs:
+            codes: *market
             limit_threshold: 0.095
             deal_price: open
             open_cost: 0.0005
@@ -76,13 +77,15 @@ task:
         kwargs:
             loss: mse
             colsample_bytree: 0.8879
-            learning_rate: 0.1
+            learning_rate: 0.05
             subsample: 0.8789
             lambda_l1: 205.6999
             lambda_l2: 580.9768
-            max_depth: 4
+            max_depth: 8
             num_leaves: 210
             num_threads: 20
+            early_stopping_round: 50
+            num_boost_round: 500
     dataset:
         class: DatasetH
         module_path: qlib.data.dataset
@@ -95,9 +98,9 @@ task:
                 # train: [2015-01-01, 2019-12-31]
                 # valid: [2020-01-01, 2020-12-31]
                 # test: [2021-01-01, 2025-03-31]
-                train: [2015-01-01, 2019-12-31]
-                valid: [2020-01-01, 2020-12-31]
-                test: [2021-01-01, 2024-12-30]
+                train: [2016-01-01, 2020-12-31]
+                valid: [2021-01-01, 2021-12-31]
+                test: [2022-01-01, 2025-12-26]
     record: 
         - class: SignalRecord
           module_path: qlib.workflow.record_temp

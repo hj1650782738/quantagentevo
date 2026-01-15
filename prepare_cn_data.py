@@ -170,8 +170,10 @@ def download_oneday_stock_data_(date):
 if __name__ == '__main__':
     # 动态设置结束日期为当前日期
     START_DATE = '2014-12-31'
-    END_DATE = (datetime.now()).strftime('%Y-%m-%d') # '2025-01-01'  - timedelta(days=7)
-    DATA_DIR = '~/.qlib/qlib_data/cn_data/raw_data_back_adjust'
+    END_DATE = (datetime.now()).strftime('%Y-%m-%d')  # '2025-01-01'  - timedelta(days=7)
+    # 默认路径是 ~/.qlib/qlib_data/cn_data/raw_data_back_adjust，但该路径目前指向挂载盘且部分目录为 root 所有，可能出现权限问题。
+    # 这里改为直接写到挂载盘下的用户目录，便于后续由 qlib 的 dump_bin.py 转成二进制数据。
+    DATA_DIR = '/mnt/DATA/quantagent/qlib_raw/cn_data/raw_data_back_adjust'
     
     print("开始下载股票数据...日期范围：", START_DATE, "至", END_DATE)
     download_stock_data(START_DATE, END_DATE, DATA_DIR)

@@ -4,7 +4,10 @@ from typing import Tuple, List, Dict, Any, Optional
 from alphaagent.core.evaluation import Evaluator
 from alphaagent.log import logger
 from alphaagent.core.scenario import Scenario
-from alphaagent.components.coder.factor_coder.factor_ast import match_alphazoo, count_free_args, count_unique_vars, count_all_nodes
+from alphaagent.components.coder.factor_coder.factor_ast import (
+    match_alphazoo, count_free_args, count_unique_vars, count_all_nodes,
+    calculate_symbol_length, count_base_features
+)
 from alphaagent.components.coder.factor_coder.expr_parser import parse_expression
 
 class FactorRegulator(Evaluator):
@@ -14,13 +17,16 @@ class FactorRegulator(Evaluator):
     and ensure new factors maintain appropriate originality.
     """
     
-    def __init__(self, factor_zoo_path: str = None, duplication_threshold: int = 8):
+    def __init__(self, factor_zoo_path: str = None, duplication_threshold: int = 8,
+                 symbol_length_threshold: int = 300, base_features_threshold: int = 6):
         """
         Initialize the FactorRegulator with a reference to the factor zoo.
         
         Args:
             factor_zoo_path (str): Path to the CSV file containing the factor zoo database.
             duplication_threshold (int): Threshold for duplication detection.
+            symbol_length_threshold (int): Maximum allowed symbol length (SL) for expressions.
+            base_features_threshold (int): Maximum allowed number of unique base features (ER).
         """
         super().__init__(None)
         self.factor_zoo_path = factor_zoo_path
@@ -29,6 +35,8 @@ class FactorRegulator(Evaluator):
         else:
             self.alphazoo = pd.DataFrame()
         self.duplication_threshold = duplication_threshold
+        self.symbol_length_threshold = symbol_length_threshold
+        self.base_features_threshold = base_features_threshold
         self.new_factors = []
         
     
@@ -72,6 +80,8 @@ class FactorRegulator(Evaluator):
             num_free_args = count_free_args(expression)
             num_unique_vars = count_unique_vars(expression)
             num_all_nodes = count_all_nodes(expression)
+            symbol_length = calculate_symbol_length(expression)
+            num_base_features = count_base_features(expression)
             
             logger.info(f"""
                         Evaluated expr: {expression}
@@ -79,6 +89,8 @@ class FactorRegulator(Evaluator):
                         Duplicated Subtree: {duplicated_subtree}
                         # Free Args: {num_free_args}
                         # Unique Vars: {num_unique_vars}
+                        Symbol Length (SL): {symbol_length}
+                        # Base Features (ER): {num_base_features}
                         """)
             
             eval_dict = {
@@ -88,7 +100,9 @@ class FactorRegulator(Evaluator):
                 "matched_alpha": matched_alpha,
                 "num_free_args": num_free_args,
                 "num_unique_vars": num_unique_vars,
-                "num_all_nodes": num_all_nodes
+                "num_all_nodes": num_all_nodes,
+                "symbol_length": symbol_length,
+                "num_base_features": num_base_features
                 }
             
             return True, eval_dict
@@ -101,7 +115,11 @@ class FactorRegulator(Evaluator):
     def is_expression_acceptable(self, eval_dict) -> bool:
         """
         Determines if an expression is acceptable based on the duplication threshold,
-        and the ratio of num_free_args and num_unique_vars to the total number of nodes in the expression.
+        the ratio of num_free_args and num_unique_vars to the total number of nodes,
+        symbol length (SL), and base features count (ER).
+        
+        This implements the complexity regularization R_g(f, h) from the paper:
+        R_g(f, h) = α₁·SL(f) + α₂·PC(f) + α₃·ER(f, h)
         
         Args:
             eval_dict (dict): Dictionary containing evaluation results of the expression.
@@ -116,6 +134,8 @@ class FactorRegulator(Evaluator):
         num_free_args = eval_dict['num_free_args']
         num_unique_vars = eval_dict['num_unique_vars']
         num_all_nodes = eval_dict['num_all_nodes']
+        symbol_length = eval_dict.get('symbol_length', 0)
+        num_base_features = eval_dict.get('num_base_features', 0)
         
         # Avoid division by zero and invalid ratios
         if num_all_nodes == 0:
@@ -139,8 +159,15 @@ class FactorRegulator(Evaluator):
         # Condition 3: Ensure the ratio of num_unique_vars to total nodes is not too high using -log(1 - ratio)
         cond3 = -np.log(1 - unique_vars_ratio) < 0.693  # Threshold for x < 0.5
         
+        # Condition 4: Check symbol length (SL) - expression should not be too long
+        cond4 = symbol_length <= self.symbol_length_threshold
+        
+        # Condition 5: Check base features count (ER) - should not use too many raw features
+        # Using log(1 + |F_f|) penalty as in the paper
+        cond5 = num_base_features <= self.base_features_threshold
+        
         # The expression is acceptable if all conditions are met
-        return cond1 and cond2 and cond3
+        return cond1 and cond2 and cond3 and cond4 and cond5
     
             
     def add_factor(self, factor_name: str, factor_expression: str) -> bool:

@@ -12,8 +12,8 @@ class LLMSettings(ExtendedBaseSettings):
     chat_use_azure_token_provider: bool = False
     embedding_use_azure_token_provider: bool = False
     managed_identity_client_id: str | None = None
-    max_retry: int = 10
-    retry_wait_seconds: int = 1
+    max_retry: int = 30  # 增加重试次数从10到30
+    retry_wait_seconds: int = 15  # 增加等待时间到15秒，避免DashScope API过载
     dump_chat_cache: bool = False
     use_chat_cache: bool = False
     dump_embedding_cache: bool = False
@@ -56,7 +56,8 @@ class LLMSettings(ExtendedBaseSettings):
     embedding_azure_api_base: str = ""
     embedding_azure_api_version: str = ""
     embedding_model: str = ""
-    embedding_max_str_num: int = 50
+    embedding_max_str_num: int = 3  # DashScope text-embedding-v4性能较差，10个线程会打挂，设置为3留安全余量
+    embedding_batch_wait_seconds: float = 2.0  # embedding批次之间的等待时间（秒），避免API过载
     embedding_api_key: str = ""
     embedding_base_url: str = ""
 

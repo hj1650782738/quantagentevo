@@ -194,13 +194,18 @@ class AlphaAgentHypothesisGen(FactorHypothesisGen):
         return context_dict, True
 
     def convert_response(self, response: str) -> AlphaAgentHypothesis:
+        """
+        将大模型返回的 JSON 结果转换为 AlphaAgentHypothesis。
+        为了增强鲁棒性，这里对缺失字段使用默认空字符串，避免 KeyError 中断整个实验流程。
+        """
         response_dict = json.loads(response)
+        # 使用 get 防止部分字段缺失导致 KeyError
         hypothesis = AlphaAgentHypothesis(
-            hypothesis=response_dict["hypothesis"],
-            concise_observation=response_dict["concise_observation"],
-            concise_knowledge=response_dict["concise_knowledge"],
-            concise_justification=response_dict["concise_justification"],
-            concise_specification=response_dict["concise_specification"],
+            hypothesis=response_dict.get("hypothesis", ""),
+            concise_observation=response_dict.get("concise_observation", ""),
+            concise_knowledge=response_dict.get("concise_knowledge", ""),
+            concise_justification=response_dict.get("concise_justification", ""),
+            concise_specification=response_dict.get("concise_specification", ""),
         )
         return hypothesis
     
@@ -263,7 +268,12 @@ class EmptyHypothesisGen(FactorHypothesisGen):
 class AlphaAgentHypothesis2FactorExpression(FactorHypothesis2Experiment):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.factor_regulator = FactorRegulator()
+        # Initialize FactorRegulator with config settings
+        from alphaagent.components.coder.factor_coder.config import FACTOR_COSTEER_SETTINGS
+        self.factor_regulator = FactorRegulator(
+            factor_zoo_path=FACTOR_COSTEER_SETTINGS.factor_zoo_path,
+            duplication_threshold=FACTOR_COSTEER_SETTINGS.duplication_threshold
+        )
         
     def prepare_context(self, hypothesis: Hypothesis, trace: Trace) -> Tuple[dict | bool]:
         scenario = trace.scen.get_scenario_all_desc()
@@ -346,26 +356,42 @@ class AlphaAgentHypothesis2FactorExpression(FactorHypothesis2Experiment):
                 
                 # If expression has problems, regenerate with feedback
                 if not self.factor_regulator.is_expression_acceptable(eval_dict):
-                    if expression_duplication_prompt is not None:
-                        expression_duplication_prompt = '\n\n'.join([expression_duplication_prompt, 
-                        (Environment(undefined=StrictUndefined)
-                            .from_string(alphaagent_prompt_dict["expression_duplication"])
-                            .render(
-                                prev_expression=expr,
-                                duplicated_subtree_size=eval_dict['duplicated_subtree_size'],
-                                duplicated_subtree=eval_dict['duplicated_subtree']
-                            )
-                        )])
-                    else:
-                        expression_duplication_prompt = (
+                    # Calculate ratios for feedback
+                    num_all_nodes = eval_dict['num_all_nodes']
+                    free_args_ratio = float(eval_dict['num_free_args']) / float(num_all_nodes) if num_all_nodes > 0 else 0.0
+                    unique_vars_ratio = float(eval_dict['num_unique_vars']) / float(num_all_nodes) if num_all_nodes > 0 else 0.0
+                    
+                    # Get symbol length and base features count for complexity feedback
+                    symbol_length = eval_dict.get('symbol_length', 0)
+                    num_base_features = eval_dict.get('num_base_features', 0)
+                    symbol_length_threshold = self.factor_regulator.symbol_length_threshold
+                    base_features_threshold = self.factor_regulator.base_features_threshold
+                    
+                    feedback_item = (
                             Environment(undefined=StrictUndefined)
                             .from_string(alphaagent_prompt_dict["expression_duplication"])
                             .render(
                                 prev_expression=expr,
                                 duplicated_subtree_size=eval_dict['duplicated_subtree_size'],
-                                duplicated_subtree=eval_dict['duplicated_subtree']
+                            duplication_threshold=self.factor_regulator.duplication_threshold,
+                            duplicated_subtree=eval_dict.get('duplicated_subtree', ''),
+                            matched_alpha=eval_dict.get('matched_alpha', ''),
+                            free_args_ratio=free_args_ratio,
+                            num_free_args=eval_dict['num_free_args'],
+                            unique_vars_ratio=unique_vars_ratio,
+                            num_unique_vars=eval_dict['num_unique_vars'],
+                            num_all_nodes=num_all_nodes,
+                            symbol_length=symbol_length,
+                            symbol_length_threshold=symbol_length_threshold,
+                            num_base_features=num_base_features,
+                            base_features_threshold=base_features_threshold
                             )
                         )
+                    
+                    if expression_duplication_prompt is not None:
+                        expression_duplication_prompt = '\n\n'.join([expression_duplication_prompt, feedback_item])
+                    else:
+                        expression_duplication_prompt = feedback_item
                     
                     user_prompt = (
                         Environment(undefined=StrictUndefined)

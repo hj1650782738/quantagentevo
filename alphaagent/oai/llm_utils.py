@@ -19,7 +19,7 @@ import numpy as np
 import tiktoken
 
 from alphaagent.core.utils import LLM_CACHE_SEED_GEN, SingletonBaseClass
-from alphaagent.log import LogColors
+from alphaagent.log import LogColors, logger
 from alphaagent.log import logger
 from alphaagent.oai.llm_conf import LLM_SETTINGS
 
@@ -576,10 +576,14 @@ class APIBackend:
                     kwargs["input_content_list"] = [
                         content[: len(content) // 2] for content in kwargs.get("input_content_list", [])
                     ]
+                # 即使是 BadRequestError，也等待一段时间再重试，避免频繁请求
+                if i < max_retry - 1:  # 最后一次重试前不需要等待
+                    time.sleep(self.retry_wait_seconds)
             except Exception as e:  # noqa: BLE001
                 logger.warning(e)
                 logger.warning(f"Retrying {i+1}th time...")
-                time.sleep(self.retry_wait_seconds)
+                if i < max_retry - 1:  # 最后一次重试前不需要等待
+                    time.sleep(self.retry_wait_seconds)
         error_message = f"Failed to create chat completion after {max_retry} retries."
         raise RuntimeError(error_message)
 
@@ -599,10 +603,20 @@ class APIBackend:
             filtered_input_content_list = input_content_list
 
         if len(filtered_input_content_list) > 0:
-            for sliced_filtered_input_content_list in [
-                filtered_input_content_list[i : i + LLM_SETTINGS.embedding_max_str_num]
-                for i in range(0, len(filtered_input_content_list), LLM_SETTINGS.embedding_max_str_num)
-            ]:
+            # 根据模型名称自动调整批次大小，DashScope text-embedding-v4性能较差
+            batch_size = LLM_SETTINGS.embedding_max_str_num
+            if self.embedding_model and ("qwen" in self.embedding_model.lower() or "text-embedding-v4" in self.embedding_model.lower()):
+                # DashScope text-embedding-v4性能较差，10个线程会打挂，使用更小的批次
+                batch_size = min(batch_size, 3)
+                logger.info(f"检测到DashScope embedding模型 {self.embedding_model}，使用批次大小: {batch_size}")
+            
+            batch_wait_seconds = LLM_SETTINGS.embedding_batch_wait_seconds
+            batches = [
+                filtered_input_content_list[i : i + batch_size]
+                for i in range(0, len(filtered_input_content_list), batch_size)
+            ]
+            
+            for batch_idx, sliced_filtered_input_content_list in enumerate(batches):
                 if self.use_azure:
                     response = self.embedding_client.embeddings.create(
                         model=self.embedding_model,
@@ -618,6 +632,10 @@ class APIBackend:
 
                 if self.dump_embedding_cache:
                     self.cache.embedding_set(content_to_embedding_dict)
+                
+                # 批次之间等待，避免API过载（最后一个批次不需要等待）
+                if batch_idx < len(batches) - 1 and batch_wait_seconds > 0:
+                    time.sleep(batch_wait_seconds)
         return [content_to_embedding_dict[content] for content in input_content_list]
 
     def _build_log_messages(self, messages: list[dict]) -> str:

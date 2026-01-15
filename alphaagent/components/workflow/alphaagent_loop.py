@@ -57,7 +57,11 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
     def __init__(self, PROP_SETTING: BaseFacSetting, potential_direction, stop_event: threading.Event, use_local: bool = True):
         with logger.tag("init"):
             self.use_local = use_local
+            # 保存初始方向，用于后续因子溯源
+            self.potential_direction = potential_direction
             logger.info(f"初始化AlphaAgentLoop，使用{'本地环境' if use_local else 'Docker容器'}回测")
+            if potential_direction:
+                logger.info(f"初始方向: {potential_direction}")
             scen: Scenario = import_class(PROP_SETTING.scen)(use_local=use_local)
             logger.log_object(scen, tag="scenario")
 
@@ -148,6 +152,55 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
         with logger.tag("ef"):  # evaluate and feedback
             logger.log_object(feedback, tag="feedback")
         self.trace.hist.append((prev_out["factor_propose"], prev_out["factor_backtest"], feedback))
+
+        # 自动保存因子到统一因子库
+        try:
+            import sys
+            from pathlib import Path
+            # 添加项目根目录到路径
+            project_root = Path(__file__).parent.parent.parent.parent
+            if str(project_root) not in sys.path:
+                sys.path.insert(0, str(project_root))
+            
+            from factor_library_manager import FactorLibraryManager
+            
+            # 获取实验ID（从session_folder提取）
+            experiment_id = "unknown"
+            if hasattr(self, 'session_folder') and self.session_folder:
+                # session_folder格式: log/2026-01-08_12-13-43-974105/__session__
+                # 提取实验ID: 2026-01-08_12-13-43-974105
+                parts = Path(self.session_folder).parts
+                for part in parts:
+                    if part.startswith("202") and len(part) > 10:  # 日期格式
+                        experiment_id = part
+                        break
+            
+            # 获取当前轮次
+            round_number = self.loop_idx + 1
+            
+            # 获取假设文本
+            hypothesis_text = None
+            if prev_out.get("factor_propose"):
+                hypothesis_text = str(prev_out["factor_propose"])
+            
+            # 获取初始方向
+            initial_direction = getattr(self, 'potential_direction', None)
+            
+            # 创建因子库管理器并保存因子
+            library_path = project_root / "all_factors_library.json"
+            manager = FactorLibraryManager(str(library_path))
+            manager.add_factors_from_experiment(
+                experiment=prev_out["factor_backtest"],
+                experiment_id=experiment_id,
+                round_number=round_number,
+                hypothesis=hypothesis_text,
+                feedback=feedback,
+                initial_direction=initial_direction
+            )
+            logger.info(f"已保存因子到统一因子库: {library_path}")
+        except Exception as e:
+            # 如果保存失败，记录警告但不影响主流程
+            logger.warning(f"保存因子到库失败: {e}")
 
 
 

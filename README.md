@@ -1,67 +1,67 @@
 <h4 align="center">
   <img src="docs/_static/logo.png" alt="RA-Agent logo" style="width:70%; ">
   
-  <!-- <a href="https://arxiv.org/abs/2502.16789"><b>📃Paper Link</b>👁️</a> -->
+  <!-- <a href="https://arxiv.org/abs/2502.16789"><b>📃论文链接</b>👁️</a> -->
 </h3>
 
-Official source code of KDD 2025 paper: [AlphaAgent: LLM-Driven Alpha Mining with Regularized Exploration to Counteract Alpha Decay](https://arxiv.org/abs/2502.16789)
+KDD 2025 论文的官方源代码: [AlphaAgent: LLM-Driven Alpha Mining with Regularized Exploration to Counteract Alpha Decay](https://arxiv.org/abs/2502.16789)
 
 
 
-# 📖Introduction
+# 📖 简介
 <div align="center">
-      <img src="docs/_static/workflow.png" alt="Our focused scenario" style="width:60%; ">
+      <img src="docs/_static/workflow.png" alt="我们的核心场景" style="width:60%; ">
 </div>
 
 
 
 <!-- Tag Cloud -->
-**AlphaAgent** is an autonomous framework that effectively integrates LLM agents for mining interpretable and decay-resistant alpha factors through three specialized agents.  
+**AlphaAgent** 是一个自主框架，通过三个专门的智能体有效整合LLM智能体，用于挖掘可解释且抗衰减的Alpha因子。  
 
-- **Idea Agent**: Proposes market hypotheses to guide factor creation based on financial theories or emerging trends.  
-- **Factor Agent**: Constructs factors based on hypotheses while incorporating regularization mechanisms to avoid duplication and overfitting. 
-- **Eval Agent**: Validates practicality, performs backtesting, and iteratively refines factors via feedback loops.
+- **Idea Agent（假设生成智能体）**: 基于金融理论或新兴趋势提出市场假设，指导因子创建。  
+- **Factor Agent（因子构建智能体）**: 根据假设构建因子，同时融入正则化机制以避免重复和过拟合。 
+- **Eval Agent（评估智能体）**: 验证实用性，执行回测，并通过反馈循环迭代优化因子。
 
-This repository follows the implementation of [RD-Agent](https://github.com/microsoft/RD-Agent). You can find its repository at: [https://github.com/microsoft/RD-Agent](https://github.com/microsoft/RD-Agent). We would like to extend our sincere gratitude to the RD-Agent team for their pioneering work and contributions to the community.
+本仓库遵循 [RD-Agent](https://github.com/microsoft/RD-Agent) 的实现。您可以在以下地址找到其仓库: [https://github.com/microsoft/RD-Agent](https://github.com/microsoft/RD-Agent)。我们要向RD-Agent团队的开创性工作和社区贡献表示诚挚的感谢。
 
 
-# ⚡ Quick start
+# ⚡ 快速开始
 
-### 🐍 Create a Conda Environment
-- Create a new conda environment with Python (3.10 and 3.11 are well-tested in our CI):
+### 🐍 创建 Conda 环境
+- 使用 Python 创建新的 conda 环境（在我们的 CI 中，3.10 和 3.11 版本已充分测试）:
   ```sh
   conda create -n alphaagent python=3.10
   ```
-- Activate the environment:
+- 激活环境:
   ```sh
   conda activate alphaagent
   ```
 
-### 🛠️ Install locally
+### 🛠️ 本地安装
 - 
   ```sh
-  # Install AlphaAgent
+  # 安装 AlphaAgent
   pip install -e .
   ```
 
-### 📈 Data Preparation
-- First, clone Qlib source code for runing backtest locally.
+### 📈 数据准备
+- 首先，克隆 Qlib 源代码以便在本地运行回测。
   ```
-  # Clone Qlib source code
+  # 克隆 Qlib 源代码
   git clone https://github.com/microsoft/qlib.git
   cd qlib
   pip install .
   cd ..
   ```
 
-- Then, mannully download Chinese stock data via baostock and dump into the Qlib format.
+- 然后，通过 baostock 手动下载中国股票数据并转换为 Qlib 格式。
   ```sh
-  # Download or update stock data from 2015-01-01 until NOW from baostock
+  # 从 baostock 下载或更新从 2015-01-01 到现在的股票数据
   python prepare_cn_data.py
 
   cd qlib
 
-  # Convert csv to Qlib format. Check correct paths before runing. 
+  # 将 csv 转换为 Qlib 格式。运行前请检查路径是否正确。 
   python scripts/dump_bin.py dump_all ... \
   --include_fields open,high,low,close,preclose,volume,amount,turn,factor \
   --csv_path  ~/.qlib/qlib_data/cn_data/raw_data_now \
@@ -69,50 +69,50 @@ This repository follows the implementation of [RD-Agent](https://github.com/micr
   --date_field_name date \
   --symbol_field_name code
 
-  # Collect calendar data
+  # 收集日历数据
   python scripts/data_collector/future_calendar_collector.py --qlib_dir ~/.qlib/qlib_data/cn_data/ --region cn
 
 
-  # Download the CSI500/CSI300/CSI100 stock universe
+  # 下载 CSI500/CSI300/CSI100 股票池
   python scripts/data_collector/cn_index/collector.py --index_name CSI500 --qlib_dir ~/.qlib/qlib_data/cn_data/ --method parse_instruments
   ```
 
 
-- Alternatively, stock data (out-dated) will be automatically downloaded to `~/.qlib/qlib_data/cn_data`.
+- 或者，股票数据（已过时）将自动下载到 `~/.qlib/qlib_data/cn_data`。
 
 
-- You can modify backtest configuration files which are located at:
-  - Baseline: `alphaagent/scenarios/qlib/experiment/factor_template/conf.yaml`
-  - For Newly proposed factors: `alphaagent/scenarios/qlib/experiment/factor_template/conf_cn_combined.yaml`
-  - For changing train/val/test periods, first remove all cache files in `./git_ignore_folder` and `./pickle_cache`. 
-  - For changing the market, remove cache files in `./git_ignore_folder`, `./pickle_cache`. Then, delete `daily_pv_all.h5` and `daily_pv_debug.h5` in directory `alphaagent/scenarios/qlib/experiment/factor_data_template/`. 
+- 您可以修改位于以下位置的回测配置文件：
+  - 基线: `alphaagent/scenarios/qlib/experiment/factor_template/conf.yaml`
+  - 新提出的因子: `alphaagent/scenarios/qlib/experiment/factor_template/conf_cn_combined.yaml`
+  - 要更改训练/验证/测试周期，请先删除 `./git_ignore_folder` 和 `./pickle_cache` 中的所有缓存文件。 
+  - 要更改市场，请删除 `./git_ignore_folder` 和 `./pickle_cache` 中的缓存文件。然后，删除目录 `alphaagent/scenarios/qlib/experiment/factor_data_template/` 中的 `daily_pv_all.h5` 和 `daily_pv_debug.h5`。 
 
 
-### ⚙️ Configuration
-- For OpenAI compatible API, ensure both `OPENAI_BASE_URL` and `OPENAI_API_KEY` are configured in the `.env` file.
-- `REASONING_MODEL` is used in the idea agent and factor agent, while `CHAT_MODEL` is for debugging factors and generating feedbacks.
-- Slow-thinking models, such as o3-mini are preferred for the `REASONING_MODEL`.
-- To run the project in a local environment (instead of Docker), add `USE_LOCAL=True` to the `.env` file.
+### ⚙️ 配置
+- 对于 OpenAI 兼容的 API，请确保在 `.env` 文件中配置了 `OPENAI_BASE_URL` 和 `OPENAI_API_KEY`。
+- `REASONING_MODEL` 用于假设生成智能体和因子构建智能体，而 `CHAT_MODEL` 用于调试因子和生成反馈。
+- 对于 `REASONING_MODEL`，推荐使用慢思考模型，例如 o3-mini。
+- 要在本地环境（而非 Docker）中运行项目，请在 `.env` 文件中添加 `USE_LOCAL=True`。
 
 
-### 🚀 Run AlphaAgent
-- Run **AlphaAgent** based on [Qlib Backtesting Framework](http://github.com/microsoft/qlib).
+### 🚀 运行 AlphaAgent
+- 基于 [Qlib 回测框架](http://github.com/microsoft/qlib) 运行 **AlphaAgent**。
   ```sh
-  alphaagent mine --potential_direction "<YOUR_MARKET_HYPOTHESIS>"
+  alphaagent mine --potential_direction "<您的市场假设>"
   ```
 
-- Alternatively, run the following command
+- 或者，运行以下命令
   ```sh
-  dotenv run -- python alphaagent/app/qlib_rd_loop/factor_alphaagent.py --direction "<YOUR_MARKET_HYPOTHESIS>"
+  dotenv run -- python alphaagent/app/qlib_rd_loop/factor_alphaagent.py --direction "<您的市场假设>"
   ```
-  After running the command, log out and log back in for the changes to take effect. 
+  运行命令后，请注销并重新登录以使更改生效。 
 
-- Multi-factor backtesting
+- 多因子回测
   ```sh
-  alphaagent backtest --factor_path "<PATH_TO_YOUR_CSV_FILE>"
+  alphaagent backtest --factor_path "<您的CSV文件路径>"
   ```
 
-  Your factors need to be stored in a `.csv` file. Here is an example:
+  您的因子需要存储在 `.csv` 文件中。以下是一个示例：
   ```csv
   factor_name,factor_expression
   MACD_Factor,"MACD($close)"
@@ -120,22 +120,22 @@ This repository follows the implementation of [RD-Agent](https://github.com/micr
   ```
 
 
-- If you need to rerun the baseline results or update backtest configs, remove the cache folders:
+- 如果您需要重新运行基线结果或更新回测配置，请删除缓存文件夹：
   ```sh
   rm -r ./pickle_cache/*
   rm -r ./git_ignore_folder/*
   ```
 
-### 🖥️ Monitor the Application Results
-- You can run the following command for our demo program to see the run logs. Note than the entrance is deprecated. 
+### 🖥️ 监控应用程序结果
+- 您可以运行以下命令来查看运行日志的演示程序。请注意，此入口已弃用。 
   ```sh
   alphaagent ui --port 19899 --log_dir log/
   ```
 
 
 
-### 📚 Citation
-If you find this work helpful, please cite our paper:
+### 📚 引用
+如果您觉得这项工作有帮助，请引用我们的论文：
 ```bibtex
 @misc{tang2025alphaagentllmdrivenalphamining,
       title={AlphaAgent: LLM-Driven Alpha Mining with Regularized Exploration to Counteract Alpha Decay}, 

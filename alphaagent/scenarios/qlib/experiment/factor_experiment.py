@@ -1,139 +1,34 @@
-from copy import deepcopy
-from pathlib import Path
+"""
+AlphaAgent 兼容层：factor_experiment
 
-from alphaagent.components.coder.factor_coder.factor import (
-    FactorExperiment,
-    FactorFBWorkspace,
-    FactorTask,
-)
-from alphaagent.core.experiment import Task
-from alphaagent.core.prompts import Prompts
-from alphaagent.core.scenario import Scenario
-from alphaagent.scenarios.qlib.experiment.utils import get_data_folder_intro
-from alphaagent.scenarios.qlib.experiment.workspace import QlibFBWorkspace
+项目中大量配置引用路径:
+- alphaagent.scenarios.qlib.experiment.factor_experiment.QlibFactorScenario
+- alphaagent.scenarios.qlib.experiment.factor_experiment.QlibFactorExperiment
+- alphaagent.scenarios.qlib.experiment.factor_experiment.QlibAlphaAgentScenario
 
-rdagent_prompt_dict = Prompts(file_path=Path(__file__).parent / "prompts_rdagent.yaml")
+原始实现已经存在于本仓库的 RD-Agent 子目录:
+- wuyinze/RD-Agent/rdagent/scenarios/qlib/experiment/factor_experiment.py
+
+由于在 alphaagent.scenarios.qlib.experiment.__init__ 中已经将 RD-Agent 根目录
+加入了 sys.path，这里可以直接从 rdagent 对应模块导入并整体导出，保证路径兼容。
+"""
+
+from rdagent.scenarios.qlib.experiment.factor_experiment import *  # type: ignore  # noqa: F401,F403
 
 
-class QlibFactorExperiment(FactorExperiment[FactorTask, QlibFBWorkspace, FactorFBWorkspace]):
-    def __init__(self, *args, **kwargs) -> None:
+class QlibAlphaAgentScenario(QlibFactorScenario):  # type: ignore[misc]
+    """
+    AlphaAgent 专用的 Scenario 包装类。
+
+    AlphaAgentLoop 在构造时会传入 `use_local` 参数，但 RD-Agent 原始的
+    QlibFactorScenario.__init__ 不接受该参数。这里通过子类包装的方式
+    兼容这个签名，同时完全复用父类的行为。
+    """
+
+    def __init__(self, use_local: bool = True, *args, **kwargs):
+        # 当前实现中暂时不区分 use_local，直接调用父类构造函数
         super().__init__(*args, **kwargs)
-        self.experiment_workspace = QlibFBWorkspace(template_folder_path=Path(__file__).parent / "factor_template")
-
-
-class QlibFactorScenario(Scenario):
-    def __init__(self) -> None:
-        super().__init__()
-        self._background = deepcopy(rdagent_prompt_dict["qlib_factor_background"])
-        self._source_data = deepcopy(get_data_folder_intro())
-        self._output_format = deepcopy(rdagent_prompt_dict["qlib_factor_output_format"])
-        self._interface = deepcopy(rdagent_prompt_dict["qlib_factor_interface"])
-        self._strategy = deepcopy(rdagent_prompt_dict["qlib_factor_strategy"])
-        self._simulator = deepcopy(rdagent_prompt_dict["qlib_factor_simulator"])
-        self._rich_style_description = deepcopy(rdagent_prompt_dict["qlib_factor_rich_style_description"])
-        self._experiment_setting = deepcopy(rdagent_prompt_dict["qlib_factor_experiment_setting"])
-
-    @property
-    def background(self) -> str:
-        return self._background
-
-    def get_source_data_desc(self, task: Task | None = None) -> str:
-        return self._source_data
-
-    @property
-    def output_format(self) -> str:
-        return self._output_format
-
-    @property
-    def interface(self) -> str:
-        return self._interface
-
-    @property
-    def simulator(self) -> str:
-        return self._simulator
-
-    @property
-    def rich_style_description(self) -> str:
-        return self._rich_style_description
-
-    @property
-    def experiment_setting(self) -> str:
-        return self._experiment_setting
-
-    def get_scenario_all_desc(
-        self, task: Task | None = None, filtered_tag: str | None = None, simple_background: bool | None = None
-    ) -> str:
-        """A static scenario describer"""
-        if simple_background:
-            return f"""Background of the scenario:
-{self.background}"""
-        return f"""Background of the scenario:
-{self.background}
-The source data you can use:
-{self.get_source_data_desc(task)}
-The interface you should follow to write the runnable code:
-{self.interface}
-The output of your code should be in the format:
-{self.output_format}
-The simulator user can use to test your factor:
-{self.simulator}
-"""
 
 
 
-alphaagent_prompt_dict = Prompts(file_path=Path(__file__).parent / "prompts_alphaagent.yaml")
-class QlibAlphaAgentScenario(Scenario):
-    def __init__(self, use_local: bool = True) -> None:
-        super().__init__()
-        self._background = deepcopy(alphaagent_prompt_dict["qlib_factor_background"])
-        self._source_data = deepcopy(get_data_folder_intro(use_local=use_local))
-        self._output_format = deepcopy(alphaagent_prompt_dict["qlib_factor_output_format"])
-        self._interface = deepcopy(alphaagent_prompt_dict["qlib_factor_interface"])
-        self._strategy = deepcopy(alphaagent_prompt_dict["qlib_factor_strategy"])
-        self._simulator = deepcopy(alphaagent_prompt_dict["qlib_factor_simulator"])
-        self._rich_style_description = deepcopy(alphaagent_prompt_dict["qlib_factor_rich_style_description"])
-        self._experiment_setting = deepcopy(alphaagent_prompt_dict["qlib_factor_experiment_setting"])
 
-    @property
-    def background(self) -> str:
-        return self._background
-
-    def get_source_data_desc(self, task: Task | None = None) -> str:
-        return self._source_data
-
-    @property
-    def output_format(self) -> str:
-        return self._output_format
-
-    @property
-    def interface(self) -> str:
-        return self._interface
-
-    @property
-    def simulator(self) -> str:
-        return self._simulator
-
-    @property
-    def rich_style_description(self) -> str:
-        return self._rich_style_description
-
-    @property
-    def experiment_setting(self) -> str:
-        return self._experiment_setting
-
-    def get_scenario_all_desc(
-        self, task: Task | None = None, filtered_tag: str | None = None, simple_background: bool | None = None
-    ) -> str:
-        """A static scenario describer"""
-        if simple_background:
-            return f"""Background of the scenario:
-{self.background}"""
-        return f"""Background of the scenario:
-{self.background}
-The source data you can use:
-{self.get_source_data_desc(task)}
-The interface you should follow to write the runnable code:
-{self.interface}
-The simulator user can use to test your factor:
-{self.simulator}
-"""

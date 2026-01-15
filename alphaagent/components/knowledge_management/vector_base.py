@@ -60,8 +60,9 @@ Document = KnowledgeMetaData
 
 
 def contents_to_documents(contents: List[str], label: str = None) -> List[Document]:
-    # openai create embedding API input's max length is 16
-    size = 16
+    # 使用配置的批次大小，避免硬编码
+    from alphaagent.oai.llm_conf import LLM_SETTINGS
+    size = LLM_SETTINGS.embedding_max_str_num
     embedding = []
     for i in range(0, len(contents), size):
         embedding.extend(APIBackend().create_embedding(input_content=contents[i : i + size]))

@@ -183,8 +183,11 @@ def DELAY(df:pd.DataFrame, p:int=1):
 
 def TS_CORR(df1:pd.Series, df2: np.ndarray | pd.Series, p:int=5):
     """计算两个序列的滚动相关性"""
-    if isinstance(df2, np.ndarray) and p != len(df2):
-        p = len(df2)
+    # 如果 df2 是 numpy.ndarray，使用固定窗口方法
+    if isinstance(df2, np.ndarray):
+        # 如果 p 不等于数组长度，使用数组长度作为窗口大小
+        if p != len(df2):
+            p = len(df2)
         def corr(window):
             x = window
             y = df2[:len(window)]
@@ -198,15 +201,24 @@ def TS_CORR(df1:pd.Series, df2: np.ndarray | pd.Series, p:int=5):
             std_y = np.sqrt(np.sum((y - mean_y) ** 2))
             
             # 计算相关系数
+            if std_x == 0 or std_y == 0:
+                return 0.0
             return cov / (std_x * std_y)
         
         return df1.groupby('instrument').transform(lambda x: x.rolling(p, min_periods=2).apply(corr, raw=True))
-    else:
+    # 如果 df2 是 pd.Series 或 pd.DataFrame，使用 DataFrame 方法
+    elif isinstance(df2, (pd.Series, pd.DataFrame)):
         def rolling_corr(group, df2, p):
             # 获取当前分组的 instrument
             instrument = group.name
             # 从 df2 中提取对应的 instrument 数据
-            df2_group = df2.xs(instrument, level='instrument')
+            if isinstance(df2, pd.DataFrame) and 'instrument' in df2.index.names:
+                df2_group = df2.xs(instrument, level='instrument')
+            elif isinstance(df2, pd.Series) and 'instrument' in df2.index.names:
+                df2_group = df2.xs(instrument, level='instrument')
+            else:
+                # 如果 df2 没有 instrument 索引，直接使用 df2
+                df2_group = df2
             # 计算滚动相关性
             return group.rolling(p, min_periods=2).corr(df2_group)
 
@@ -215,29 +227,43 @@ def TS_CORR(df1:pd.Series, df2: np.ndarray | pd.Series, p:int=5):
         # 由于 apply 会改变索引结构，我们需要将其恢复为原始结构
         result = result.reset_index(level=0, drop=True).sort_index()
         return result
+    else:
+        raise TypeError(f"TS_CORR 不支持 df2 的类型: {type(df2)}")
 
 
 def TS_COVARIANCE(df1:pd.DataFrame, df2:pd.DataFrame, p:int=5):  
     """计算两个序列的滚动协方差"""
-    if isinstance(df2, np.ndarray) and p != len(df2):
-        p = len(df2)
+    # 如果 df2 是 numpy.ndarray，使用固定窗口方法
+    if isinstance(df2, np.ndarray):
+        # 如果 p 不等于数组长度，使用数组长度作为窗口大小
+        if p != len(df2):
+            p = len(df2)
         def cov(window):
-            return np.cov(window, df2[:len(window)])
+            return np.cov(window, df2[:len(window)])[0, 1] if len(window) > 1 else 0.0
         return df1.groupby('instrument').transform(lambda x: x.rolling(p, min_periods=2).apply(cov, raw=True))
-    else:
+    # 如果 df2 是 pd.Series 或 pd.DataFrame，使用 DataFrame 方法
+    elif isinstance(df2, (pd.Series, pd.DataFrame)):
         def rolling_cov(group, df2, p):
             # 获取当前分组的 instrument
             instrument = group.name
             # 从 df2 中提取对应的 instrument 数据
-            df2_group = df2.xs(instrument, level='instrument')
-            # 计算滚动相关性
+            if isinstance(df2, pd.DataFrame) and 'instrument' in df2.index.names:
+                df2_group = df2.xs(instrument, level='instrument')
+            elif isinstance(df2, pd.Series) and 'instrument' in df2.index.names:
+                df2_group = df2.xs(instrument, level='instrument')
+            else:
+                # 如果 df2 没有 instrument 索引，直接使用 df2
+                df2_group = df2
+            # 计算滚动协方差
             return group.rolling(p, min_periods=2).cov(df2_group)
 
-        # 使用 groupby 和 apply 来计算每个 instrument 的滚动相关性
+        # 使用 groupby 和 apply 来计算每个 instrument 的滚动协方差
         result = df1.groupby('instrument').apply(lambda x: rolling_cov(x, df2, p))
         # 由于 apply 会改变索引结构，我们需要将其恢复为原始结构
         result = result.reset_index(level=0, drop=True).sort_index()
         return result
+    else:
+        raise TypeError(f"TS_COVARIANCE 不支持 df2 的类型: {type(df2)}")
 
 @datatype_adapter
 def TS_STD(df:pd.DataFrame, p:int=20):

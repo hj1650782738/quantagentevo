@@ -138,10 +138,21 @@ class FactorFBWorkspace(FBWorkspace):
                     )
                 )
 
+                # 确保使用绝对路径
+                if not source_data_path.is_absolute():
+                    source_data_path = self.workspace_path.parent.parent.parent / source_data_path
+                else:
+                    source_data_path = Path(source_data_path).absolute()
+
             source_data_path.mkdir(exist_ok=True, parents=True)
             code_path = self.workspace_path / f"factor.py"
 
-            self.link_all_files_in_folder_to_workspace(source_data_path, self.workspace_path)
+            # 确保数据路径存在且有文件
+            if source_data_path.exists() and any(source_data_path.iterdir()):
+                self.link_all_files_in_folder_to_workspace(source_data_path, self.workspace_path)
+            else:
+                from alphaagent.log import logger
+                logger.warning(f"Data folder {source_data_path} does not exist or is empty. Skipping linking.")
 
             execution_feedback = self.FB_EXECUTION_SUCCEEDED
             execution_success = False
@@ -154,12 +165,23 @@ class FactorFBWorkspace(FBWorkspace):
                 execution_code_path.write_text((Path(__file__).parent / "factor_execution_template.txt").read_text())
 
             try:
+                # Set PYTHONPATH to include the project root so alphaagent can be imported
+                import os
+                env = os.environ.copy()
+                project_root = Path(__file__).parent.parent.parent.parent.parent
+                pythonpath = str(project_root)
+                if 'PYTHONPATH' in env:
+                    env['PYTHONPATH'] = pythonpath + ':' + env['PYTHONPATH']
+                else:
+                    env['PYTHONPATH'] = pythonpath
+                
                 subprocess.check_output(
                     f"{FACTOR_COSTEER_SETTINGS.python_bin} {execution_code_path}",
                     shell=True,
                     cwd=self.workspace_path,
                     stderr=subprocess.STDOUT,
                     timeout=FACTOR_COSTEER_SETTINGS.file_based_execution_timeout,
+                    env=env,
                 )
                 execution_success = True
             except subprocess.CalledProcessError as e:

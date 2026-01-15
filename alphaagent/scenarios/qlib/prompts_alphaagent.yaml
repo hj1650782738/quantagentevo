@@ -222,9 +222,17 @@ factor_feedback_generation:
           - Recommend parameter ranges for further exploration
           - Identify critical components in the factor construction process
 
+      3. **Complexity Control (Critical):**
+          - **Symbol Length (SL)**: Factors with excessively long expressions (symbol length > 300) are prone to overfitting and poor generalization. If a factor is flagged for high symbol length, strongly recommend simplification.
+          - **Base Features Count (ER)**: Factors using too many distinct raw features (e.g., $close, $open, $high, $low, $volume) (> 6) indicate over-engineering. Recommend reducing the number of base features.
+          - **Free Parameters (PC)**: Factors with too many free parameters (numeric constants) relative to total nodes (> 50%) are likely over-parameterized. Recommend reducing parameter count.
+          - **Complexity Impact**: Overly complex factors often perform well on training/validation sets but fail on test sets due to overfitting. Always prioritize simpler, more interpretable factors that maintain predictive power.
+          - When complexity feedback is provided for a factor, it is a critical issue that must be addressed in the next iteration. The factor's poor test performance is likely due to its excessive complexity.
+
     Focus on Continuous Refinement:
       - Exhaust all possible variations within the current theoretical framework
       - Document the effectiveness of different implementation approaches
+      - **Always prioritize simplicity over complexity** - simpler factors that achieve similar or better performance are preferred
       
     Please provide detailed and constructive feedback for future exploration.
     Respond in JSON format. Example JSON structure for Result Analysis:
@@ -244,6 +252,10 @@ factor_feedback_generation:
         - Factor Formulation: {{ task.factor_formulation }}
         - Variables: {{ task.variables }}
         - Factor Implementation: {{ task.factor_implementation }}
+        {% if task.get("complexity_feedback") and task.complexity_feedback %}
+        - **Complexity Feedback**: {{ task.complexity_feedback }}
+          **Important**: This factor has been flagged for excessive complexity. Please consider simplifying the expression in future iterations. Factors that are too complex (long symbol length, too many base features, or excessive parameters) are prone to overfitting and poor generalization to test sets.
+        {% endif %}
         {% if task.factor_implementation == "False" %}
         **Note: This factor was not implemented in the current experiment. Only the hypothesis for implemented factors can be verified.**
         {% endif %}
@@ -268,6 +280,12 @@ factor_feedback_generation:
         - If the new factor shows a significant improvement in the annualized return without transaction costs, recommend it to replace the current best result.
         - If the annualized return and any other single metric are better than SOTA, recommend the replacement.
         - Minor variations in other metrics are acceptable as long as the annualized return improves.
+        - **However, if a factor has complexity warnings, be cautious about recommending replacement even if metrics are good, as it may overfit and fail on future data.**
+      
+      2. **Complexity Considerations:**
+        - If complexity feedback is provided for a factor, this is a critical issue that must be addressed.
+        - Factors flagged for excessive complexity should be simplified in the next iteration, even if current metrics appear good.
+        - Emphasize in your feedback that the factor needs simplification to avoid overfitting and improve generalization.
 
     Note: Only factors with 'Factor Implementation' as True are implemented and tested in this experiment. If 'Factor Implementation' is False, the hypothesis for that factor cannot be verified in this run.
 
@@ -321,8 +339,25 @@ hypothesis2experiment:
       - Balance simplicity and innovation to build a robust factor library.
       - Note that each factor is independent. Please do NOT reference other factors within the factor expression.
 
+    2. **CRITICAL: Factor Complexity Constraints (MUST FOLLOW):**
+      - **Symbol Length (SL) Limit: ≤ 300 characters**
+        - Factor expressions MUST be concise and simple. Long expressions (> 300 characters) will be automatically rejected.
+        - Prefer shorter, more interpretable expressions over complex nested formulas.
+        - Example of GOOD (short): `RANK(TS_MEAN($return, 20))`
+        - Example of BAD (too long): `RANK(POW(TS_CORR($close, SEQUENCE(15), 15), 2)) * RANK(TS_MEAN(($high - $low) / ($volume + 1e-8), 15))`
+      - **Base Features (ER) Limit: ≤ 6 distinct raw features**
+        - Use at most 6 distinct base features (e.g., $close, $open, $high, $low, $volume, $return).
+        - Reusing the same feature multiple times is acceptable, but using too many different features indicates over-engineering.
+        - Example: Using $close, $open, $high, $low, $volume, $return = 6 features (at limit)
+        - Prefer factors that focus on 2-4 core features rather than using all available features.
+      - **Simplicity Priority:**
+        - **ALWAYS prioritize simplicity over complexity.** A simple factor that works is better than a complex one.
+        - Avoid deep nesting (e.g., RANK(POW(TS_CORR(...))) is too nested)
+        - Prefer linear combinations over multiplicative chains
+        - Use fewer function calls and simpler operations
+      - **If previous factors were flagged for complexity, you MUST generate simpler alternatives in the next iteration.**
 
-    2.**Key Considerations in Factor Construction:**
+    3.**Key Considerations in Factor Construction:**
       - **Data Preprocessing and Standardization:**
           - Avoid using raw prices and volumes directly due to scale differences
           - Use relative changes or standardized data (e.g., RANK(), ZSCORE())
@@ -406,6 +441,33 @@ hypothesis2experiment:
 
 expression_duplication: |-
   - Proposed Expression: {{ prev_expression }}
-  - Duplicated Sub-expression Size: {{ duplicated_subtree_size }}
+  {% if duplicated_subtree_size > duplication_threshold %}
+  - Novelty Check Failed: Duplicated subtree size ({{ duplicated_subtree_size }}) exceeds threshold ({{ duplication_threshold }})
   - Duplicated Sub-expression: {{ duplicated_subtree }}
+    {% if matched_alpha %}Matched with: {{ matched_alpha }}{% endif %}
+  {% endif %}
+  {% if free_args_ratio >= 0.5 %}
+  - Parsimony Check Failed: Free arguments ratio ({{ "%.2f"|format(free_args_ratio * 100) }}%) >= 50%
+    - Number of free args: {{ num_free_args }}, Total nodes: {{ num_all_nodes }}
+    - This indicates the factor is over-parameterized. Please reduce the number of free parameters.
+  {% endif %}
+  {% if unique_vars_ratio >= 0.5 %}
+  - Diversity Check Failed: Unique variables ratio ({{ "%.2f"|format(unique_vars_ratio * 100) }}%) >= 50%
+    - Number of unique vars: {{ num_unique_vars }}, Total nodes: {{ num_all_nodes }}
+    - This indicates the factor lacks diversity. Please use more repeated variables or operators.
+  {% endif %}
+  {% if symbol_length > symbol_length_threshold %}
+  - **Symbol Length (SL) Check Failed: Symbol length ({{ symbol_length }}) exceeds threshold ({{ symbol_length_threshold }})**
+    - **CRITICAL**: The factor expression is too long and complex. This will cause overfitting and poor generalization.
+    - **Action Required**: Generate a MUCH simpler and shorter expression. Reduce nesting, use fewer function calls, and simplify the logic.
+    - Target: Keep expressions under {{ symbol_length_threshold }} characters. Prefer simple linear combinations over complex multiplicative chains.
+    - Example of GOOD (short): `RANK(TS_MEAN($return, 20))`
+    - Example of BAD (too long): `RANK(POW(TS_CORR($close, SEQUENCE(15), 15), 2)) * RANK(TS_MEAN(($high - $low) / ($volume + 1e-8), 15))`
+  {% endif %}
+  {% if num_base_features > base_features_threshold %}
+  - **Base Features Count (ER) Check Failed: Number of base features ({{ num_base_features }}) exceeds threshold ({{ base_features_threshold }})**
+    - **CRITICAL**: The factor uses too many distinct raw features (e.g., $close, $open, $high, $low, $volume, $return).
+    - **Action Required**: Reduce the number of distinct base features used. Focus on 2-4 core features instead of using all available features.
+    - Target: Use at most {{ base_features_threshold }} distinct base features. Reusing the same feature multiple times is acceptable.
+  {% endif %}
 

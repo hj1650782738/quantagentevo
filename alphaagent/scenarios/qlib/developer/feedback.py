@@ -23,6 +23,35 @@ DIRNAME = Path(__file__).absolute().resolve().parent
 def process_results(current_result, sota_result):
     # Convert the results to dataframes
     current_df = pd.DataFrame(current_result)
+    
+    # Handle case where sota_result might be None or empty
+    if sota_result is None or (isinstance(sota_result, pd.DataFrame) and sota_result.empty):
+        # If no SOTA result, return only current result
+        current_df.index.name = "metric"
+        if "0" in current_df.columns:
+            current_df.rename(columns={"0": "Current Result"}, inplace=True)
+        elif len(current_df.columns) > 0:
+            # Use first column if "0" doesn't exist
+            first_col = current_df.columns[0]
+            current_df.rename(columns={first_col: "Current Result"}, inplace=True)
+        
+        # Select important metrics for comparison
+        important_metrics = [
+            "1day.excess_return_without_cost.max_drawdown",
+            "1day.excess_return_without_cost.information_ratio",
+            "1day.excess_return_without_cost.annualized_return",
+            "IC",
+        ]
+        
+        # Filter the DataFrame to retain only the important metrics that exist
+        available_metrics = [m for m in important_metrics if m in current_df.index]
+        if available_metrics:
+            filtered_df = current_df.loc[available_metrics]
+        else:
+            filtered_df = current_df
+        
+        return filtered_df.to_string()
+    
     sota_df = pd.DataFrame(sota_result)
 
     # Set the metric as the index
@@ -30,8 +59,24 @@ def process_results(current_result, sota_result):
     sota_df.index.name = "metric"
 
     # Rename the value column to reflect the result type
-    current_df.rename(columns={"0": "Current Result"}, inplace=True)
-    sota_df.rename(columns={"0": "SOTA Result"}, inplace=True)
+    # Handle case where column "0" might not exist
+    if "0" in current_df.columns:
+        current_df.rename(columns={"0": "Current Result"}, inplace=True)
+    elif len(current_df.columns) > 0:
+        first_col = current_df.columns[0]
+        current_df.rename(columns={first_col: "Current Result"}, inplace=True)
+    else:
+        # If no columns, create a dummy column
+        current_df["Current Result"] = 0
+    
+    if "0" in sota_df.columns:
+        sota_df.rename(columns={"0": "SOTA Result"}, inplace=True)
+    elif len(sota_df.columns) > 0:
+        first_col = sota_df.columns[0]
+        sota_df.rename(columns={first_col: "SOTA Result"}, inplace=True)
+    else:
+        # If no columns, create a dummy column
+        sota_df["SOTA Result"] = 0
 
     # Combine the dataframes on the Metric index
     combined_df = pd.concat([current_df, sota_df], axis=1)
@@ -44,14 +89,30 @@ def process_results(current_result, sota_result):
         "IC",
     ]
 
-    # Filter the combined DataFrame to retain only the important metrics
-    filtered_combined_df = combined_df.loc[important_metrics]
+    # Filter the combined DataFrame to retain only the important metrics that exist
+    available_metrics = [m for m in important_metrics if m in combined_df.index]
+    if available_metrics:
+        filtered_combined_df = combined_df.loc[available_metrics]
+    else:
+        filtered_combined_df = combined_df
 
-    filtered_combined_df[
-        "Bigger columns name (Didn't consider the direction of the metric, you should judge it by yourself that bigger is better or smaller is better)"
-    ] = filtered_combined_df.apply(
-        lambda row: "Current Result" if row["Current Result"] > row["SOTA Result"] else "SOTA Result", axis=1
-    )
+    # Check if both columns exist before comparing
+    if "Current Result" in filtered_combined_df.columns and "SOTA Result" in filtered_combined_df.columns:
+        filtered_combined_df[
+            "Bigger columns name (Didn't consider the direction of the metric, you should judge it by yourself that bigger is better or smaller is better)"
+        ] = filtered_combined_df.apply(
+                lambda row: "Current Result" if pd.notna(row["Current Result"]) and pd.notna(row["SOTA Result"]) and row["Current Result"] > row["SOTA Result"] else "SOTA Result", axis=1
+        )
+    elif "Current Result" in filtered_combined_df.columns:
+        # Only current result available
+        filtered_combined_df[
+            "Bigger columns name (Didn't consider the direction of the metric, you should judge it by yourself that bigger is better or smaller is better)"
+        ] = "Current Result"
+    elif "SOTA Result" in filtered_combined_df.columns:
+        # Only SOTA result available
+        filtered_combined_df[
+            "Bigger columns name (Didn't consider the direction of the metric, you should judge it by yourself that bigger is better or smaller is better)"
+        ] = "SOTA Result"
 
     return filtered_combined_df.to_string()
 
@@ -73,7 +134,10 @@ class QlibFactorHypothesisExperiment2Feedback(HypothesisExperiment2Feedback):
         hypothesis_text = hypothesis.hypothesis
         current_result = exp.result
         tasks_factors = [task.get_task_information_and_implementation_result() for task in exp.sub_tasks]
-        sota_result = exp.based_experiments[-1].result
+        # Safely get SOTA result, handle case where based_experiments might be empty or result is None
+        sota_result = None
+        if exp.based_experiments and len(exp.based_experiments) > 0:
+            sota_result = exp.based_experiments[-1].result
 
         # Process the results to filter important metrics
         combined_result = process_results(current_result, sota_result)
@@ -141,7 +205,47 @@ class AlphaAgentQlibFactorHypothesisExperiment2Feedback(HypothesisExperiment2Fee
         hypothesis_text = hypothesis.hypothesis
         current_result = exp.result
         tasks_factors = [task.get_task_information_and_implementation_result() for task in exp.sub_tasks]
-        sota_result = exp.based_experiments[-1].result
+        # Safely get SOTA result, handle case where based_experiments might be empty or result is None
+        sota_result = None
+        if exp.based_experiments and len(exp.based_experiments) > 0:
+            sota_result = exp.based_experiments[-1].result
+
+        # Extract complexity information by directly calculating from factor expressions
+        # Import complexity calculation functions
+        try:
+            from alphaagent.components.coder.factor_coder.factor_ast import (
+                calculate_symbol_length, count_base_features
+            )
+            from alphaagent.components.coder.factor_coder.config import FACTOR_COSTEER_SETTINGS
+            
+            for idx, task_detail in enumerate(tasks_factors):
+                if idx < len(exp.sub_tasks):
+                    task = exp.sub_tasks[idx]
+                    factor_expr = task_detail.get("factor_expression", "")
+                    if factor_expr:
+                        complexity_warnings = []
+                        # Calculate symbol length
+                        symbol_length = calculate_symbol_length(factor_expr)
+                        symbol_length_threshold = getattr(FACTOR_COSTEER_SETTINGS, 'symbol_length_threshold', 300)
+                        if symbol_length > symbol_length_threshold:
+                            complexity_warnings.append(
+                                f"Symbol Length (SL) Check Failed: Symbol length ({symbol_length}) exceeds threshold ({symbol_length_threshold}). "
+                                f"The factor expression is too complex and may lead to overfitting."
+                            )
+                        
+                        # Calculate base features count
+                        num_base_features = count_base_features(factor_expr)
+                        base_features_threshold = getattr(FACTOR_COSTEER_SETTINGS, 'base_features_threshold', 6)
+                        if num_base_features > base_features_threshold:
+                            complexity_warnings.append(
+                                f"Base Features Count (ER) Check Failed: Number of base features ({num_base_features}) exceeds threshold ({base_features_threshold}). "
+                                f"The factor uses too many raw features, which may indicate over-engineering."
+                            )
+                        
+                        if complexity_warnings:
+                            task_detail["complexity_feedback"] = "\n".join(complexity_warnings)
+        except Exception as e:
+            logger.warning(f"Failed to calculate complexity info: {e}")
 
         # Process the results to filter important metrics
         combined_result = process_results(current_result, sota_result)

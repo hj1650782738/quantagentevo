@@ -135,6 +135,13 @@ class FactorMultiProcessEvolvingStrategy(MultiProcessEvolvingStrategy):
             else:
                 error_summary_critics = None
             # 构建user_prompt。开始写代码
+            # 检查列表是否为空，避免 IndexError
+            similar_successful_factor_description = ""
+            similar_successful_expression = ""
+            if len(queried_similar_successful_knowledge_to_render) > 0:
+                similar_successful_factor_description = queried_similar_successful_knowledge_to_render[0].target_task.get_task_description()
+                similar_successful_expression = self.extract_expr(queried_similar_successful_knowledge_to_render[0].implementation.code)
+            
             user_prompt = (
                 Environment(undefined=StrictUndefined)
                 .from_string(
@@ -149,8 +156,8 @@ class FactorMultiProcessEvolvingStrategy(MultiProcessEvolvingStrategy):
                     factor_information_str=target_task.get_task_description(),
                     queried_similar_error_knowledge=queried_similar_error_knowledge_to_render,
                     error_summary_critics=error_summary_critics,
-                    similar_successful_factor_description=queried_similar_successful_knowledge_to_render[0].target_task.get_task_description(),
-                    similar_successful_expression=self.extract_expr(queried_similar_successful_knowledge_to_render[0].implementation.code),
+                    similar_successful_factor_description=similar_successful_factor_description,
+                    similar_successful_expression=similar_successful_expression,
                     latest_attempt_to_latest_successful_execution=latest_attempt_to_latest_successful_execution,
                 )
                 .strip("\n")
@@ -308,6 +315,13 @@ class FactorParsingStrategy(MultiProcessEvolvingStrategy):
                     error_summary_critics = None
                     
                 # 构建用户提示
+                # 检查列表是否为空，避免 IndexError
+                similar_successful_factor_description = ""
+                similar_successful_expression = ""
+                if len(queried_similar_successful_knowledge_to_render) > 0:
+                    similar_successful_factor_description = queried_similar_successful_knowledge_to_render[-1].target_task.get_task_description()
+                    similar_successful_expression = self.extract_expr(queried_similar_successful_knowledge_to_render[-1].implementation.code)
+                
                 user_prompt = (
                     Environment(undefined=StrictUndefined)
                     .from_string(
@@ -319,8 +333,8 @@ class FactorParsingStrategy(MultiProcessEvolvingStrategy):
                         former_expression=self.extract_expr(queried_former_failed_knowledge_to_render[-1].implementation.code),
                         former_feedback=queried_former_failed_knowledge_to_render[-1].feedback,
                         error_summary_critics=error_summary_critics,
-                        similar_successful_factor_description=queried_similar_successful_knowledge_to_render[-1].target_task.get_task_description(),
-                        similar_successful_expression=self.extract_expr(queried_similar_successful_knowledge_to_render[-1].implementation.code),
+                        similar_successful_factor_description=similar_successful_factor_description,
+                        similar_successful_expression=similar_successful_expression,
                         latest_attempt_to_latest_successful_execution=latest_attempt_to_latest_successful_execution,
                     )
                     .strip("\n")

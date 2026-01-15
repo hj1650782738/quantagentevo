@@ -445,6 +445,64 @@ def count_all_nodes(expr: str) -> int:
     return count_nodes(tree)
 
 
+def calculate_symbol_length(expr: str) -> int:
+    """
+    Calculate the symbol length (SL) of an expression.
+    Symbol length is the length of the expression string, which measures structural complexity.
+    
+    Args:
+        expr: A string representing a mathematical expression
+        
+    Returns:
+        int: The symbol length of the expression
+    """
+    return len(expr.strip())
+
+
+def count_base_features(expr: str) -> int:
+    """
+    Count the number of unique base features (raw variables starting with $) used in the expression.
+    This corresponds to ER(f, h) in the paper - the feature usage penalty.
+    
+    Args:
+        expr: A string representing a mathematical expression
+        
+    Returns:
+        int: The number of unique base features (e.g., $close, $open, $high, $low, $volume)
+    """
+    tree = parse_expression(expr)
+    base_features = set()
+    collect_base_features(tree, base_features)
+    return len(base_features)
+
+
+def collect_base_features(node: Node, base_features: set) -> None:
+    """
+    Recursively collect base feature names (variables starting with $) from an AST.
+    
+    Args:
+        node: The root node of the AST or sub-tree
+        base_features: A set to collect unique base feature names
+    """
+    if isinstance(node, VarNode):
+        # Only add base features (raw variables starting with $)
+        if node.name.startswith('$'):
+            base_features.add(node.name)
+    elif isinstance(node, NumberNode):
+        pass  # No features in number nodes
+    elif isinstance(node, FunctionNode):
+        # Don't add the function name itself as a feature
+        for arg in node.args:
+            collect_base_features(arg, base_features)
+    elif isinstance(node, BinaryOpNode):
+        collect_base_features(node.left, base_features)
+        collect_base_features(node.right, base_features)
+    elif isinstance(node, ConditionalNode):
+        collect_base_features(node.condition, base_features)
+        collect_base_features(node.true_expr, base_features)
+        collect_base_features(node.false_expr, base_features)
+
+
 def count_nodes(node: Node) -> int:
     """
     Recursively count the number of Node instances in an AST.
