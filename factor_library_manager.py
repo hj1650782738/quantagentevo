@@ -210,6 +210,9 @@ class FactorLibraryManager:
         factor_implementation_code: Optional[str] = None,
         user_initial_direction: Optional[str] = None,
         planning_direction: Optional[str] = None,
+        evolution_phase: Optional[str] = None,
+        trajectory_id: Optional[str] = None,
+        parent_trajectory_ids: Optional[List[str]] = None,
     ) -> str:
         """
         添加因子到库中
@@ -257,6 +260,10 @@ class FactorLibraryManager:
             "user_initial_direction": user_initial_direction or "",
             # 显式保存 planning 方向字段，方便后续区分
             "planning_direction": planning_direction or "",
+            # 进化相关字段
+            "evolution_phase": evolution_phase or "original",  # original/mutation/crossover
+            "trajectory_id": trajectory_id or "",
+            "parent_trajectory_ids": parent_trajectory_ids or [],
             "is_sota": is_sota,
             "quality": quality,
             "backtest_metrics": {
@@ -299,6 +306,9 @@ class FactorLibraryManager:
         initial_direction: Optional[str] = None,
         user_initial_direction: Optional[str] = None,
         planning_direction: Optional[str] = None,
+        evolution_phase: Optional[str] = None,
+        trajectory_id: Optional[str] = None,
+        parent_trajectory_ids: Optional[List[str]] = None,
     ):
         """
         从实验对象中添加所有因子
@@ -357,6 +367,9 @@ class FactorLibraryManager:
                 initial_direction=initial_direction,
                 user_initial_direction=user_initial_direction,
                 planning_direction=planning_direction,
+                evolution_phase=evolution_phase,
+                trajectory_id=trajectory_id,
+                parent_trajectory_ids=parent_trajectory_ids,
             )
     
     def get_factors_by_quality(self, quality: str) -> List[Dict]:
@@ -364,6 +377,36 @@ class FactorLibraryManager:
         return [
             factor for factor in self.library["factors"].values()
             if factor.get("quality") == quality
+        ]
+    
+    def get_factors_by_phase(self, phase: str) -> List[Dict]:
+        """
+        根据进化阶段获取因子列表
+        
+        Args:
+            phase: 进化阶段 (original/mutation/crossover)
+            
+        Returns:
+            该阶段的因子列表
+        """
+        return [
+            factor for factor in self.library["factors"].values()
+            if factor.get("evolution_phase") == phase
+        ]
+    
+    def get_factors_by_trajectory(self, trajectory_id: str) -> List[Dict]:
+        """
+        根据轨迹ID获取因子列表
+        
+        Args:
+            trajectory_id: 策略轨迹ID
+            
+        Returns:
+            该轨迹产出的因子列表
+        """
+        return [
+            factor for factor in self.library["factors"].values()
+            if factor.get("trajectory_id") == trajectory_id
         ]
     
     def get_sota_factors(self) -> List[Dict]:
@@ -384,7 +427,14 @@ class FactorLibraryManager:
             "poor": len([f for f in factors if f.get("quality") == "poor"]),
             "unknown": len([f for f in factors if f.get("quality") == "unknown"]),
             "sota_factors": len([f for f in factors if f.get("is_sota", False)]),
-            "experiments": len(set(f.get("experiment_id", "") for f in factors))
+            "experiments": len(set(f.get("experiment_id", "") for f in factors)),
+            # 进化阶段统计
+            "by_evolution_phase": {
+                "original": len([f for f in factors if f.get("evolution_phase") == "original"]),
+                "mutation": len([f for f in factors if f.get("evolution_phase") == "mutation"]),
+                "crossover": len([f for f in factors if f.get("evolution_phase") == "crossover"]),
+            },
+            "trajectories": len(set(f.get("trajectory_id", "") for f in factors if f.get("trajectory_id")))
         }
 
 

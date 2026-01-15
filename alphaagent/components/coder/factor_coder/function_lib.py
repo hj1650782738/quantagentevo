@@ -639,8 +639,27 @@ def REGRESI(df1: pd.DataFrame, df2: pd.DataFrame, p: int = 5, n_jobs: int = -1):
         return result
     
     else:
-        # 确保 df1 和 df2 的索引一致
-        assert df1.index.equals(df2.index), "df1 和 df2 的索引必须对齐"
+        # 处理 df2 只有 datetime 索引的情况（例如来自 MEAN 等截面函数）
+        # 如果 df1 是 MultiIndex 而 df2 不是，需要将 df2 广播到与 df1 相同的结构
+        if isinstance(df1.index, pd.MultiIndex) and not isinstance(df2.index, pd.MultiIndex):
+            # df2 只有 datetime 索引（来自截面函数如 MEAN），需要广播到 (datetime, instrument) MultiIndex
+            # 获取 df1 的 datetime 层级值
+            datetime_level = df1.index.get_level_values('datetime')
+            # 将 df2 的索引对齐到 df1 的 datetime 层级
+            df2_aligned = df2.reindex(datetime_level, method='ffill')
+            # 创建与 df1 相同的 MultiIndex
+            df2_aligned.index = df1.index
+            df2 = df2_aligned
+        elif not df1.index.equals(df2.index):
+            # 如果索引结构不同，尝试对齐
+            if isinstance(df1.index, pd.MultiIndex) and isinstance(df2.index, pd.MultiIndex):
+                # 两个都是 MultiIndex，尝试对齐
+                try:
+                    df2 = df2.reindex(df1.index)
+                except Exception:
+                    assert df1.index.equals(df2.index), "df1 和 df2 的索引必须对齐"
+            else:
+                assert df1.index.equals(df2.index), "df1 和 df2 的索引必须对齐"
         
         # 填充缺失值
         df1 = df1.fillna(0)
@@ -648,17 +667,25 @@ def REGRESI(df1: pd.DataFrame, df2: pd.DataFrame, p: int = 5, n_jobs: int = -1):
         
         # 获取分组后的数据
         df1_groups = list(df1.groupby('instrument'))
-        df2_groups = list(df2.groupby('instrument'))
         
-        # 确保分组顺序一致
-        if len(df1_groups) != len(df2_groups):
-            raise ValueError("df1 和 df2 的分组数量不一致，请检查数据。")
-        
-        # 使用 joblib 进行并行计算
-        results = Parallel(n_jobs=n_jobs)(
-            delayed(rolling_residuals)(df1_group, df2_group, p)
-            for (_, df1_group), (_, df2_group) in zip(df1_groups, df2_groups)
-        )
+        # 如果 df2 已经是 MultiIndex 且与 df1 对齐，按 instrument 分组
+        if isinstance(df2.index, pd.MultiIndex) and 'instrument' in df2.index.names:
+            df2_groups = list(df2.groupby('instrument'))
+            # 确保分组顺序一致
+            if len(df1_groups) != len(df2_groups):
+                raise ValueError("df1 和 df2 的分组数量不一致，请检查数据。")
+            # 使用 joblib 进行并行计算
+            results = Parallel(n_jobs=n_jobs)(
+                delayed(rolling_residuals)(df1_group, df2_group, p)
+                for (_, df1_group), (_, df2_group) in zip(df1_groups, df2_groups)
+            )
+        else:
+            # df2 是截面数据（只有 datetime），对每个 instrument 使用相同的 df2
+            # 这种情况不应该发生，因为我们已经在上面的逻辑中处理了
+            results = Parallel(n_jobs=n_jobs)(
+                delayed(rolling_residuals)(df1_group, df2, p)
+                for _, df1_group in df1_groups
+            )
         
         # 将结果合并为一个 Series，并确保索引一致
         result = pd.concat(results)

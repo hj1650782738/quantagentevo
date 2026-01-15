@@ -1,30 +1,233 @@
+# ============================================================
+# AlphaAgent Run Configuration
+# All experiment parameters are consolidated here
+# AlphaAgent 运行配置
+# 所有实验参数统一在此配置
+# ============================================================
+
+# ============================================================
+# PLANNING CONFIGURATION
+# Controls parallel exploration direction generation
+# 规划配置
+# 控制并行探索方向的生成
+# ============================================================
 planning:
-  # 是否启用“规划并行”功能：在第一轮把初始方向扩展成 N 条探索方向
+  # Enable "parallel planning" feature: expand initial direction into N exploration directions
+  # 启用"并行规划"功能：将初始方向扩展为N个探索方向
   enabled: true
-  # 并行方向数量：planning 会生成这么多条探索方向（每条方向独立循环）
+  # Number of parallel directions: planning generates this many exploration directions
+  # 并行方向数量：规划生成多少个探索方向
   num_directions: 2
-  # 规划阶段最大重试次数：当 LLM 输出不符合 JSON 规范时会重试
+  # Maximum retry attempts for planning: retries when LLM output doesn't match JSON format
+  # 规划最大重试次数：当LLM输出不符合JSON格式时重试
   max_attempts: 5
-  # 是否使用 LLM 生成方向：true=调用大模型；false=只使用 fallback
+  # Whether to use LLM to generate directions: true=call LLM; false=only use fallback
+  # 是否使用LLM生成方向：true=调用LLM；false=仅使用备用方案
   use_llm: true
-  # 当 LLM 失败时是否允许 fallback：true=使用内置方向模板补齐
+  # Whether to allow fallback when LLM fails: true=use built-in direction templates
+  # 当LLM失败时是否允许回退：true=使用内置方向模板
   allow_fallback: true
-  # 规划提示词文件路径：相对 qlib_rd_loop 目录
+  # Planning prompts file path: relative to qlib_rd_loop directory
+  # 规划提示词文件路径：相对于qlib_rd_loop目录
   prompt_file: planning_prompts.yaml
 
+
+# ============================================================
+# EXECUTION CONFIGURATION
+# Controls main loop execution parameters
+# 执行配置
+# 控制主循环执行参数
+# ============================================================
 execution:
-  # 最大循环轮数：与 steps_per_loop 相乘得到 step_n（当 step_n 未显式给出时）
-  max_loops: 2
-  # 每轮步骤数：固定为 5（propose/construct/calculate/backtest/feedback）
+  # Maximum loop iterations: multiplied with steps_per_loop to get step_n (when step_n not specified)
+  # 最大循环迭代次数：与steps_per_loop相乘得到step_n（当step_n未指定时）
+  max_loops: 7
+  # Steps per loop: fixed at 5 (propose/construct/calculate/backtest/feedback)
+  # 每循环步数：固定为5（提出假设/构建因子/计算/回测/反馈）
   steps_per_loop: 5
-  # 总步数（优先级最高）：如果设置，则覆盖 max_loops * steps_per_loop
+  # Total steps (highest priority): if set, overrides max_loops * steps_per_loop
+  # 总步数（最高优先级）：如果设置，将覆盖max_loops * steps_per_loop
   step_n: null
-  # 是否使用本地环境回测：true=本地，false=Docker
+  # Whether to use local environment for backtest: true=local, false=Docker
+  # 是否使用本地环境进行回测：true=本地，false=Docker
   use_local: true
-  # 是否多进程并行运行各分支：true=每条方向独立进程
+  # Whether to run branches in parallel using multiprocessing
+  # 是否使用多进程并行运行分支
   parallel_execution: true
-  # 分支日志根目录：仅在并行规划开启且分支>1时生效
+  # Branch log root directory: effective only when parallel planning enabled with >1 branches
+  # 分支日志根目录：仅在启用并行规划且分支数>1时有效
   branch_log_root: log
-  # 分支日志前缀：日志目录名格式为 {prefix}_{index}
+  # Branch log prefix: log directory name format is {prefix}_{index}
+  # 分支日志前缀：日志目录名称格式为{prefix}_{index}
   branch_log_prefix: branch
 
+
+# ============================================================
+# EVOLUTION CONFIGURATION
+# Controls evolutionary exploration (mutation and crossover)
+# Flow: Original → Mutation → Crossover → Mutation → Crossover → ...
+# 进化配置
+# 控制进化探索（变异和交叉）
+# 流程：原始轮 → 变异轮 → 交叉轮 → 变异轮 → 交叉轮 → ...
+# ============================================================
+evolution:
+  # Enable evolution mode
+  # When enabled, overrides traditional planning + parallel execution mode
+  # 启用进化模式
+  # 启用时，将覆盖传统的规划+并行执行模式
+  enabled: true
+  
+  # Maximum evolution rounds (including original, mutation, and crossover rounds)
+  # Flow: round 0 = original, round 1 = mutation, round 2 = crossover, ...
+  # 最大进化轮数（包括原始轮、变异轮和交叉轮）
+  # 流程：轮次0=原始轮，轮次1=变异轮，轮次2=交叉轮，...
+  max_rounds: 7
+  
+  # Crossover operation parameters
+  # crossover_size: Number of parents selected per crossover operation
+  # 交叉操作参数
+  # crossover_size: 每次交叉操作选择的父代数量
+  crossover_size: 2
+  # crossover_n: Number of combinations generated per crossover round (determines parallelism after crossover)
+  # crossover_n: 每轮交叉生成的组合数量（决定交叉后的并行度）
+  crossover_n: 2
+  
+  # Whether to prefer diverse crossover combinations
+  # true: Prioritize combinations from different directions and phases
+  # false: Random parent combination selection
+  # 是否偏好多样化的交叉组合
+  # true: 优先选择来自不同方向和阶段的组合
+  # false: 随机选择父代组合
+  prefer_diverse_crossover: true
+  
+  # Evolution prompts file path: relative to qlib_rd_loop directory
+  # 进化提示词文件路径：相对于qlib_rd_loop目录
+  prompt_file: evolution_prompts.yaml
+  
+  # Parent selection strategy
+  # weighted: Performance-weighted sampling (lower performance = higher weight, encourages exploration)
+  # best: Prioritize best-performing trajectories
+  # random: Random selection
+  # 父代选择策略
+  # weighted: 性能加权采样（性能越低权重越高，鼓励探索）
+  # best: 优先选择表现最好的轨迹
+  # random: 随机选择
+  parent_selection_strategy: weighted
+
+
+# ============================================================
+# FACTOR GENERATION CONFIGURATION
+# Controls factor proposal and expression generation
+# 因子生成配置
+# 控制因子提出和表达式生成
+# ============================================================
+factor:
+  # Number of factors to generate per hypothesis
+  # 每个假设生成的因子数量
+  factors_per_hypothesis: 3
+  
+  # Factor complexity constraints
+  # 因子复杂度约束
+  complexity:
+    # Maximum symbol length for factor expressions
+    # 因子表达式的最大符号长度
+    symbol_length_threshold: 300
+    # Maximum number of distinct base features ($close, $open, etc.)
+    # 不同基础特征的最大数量（$close, $open等）
+    base_features_threshold: 6
+    # Maximum free arguments ratio (numeric constants / total nodes)
+    # 最大自由参数比例（数值常量/总节点数）
+    free_args_ratio_threshold: 0.5
+  
+  # Factor uniqueness/duplication checking
+  # 因子唯一性/重复性检查
+  duplication:
+    # Enable duplication checking against factor zoo
+    # 启用针对因子库的重复性检查
+    enabled: true
+    # Duplication subtree size threshold
+    # 重复子树大小阈值
+    threshold: 5
+    # Path to factor zoo file for duplication checking
+    # 用于重复性检查的因子库文件路径
+    factor_zoo_path: null  # Uses default if null  # 如果为null则使用默认值
+
+
+# ============================================================
+# BACKTEST CONFIGURATION
+# Controls factor backtesting parameters
+# 回测配置
+# 控制因子回测参数
+# ============================================================
+backtest:
+  # Backtest environment
+  # 回测环境
+  use_docker: false
+  # Timeout for each backtest run (seconds)
+  # 每次回测运行的超时时间（秒）
+  timeout: 600
+  
+  # Qlib configuration (only used when not using local environment)
+  # Qlib配置（仅在未使用本地环境时使用）
+  qlib:
+    config_name: conf.yaml
+
+
+# ============================================================
+# LLM CONFIGURATION
+# Controls LLM API behavior
+# LLM配置
+# 控制LLM API行为
+# ============================================================
+llm:
+  # Factor mining timeout (seconds) - overall timeout for the mining process
+  # 因子挖掘超时时间（秒）- 挖掘过程的总体超时时间
+  factor_mining_timeout: 7200
+  
+  # Retry configuration
+  # 重试配置
+  max_retries: 3
+  retry_delay: 1.0
+  
+  # JSON mode strictness
+  # JSON模式严格性
+  json_mode_strict: true
+
+
+# ============================================================
+# LOGGING CONFIGURATION
+# Controls logging and output
+# 日志配置
+# 控制日志记录和输出
+# ============================================================
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  # 日志级别：DEBUG, INFO, WARNING, ERROR
+  level: INFO
+  # Save intermediate session snapshots
+  # 保存中间会话快照
+  save_snapshots: true
+  # Save trajectory pool to JSON
+  # 保存轨迹池到JSON文件
+  save_trajectory_pool: true
+
+
+# ============================================================
+# PROMPT FILES CONFIGURATION
+# Paths to all prompt configuration files (relative to qlib_rd_loop directory)
+# 提示词文件配置
+# 所有提示词配置文件的路径（相对于qlib_rd_loop目录）
+# ============================================================
+prompts:
+  # Planning phase prompts
+  # 规划阶段提示词
+  planning: planning_prompts.yaml
+  # Evolution (mutation & crossover) prompts
+  # 进化（变异和交叉）提示词
+  evolution: evolution_prompts.yaml
+  # Factor and hypothesis generation prompts are in:
+  # - alphaagent/scenarios/qlib/prompts_alphaagent.yaml (main prompts)
+  # - alphaagent/scenarios/qlib/prompts_rdagent.yaml (legacy prompts)
+  # 因子和假设生成提示词位于：
+  # - alphaagent/scenarios/qlib/prompts_alphaagent.yaml (主要提示词)
+  # - alphaagent/scenarios/qlib/prompts_rdagent.yaml (遗留提示词)

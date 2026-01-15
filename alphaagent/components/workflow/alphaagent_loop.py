@@ -54,19 +54,51 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
     skip_loop_error = (FactorEmptyError,)
     
     @measure_time
-    def __init__(self, PROP_SETTING: BaseFacSetting, potential_direction, stop_event: threading.Event, use_local: bool = True):
+    def __init__(
+        self, 
+        PROP_SETTING: BaseFacSetting, 
+        potential_direction, 
+        stop_event: threading.Event, 
+        use_local: bool = True,
+        strategy_suffix: str = "",
+        evolution_phase: str = "original",
+        trajectory_id: str = "",
+        parent_trajectory_ids: list = None,
+        direction_id: int = 0,
+    ):
         with logger.tag("init"):
             self.use_local = use_local
             # 保存初始方向，用于后续因子溯源
             self.potential_direction = potential_direction
+            
+            # 进化相关属性
+            self.strategy_suffix = strategy_suffix  # 策略指导后缀
+            self.evolution_phase = evolution_phase  # 进化阶段: original/mutation/crossover
+            self.trajectory_id = trajectory_id  # 轨迹ID
+            self.parent_trajectory_ids = parent_trajectory_ids or []  # 父代轨迹ID列表
+            self.direction_id = direction_id  # 方向ID
+            
+            # 用于收集轨迹数据
+            self._last_hypothesis = None
+            self._last_experiment = None
+            self._last_feedback = None
+            
             logger.info(f"初始化AlphaAgentLoop，使用{'本地环境' if use_local else 'Docker容器'}回测")
             if potential_direction:
                 logger.info(f"初始方向: {potential_direction}")
+            if evolution_phase != "original":
+                logger.info(f"进化阶段: {evolution_phase}, 轨迹ID: {trajectory_id}")
+                
             scen: Scenario = import_class(PROP_SETTING.scen)(use_local=use_local)
             logger.log_object(scen, tag="scenario")
 
             ### 换成基于初始hypo的，生成完整的hypo
-            self.hypothesis_generator: HypothesisGen = import_class(PROP_SETTING.hypothesis_gen)(scen, potential_direction)
+            # 如果有策略后缀，将其附加到方向中
+            effective_direction = potential_direction
+            if strategy_suffix:
+                effective_direction = (potential_direction or "") + "\n" + strategy_suffix
+            
+            self.hypothesis_generator: HypothesisGen = import_class(PROP_SETTING.hypothesis_gen)(scen, effective_direction)
             logger.log_object(self.hypothesis_generator, tag="hypothesis generator")
 
             ### 换成一次生成10个因子
@@ -105,6 +137,8 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
         with logger.tag("r"):  
             idea = self.hypothesis_generator.gen(self.trace)
             logger.log_object(idea, tag="hypothesis generation")
+            # 保存用于轨迹收集
+            self._last_hypothesis = idea
         return idea
 
     @measure_time
@@ -143,6 +177,8 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
                 logger.error(f"Factor extraction failed.")
                 raise FactorEmptyError("Factor extraction failed.")
             logger.log_object(exp, tag="runner result")
+            # 保存用于轨迹收集
+            self._last_experiment = exp
         return exp
 
     @measure_time
@@ -152,6 +188,9 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
         with logger.tag("ef"):  # evaluate and feedback
             logger.log_object(feedback, tag="feedback")
         self.trace.hist.append((prev_out["factor_propose"], prev_out["factor_backtest"], feedback))
+        
+        # 保存用于轨迹收集
+        self._last_feedback = feedback
 
         # 自动保存因子到统一因子库
         try:
@@ -187,6 +226,11 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
             planning_direction = getattr(self, 'potential_direction', None)
             user_initial_direction = getattr(self, 'user_initial_direction', None)
             
+            # 获取进化相关信息
+            evolution_phase = getattr(self, 'evolution_phase', 'original')
+            trajectory_id = getattr(self, 'trajectory_id', '')
+            parent_trajectory_ids = getattr(self, 'parent_trajectory_ids', [])
+            
             # 创建因子库管理器并保存因子
             library_path = project_root / "all_factors_library.json"
             manager = FactorLibraryManager(str(library_path))
@@ -199,11 +243,35 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
                 initial_direction=planning_direction,
                 user_initial_direction=user_initial_direction,
                 planning_direction=planning_direction,
+                evolution_phase=evolution_phase,
+                trajectory_id=trajectory_id,
+                parent_trajectory_ids=parent_trajectory_ids,
             )
-            logger.info(f"已保存因子到统一因子库: {library_path}")
+            logger.info(f"已保存因子到统一因子库: {library_path} (phase={evolution_phase})")
         except Exception as e:
             # 如果保存失败，记录警告但不影响主流程
             logger.warning(f"保存因子到库失败: {e}")
+    
+    def _get_trajectory_data(self) -> dict[str, Any]:
+        """
+        获取当前轮次的轨迹数据，用于进化控制器收集。
+        
+        注意：方法名以下划线开头，避免被工作流系统识别为步骤。
+        工作流系统会自动将所有非以下划线开头的可调用方法识别为步骤。
+        
+        Returns:
+            包含假设、实验、反馈等信息的字典
+        """
+        return {
+            "hypothesis": self._last_hypothesis,
+            "experiment": self._last_experiment,
+            "feedback": self._last_feedback,
+            "direction_id": self.direction_id,
+            "evolution_phase": self.evolution_phase,
+            "trajectory_id": self.trajectory_id,
+            "parent_trajectory_ids": self.parent_trajectory_ids,
+            "loop_idx": self.loop_idx,
+        }
 
 
 
