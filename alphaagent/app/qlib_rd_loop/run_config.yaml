@@ -81,7 +81,7 @@ evolution:
   # Flow: round 0 = original, round 1 = mutation, round 2 = crossover, ...
   # 最大进化轮数（包括原始轮、变异轮和交叉轮）
   # 流程：轮次0=原始轮，轮次1=变异轮，轮次2=交叉轮，...
-  max_rounds: 6  #超参
+  max_rounds: 5  #超参
   
   # Crossover operation parameters
   # crossover_size: Number of parents selected per crossover operation

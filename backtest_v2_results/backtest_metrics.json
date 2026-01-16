@@ -7,10 +7,10 @@
     "ICIR": 0.028252703854599062,
     "Rank IC": 0.018169940440589522,
     "Rank ICIR": 0.11134594400534176,
-    "annualized_return": 0.04045994596948709,
-    "information_ratio": 0.43707858534388255,
-    "max_drawdown": -0.22369193796474773,
-    "calmar_ratio": 0.18087350996021723
+    "annualized_return": 0.0404599459694871,
+    "information_ratio": 0.437078585343885,
+    "max_drawdown": -0.2236919379647476,
+    "calmar_ratio": 0.18087350996021737
   },
   "config": {
     "data_range": "2016-01-01 ~ 2025-12-26",
@@ -19,5 +19,5 @@
     "market": "csi300",
     "benchmark": "SH000300"
   },
-  "elapsed_seconds": 35.94004678726196
+  "elapsed_seconds": 36.295307874679565
 }
