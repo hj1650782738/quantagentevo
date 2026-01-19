@@ -22,6 +22,7 @@
 
 import json
 import hashlib
+import os
 from datetime import datetime
 from pathlib import Path
 from collections import OrderedDict
@@ -183,12 +184,44 @@ class FactorLibraryManager:
                     factor_description = task_info.get('factor_description') or getattr(task, 'factor_description', '')
                     factor_formulation = task_info.get('factor_formulation') or getattr(task, 'factor_formulation', '')
                     
-                    # 获取实现代码
+                    # 获取实现代码和因子目录路径（稳健处理）
                     implementation_code = ""
-                    if hasattr(experiment, 'sub_workspace_list') and idx < len(experiment.sub_workspace_list):
-                        workspace = experiment.sub_workspace_list[idx]
-                        if hasattr(workspace, 'code'):
-                            implementation_code = workspace.code or ""
+                    factor_dir = ""
+                    result_h5_path = ""
+                    cache_location = None
+                    
+                    try:
+                        if hasattr(experiment, 'sub_workspace_list') and idx < len(experiment.sub_workspace_list):
+                            workspace = experiment.sub_workspace_list[idx]
+                            # 获取实现代码
+                            if hasattr(workspace, 'code'):
+                                implementation_code = workspace.code or ""
+                            # 获取因子目录路径（workspace_path 属性）
+                            if hasattr(workspace, 'workspace_path') and workspace.workspace_path:
+                                try:
+                                    ws_path = Path(workspace.workspace_path) if not isinstance(workspace.workspace_path, Path) else workspace.workspace_path
+                                    factor_dir = ws_path.name
+                                    result_h5_path = str(ws_path / 'result.h5')
+                                except Exception as path_err:
+                                    print(f"Warning: Failed to parse workspace path: {path_err}")
+                        
+                        # 获取工作空间后缀（用于定位缓存）
+                        workspace_suffix = os.environ.get('EXPERIMENT_ID', '')
+                        pickle_cache_path = os.environ.get('PICKLE_CACHE_FOLDER_PATH_STR', '')
+                        env_workspace_path = os.environ.get('WORKSPACE_PATH', '')
+                        
+                        # 构建缓存位置信息（仅当有足够信息时）
+                        if workspace_suffix and factor_dir:
+                            cache_location = {
+                                "workspace_suffix": workspace_suffix,
+                                "workspace_path": env_workspace_path,
+                                "factor_dir": factor_dir,
+                                "result_h5_path": result_h5_path,
+                            }
+                    except Exception as cache_err:
+                        # 缓存位置获取失败不影响因子保存
+                        print(f"Warning: Failed to get cache location for factor {idx}: {cache_err}")
+                        cache_location = None
                     
                     # 生成因子ID
                     factor_id = self._generate_factor_id(factor_name, factor_expression, timestamp)
@@ -201,6 +234,7 @@ class FactorLibraryManager:
                         "factor_implementation_code": implementation_code,
                         "factor_description": factor_description,
                         "factor_formulation": factor_formulation,
+                        "cache_location": cache_location,  # 新增：完整的缓存位置信息
                         "metadata": {
                             "experiment_id": experiment_id,
                             "round_number": round_number,

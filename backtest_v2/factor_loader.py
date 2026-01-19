@@ -407,7 +407,7 @@ class FactorLoader:
             quality_filter: 质量过滤器
             
         Returns:
-            List[Dict]: 因子列表
+            List[Dict]: 因子列表，包含 cache_location 字段（如果存在）
         """
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -428,12 +428,19 @@ class FactorLoader:
             if not factor_expr:
                 continue
             
-            result.append({
+            factor_dict = {
                 'factor_id': factor_id,
                 'factor_name': factor_name,
                 'factor_expression': factor_expr,
                 'factor_description': factor_info.get('factor_description', ''),
-            })
+            }
+            
+            # 新增: 包含 cache_location 字段（如果存在）
+            cache_location = factor_info.get('cache_location')
+            if cache_location:
+                factor_dict['cache_location'] = cache_location
+            
+            result.append(factor_dict)
         
         return result
     

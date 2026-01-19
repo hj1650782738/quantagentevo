@@ -17,10 +17,10 @@ planning:
   enabled: false
   # Number of parallel directions: planning generates this many exploration directions
   # 并行方向数量：规划生成多少个探索方向
-  num_directions: 10  #超参
+  num_directions: 5  #超参
   # Maximum retry attempts for planning: retries when LLM output doesn't match JSON format
   # 规划最大重试次数：当LLM输出不符合JSON格式时重试
-  max_attempts: 5 
+  max_attempts: 10 
   # Whether to use LLM to generate directions: true=call LLM; false=only use fallback
   # 是否使用LLM生成方向：true=调用LLM；false=仅使用备用方案
   use_llm: true
@@ -41,7 +41,7 @@ planning:
 execution:
   # Maximum loop iterations: multiplied with steps_per_loop to get step_n (when step_n not specified)
   # 最大循环迭代次数：与steps_per_loop相乘得到step_n（当step_n未指定时）
-  max_loops: 5
+  max_loops: 15
   # Steps per loop: fixed at 5 (propose/construct/calculate/backtest/feedback)
   # 每循环步数：固定为5（提出假设/构建因子/计算/回测/反馈）
   steps_per_loop: 5

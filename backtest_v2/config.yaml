@@ -192,7 +192,9 @@ llm:
   
   # 是否自动从主程序日志中提取缓存
   # 启用后，回测时会自动检查并提取主程序已计算的因子
-  auto_extract_cache: true
+  # 禁用自动缓存提取（扫描 45+ 实验目录非常慢）
+  # 如需提取缓存，手动运行: python tools/factor_cache_extractor.py
+  auto_extract_cache: false
   
   # 调试模式（输出更多日志）
   debug: false

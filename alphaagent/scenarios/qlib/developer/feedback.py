@@ -13,8 +13,11 @@ from alphaagent.core.proposal import (
     Trace,
 )
 from alphaagent.log import logger
-from alphaagent.oai.llm_utils import APIBackend
+from alphaagent.oai.llm_utils import APIBackend, robust_json_parse
 from alphaagent.utils import convert2bool
+
+# JSON 解析最大重试次数
+MAX_JSON_PARSE_RETRIES = 3
 
 rdagent_feedback_prompts = Prompts(file_path=Path(__file__).parent.parent / "prompts_rdagent.yaml")
 DIRNAME = Path(__file__).absolute().resolve().parent
@@ -160,15 +163,37 @@ class QlibFactorHypothesisExperiment2Feedback(HypothesisExperiment2Feedback):
             )
         )
 
-        # Call the APIBackend to generate the response for hypothesis feedback
-        response = APIBackend().build_messages_and_create_chat_completion(
-            user_prompt=usr_prompt,
-            system_prompt=sys_prompt,
-            json_mode=True,
-        )
-
-        # Parse the JSON response to extract the feedback
-        response_json = json.loads(response)
+        # Call the APIBackend to generate the response for hypothesis feedback with retry
+        response_json = None
+        last_error = None
+        
+        for attempt in range(MAX_JSON_PARSE_RETRIES):
+            try:
+                response = APIBackend().build_messages_and_create_chat_completion(
+                    user_prompt=usr_prompt,
+                    system_prompt=sys_prompt,
+                    json_mode=True,
+                )
+                # Parse the JSON response using robust parser
+                response_json = robust_json_parse(response)
+                break
+            except json.JSONDecodeError as e:
+                last_error = e
+                logger.warning(f"[RDAgent] JSON 解析失败 (尝试 {attempt + 1}/{MAX_JSON_PARSE_RETRIES}): {e}")
+                if attempt < MAX_JSON_PARSE_RETRIES - 1:
+                    logger.info("[RDAgent] 重新请求 LLM...")
+                continue
+        
+        if response_json is None:
+            logger.error(f"[RDAgent] JSON 解析在 {MAX_JSON_PARSE_RETRIES} 次尝试后仍然失败")
+            # 返回默认反馈而不是崩溃
+            return HypothesisFeedback(
+                observations="JSON 解析失败，无法提取反馈",
+                hypothesis_evaluation="无法评估",
+                new_hypothesis="",
+                reason=f"JSON 解析错误: {last_error}",
+                decision=False,
+            )
 
         # Extract fields from JSON response
         observations = response_json.get("Observations", "No observations provided")
@@ -268,15 +293,37 @@ class AlphaAgentQlibFactorHypothesisExperiment2Feedback(HypothesisExperiment2Fee
             )
         )
 
-        # Call the APIBackend to generate the response for hypothesis feedback
-        response = APIBackend().build_messages_and_create_chat_completion(
-            user_prompt=usr_prompt,
-            system_prompt=sys_prompt,
-            json_mode=True,
-        )
-
-        # Parse the JSON response to extract the feedback
-        response_json = json.loads(response)
+        # Call the APIBackend to generate the response for hypothesis feedback with retry
+        response_json = None
+        last_error = None
+        
+        for attempt in range(MAX_JSON_PARSE_RETRIES):
+            try:
+                response = APIBackend().build_messages_and_create_chat_completion(
+                    user_prompt=usr_prompt,
+                    system_prompt=sys_prompt,
+                    json_mode=True,
+                )
+                # Parse the JSON response using robust parser
+                response_json = robust_json_parse(response)
+                break
+            except json.JSONDecodeError as e:
+                last_error = e
+                logger.warning(f"[AlphaAgent] JSON 解析失败 (尝试 {attempt + 1}/{MAX_JSON_PARSE_RETRIES}): {e}")
+                if attempt < MAX_JSON_PARSE_RETRIES - 1:
+                    logger.info("[AlphaAgent] 重新请求 LLM...")
+                continue
+        
+        if response_json is None:
+            logger.error(f"[AlphaAgent] JSON 解析在 {MAX_JSON_PARSE_RETRIES} 次尝试后仍然失败")
+            # 返回默认反馈而不是崩溃
+            return HypothesisFeedback(
+                observations="JSON 解析失败，无法提取反馈",
+                hypothesis_evaluation="无法评估",
+                new_hypothesis="",
+                reason=f"JSON 解析错误: {last_error}",
+                decision=False,
+            )
 
         # Extract fields from JSON response
         observations = response_json.get("Observations", "No observations provided")
@@ -325,15 +372,37 @@ class QlibModelHypothesisExperiment2Feedback(HypothesisExperiment2Feedback):
             )
         )
 
-        # Call the APIBackend to generate the response for hypothesis feedback
-        response_hypothesis = APIBackend().build_messages_and_create_chat_completion(
-            user_prompt=user_prompt,
-            system_prompt=system_prompt,
-            json_mode=True,
-        )
-
-        # Parse the JSON response to extract the feedback
-        response_json_hypothesis = json.loads(response_hypothesis)
+        # Call the APIBackend to generate the response for hypothesis feedback with retry
+        response_json_hypothesis = None
+        last_error = None
+        
+        for attempt in range(MAX_JSON_PARSE_RETRIES):
+            try:
+                response_hypothesis = APIBackend().build_messages_and_create_chat_completion(
+                    user_prompt=user_prompt,
+                    system_prompt=system_prompt,
+                    json_mode=True,
+                )
+                # Parse the JSON response using robust parser
+                response_json_hypothesis = robust_json_parse(response_hypothesis)
+                break
+            except json.JSONDecodeError as e:
+                last_error = e
+                logger.warning(f"[Model] JSON 解析失败 (尝试 {attempt + 1}/{MAX_JSON_PARSE_RETRIES}): {e}")
+                if attempt < MAX_JSON_PARSE_RETRIES - 1:
+                    logger.info("[Model] 重新请求 LLM...")
+                continue
+        
+        if response_json_hypothesis is None:
+            logger.error(f"[Model] JSON 解析在 {MAX_JSON_PARSE_RETRIES} 次尝试后仍然失败")
+            return HypothesisFeedback(
+                observations="JSON 解析失败，无法提取反馈",
+                hypothesis_evaluation="无法评估",
+                new_hypothesis="",
+                reason=f"JSON 解析错误: {last_error}",
+                decision=False,
+            )
+        
         return HypothesisFeedback(
             observations=response_json_hypothesis.get("Observations", "No observations provided"),
             hypothesis_evaluation=response_json_hypothesis.get("Feedback for Hypothesis", "No feedback provided"),

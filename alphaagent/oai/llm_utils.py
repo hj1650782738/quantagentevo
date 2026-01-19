@@ -33,6 +33,109 @@ def md5_hash(input_string: str) -> str:
     return hash_md5.hexdigest()
 
 
+def robust_json_parse(text: str, max_retries: int = 3) -> dict:
+    """
+    健壮的 JSON 解析函数，可以处理以下常见问题：
+    1. Extra data 错误（JSON 后面有额外内容）
+    2. LaTeX 转义字符问题
+    3. JSON 被 markdown 代码块包裹
+    
+    Args:
+        text: 要解析的文本
+        max_retries: 最大重试次数（用于不同的解析策略）
+        
+    Returns:
+        解析后的 dict
+        
+    Raises:
+        json.JSONDecodeError: 如果所有解析策略都失败
+    """
+    original_text = text
+    
+    # 策略 1: 直接解析
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    
+    # 策略 2: 提取 JSON 代码块
+    json_block_pattern = r'```(?:json)?\s*\n?([\s\S]*?)\n?```'
+    matches = re.findall(json_block_pattern, text)
+    if matches:
+        for match in matches:
+            try:
+                return json.loads(match.strip())
+            except json.JSONDecodeError:
+                continue
+    
+    # 策略 3: 查找第一个完整的 JSON 对象（处理 Extra data 问题）
+    # 找到第一个 { 和对应的 }
+    brace_count = 0
+    start_idx = -1
+    end_idx = -1
+    in_string = False
+    escape_next = False
+    
+    for i, char in enumerate(text):
+        if escape_next:
+            escape_next = False
+            continue
+        if char == '\\':
+            escape_next = True
+            continue
+        if char == '"' and not escape_next:
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+            
+        if char == '{':
+            if brace_count == 0:
+                start_idx = i
+            brace_count += 1
+        elif char == '}':
+            brace_count -= 1
+            if brace_count == 0 and start_idx != -1:
+                end_idx = i
+                break
+    
+    if start_idx != -1 and end_idx != -1:
+        json_str = text[start_idx:end_idx + 1]
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            # 策略 4: 修复 LaTeX 转义字符
+            fixed_str = json_str
+            latex_commands = ['text', 'frac', 'left', 'right', 'times', 'cdot', 'sqrt', 
+                              'sum', 'prod', 'int', 'alpha', 'beta', 'gamma', 'delta']
+            for cmd in latex_commands:
+                fixed_str = re.sub(r'(?<!\\)\\(' + cmd + r')', r'\\\\\1', fixed_str)
+            fixed_str = re.sub(r'(?<!\\)\\([_\{\}\[\]])', r'\\\\\1', fixed_str)
+            
+            try:
+                return json.loads(fixed_str)
+            except json.JSONDecodeError:
+                pass
+    
+    # 策略 5: 尝试更宽松的 JSON 提取
+    # 找到所有可能的 JSON 对象
+    potential_jsons = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text)
+    for pj in potential_jsons:
+        try:
+            result = json.loads(pj)
+            if isinstance(result, dict) and len(result) > 0:
+                return result
+        except json.JSONDecodeError:
+            continue
+    
+    # 所有策略都失败，抛出原始错误
+    raise json.JSONDecodeError(
+        f"无法解析 JSON，原始文本长度: {len(original_text)}", 
+        original_text, 
+        0
+    )
+
+
 try:
     from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 except ImportError:

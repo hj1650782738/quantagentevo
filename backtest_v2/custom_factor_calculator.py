@@ -96,33 +96,80 @@ class CustomFactorCalculator:
         if cache_file.exists():
             try:
                 result = pd.read_pickle(cache_file)
-                # 处理可能的 DataFrame 格式 (主程序保存的是 DataFrame)
-                if isinstance(result, pd.DataFrame):
-                    if len(result.columns) == 1:
-                        result = result.iloc[:, 0]
-                    elif 'factor' in result.columns:
-                        result = result['factor']
-                    else:
-                        # 取第一列
-                        result = result.iloc[:, 0]
-                
-                # 处理索引顺序不一致的问题
-                # 缓存可能是 (datetime, instrument)，而回测数据是 (instrument, datetime)
-                if isinstance(result.index, pd.MultiIndex):
-                    cache_idx_names = list(result.index.names)
-                    data_idx_names = list(self.data_df.index.names)
-                    
-                    # 如果索引名称顺序不同，调整顺序
-                    if cache_idx_names != data_idx_names and set(cache_idx_names) == set(data_idx_names):
-                        # 交换索引级别以匹配目标数据
-                        result = result.swaplevel()
-                        result = result.sort_index()
-                
-                return result
+                return self._process_cached_result(result, cache_key)
             except Exception as e:
                 logger.debug(f"缓存加载失败 [{cache_key}]: {e}")
                 return None
         return None
+    
+    def _load_from_cache_location(self, cache_location: Dict) -> Optional[pd.Series]:
+        """
+        从 cache_location 字段指定的路径加载因子值
+        
+        Args:
+            cache_location: 缓存位置信息，包含 result_h5_path
+            
+        Returns:
+            Optional[pd.Series]: 缓存的因子值，如果不存在则返回 None
+        """
+        if not cache_location:
+            return None
+        
+        result_h5_path = cache_location.get('result_h5_path', '')
+        if not result_h5_path:
+            return None
+        
+        h5_file = Path(result_h5_path)
+        if not h5_file.exists():
+            logger.debug(f"缓存文件不存在: {result_h5_path}")
+            return None
+        
+        try:
+            # 读取 HDF5 文件
+            result = pd.read_hdf(str(h5_file))
+            return self._process_cached_result(result, result_h5_path)
+        except Exception as e:
+            logger.debug(f"从 cache_location 加载失败 [{result_h5_path}]: {e}")
+            return None
+    
+    def _process_cached_result(self, result: Any, source: str) -> Optional[pd.Series]:
+        """
+        处理缓存结果，统一格式
+        
+        Args:
+            result: 从缓存加载的原始数据
+            source: 数据来源（用于日志）
+            
+        Returns:
+            Optional[pd.Series]: 处理后的因子值
+        """
+        try:
+            # 处理可能的 DataFrame 格式
+            if isinstance(result, pd.DataFrame):
+                if len(result.columns) == 1:
+                    result = result.iloc[:, 0]
+                elif 'factor' in result.columns:
+                    result = result['factor']
+                else:
+                    # 取第一列
+                    result = result.iloc[:, 0]
+            
+            # 处理索引顺序不一致的问题
+            # 缓存可能是 (datetime, instrument)，而回测数据是 (instrument, datetime)
+            if isinstance(result.index, pd.MultiIndex):
+                cache_idx_names = list(result.index.names)
+                data_idx_names = list(self.data_df.index.names)
+                
+                # 如果索引名称顺序不同，调整顺序
+                if cache_idx_names != data_idx_names and set(cache_idx_names) == set(data_idx_names):
+                    # 交换索引级别以匹配目标数据
+                    result = result.swaplevel()
+                    result = result.sort_index()
+            
+            return result
+        except Exception as e:
+            logger.debug(f"处理缓存结果失败 [{source}]: {e}")
+            return None
     
     def _save_to_cache(self, expr: str, result: pd.Series):
         """
@@ -304,8 +351,16 @@ class CustomFactorCalculator:
         """
         批量计算因子
         
+        优先级:
+        1. cache_location 字段（直接从 result.h5 读取）
+        2. MD5 缓存（factor_cache 目录）
+        3. 使用 factor_expression 重新计算
+        
         Args:
-            factors: 因子列表，每个因子是 dict，包含 factor_name 和 factor_expression
+            factors: 因子列表，每个因子是 dict，包含:
+                - factor_name: 因子名称
+                - factor_expression: 因子表达式
+                - cache_location (可选): 缓存位置信息
             use_cache: 是否使用缓存 (默认 True)
             
         Returns:
@@ -319,11 +374,13 @@ class CustomFactorCalculator:
         success_count = 0
         fail_count = 0
         cache_hit_count = 0
+        cache_location_hit_count = 0
         total = len(factors)
         
         for i, factor_info in enumerate(factors):
             factor_name = factor_info.get('factor_name', 'unknown')
             factor_expr = factor_info.get('factor_expression', '')
+            cache_location = factor_info.get('cache_location')  # 新增: 缓存位置字段
             
             if not factor_expr:
                 fail_count += 1
@@ -333,34 +390,33 @@ class CustomFactorCalculator:
             
             result = None
             
-            # 1. 优先检查缓存
+            # 1. 优先检查 cache_location (从 result.h5 直接读取)
+            if use_cache and cache_location:
+                result = self._load_from_cache_location(cache_location)
+                if result is not None:
+                    cache_location_hit_count += 1
+                    result = self._validate_and_align_result(result, factor_name)
+                    if result is not None:
+                        results[factor_name] = result
+                        success_count += 1
+                        valid_count = (~result.isna()).sum()
+                        logger.info(f"    ✓ 从 cache_location 加载 (有效数据: {valid_count}/{len(result)})")
+                        continue
+            
+            # 2. 检查 MD5 缓存
             if use_cache:
                 result = self._load_from_cache(factor_expr)
                 if result is not None:
                     cache_hit_count += 1
-                    # 确保索引对齐
-                    if not result.index.equals(self.data_df.index):
-                        try:
-                            # 尝试对齐索引 - 缓存可能包含更多股票/日期
-                            common_idx = result.index.intersection(self.data_df.index)
-                            if len(common_idx) > len(self.data_df.index) * 0.5:  # 至少50%匹配
-                                result = result.reindex(self.data_df.index)
-                                logger.debug(f"    索引对齐: 共同索引 {len(common_idx)}, 目标 {len(self.data_df.index)}")
-                            else:
-                                logger.warning(f"    ⚠ 缓存索引匹配率过低 ({len(common_idx)}/{len(self.data_df.index)}), 重新计算")
-                                result = None
-                        except Exception as e:
-                            logger.warning(f"    ⚠ 索引对齐失败: {e}, 重新计算")
-                            result = None
-                    
-                    if result is not None and len(result) > 0 and not result.isna().all():
-                        valid_count = (~result.isna()).sum()
+                    result = self._validate_and_align_result(result, factor_name)
+                    if result is not None:
                         results[factor_name] = result
                         success_count += 1
-                        logger.info(f"    ✓ 从缓存加载 (有效数据: {valid_count}/{len(result)})")
+                        valid_count = (~result.isna()).sum()
+                        logger.info(f"    ✓ 从 MD5 缓存加载 (有效数据: {valid_count}/{len(result)})")
                         continue
             
-            # 2. 缓存未命中，进行计算
+            # 3. 缓存未命中，使用 factor_expression 进行计算
             result = self.calculate_factor(factor_name, factor_expr)
             
             if result is not None and len(result) > 0:
@@ -369,7 +425,7 @@ class CustomFactorCalculator:
                     results[factor_name] = result
                     success_count += 1
                     logger.info(f"    ✓ 计算成功 (有效数据: {(~result.isna()).sum()}/{len(result)})")
-                    # 保存到缓存
+                    # 保存到 MD5 缓存
                     if use_cache:
                         self._save_to_cache(factor_expr, result)
                 else:
@@ -379,7 +435,10 @@ class CustomFactorCalculator:
                 fail_count += 1
                 logger.warning(f"    ✗ 因子 {factor_name} 计算失败或为空")
         
-        logger.info(f"  因子计算完成: 成功 {success_count}, 失败 {fail_count}, 缓存命中 {cache_hit_count}")
+        logger.info(f"  因子计算完成: 成功 {success_count}, 失败 {fail_count}")
+        logger.info(f"    - cache_location 命中: {cache_location_hit_count}")
+        logger.info(f"    - MD5 缓存命中: {cache_hit_count}")
+        logger.info(f"    - 重新计算: {success_count - cache_location_hit_count - cache_hit_count}")
         
         if results:
             # 创建 DataFrame，使用原始数据的索引
@@ -391,6 +450,41 @@ class CustomFactorCalculator:
             return result_df
         
         return pd.DataFrame()
+    
+    def _validate_and_align_result(self, result: pd.Series, factor_name: str) -> Optional[pd.Series]:
+        """
+        验证并对齐缓存结果的索引
+        
+        Args:
+            result: 缓存加载的因子值
+            factor_name: 因子名称（用于日志）
+            
+        Returns:
+            Optional[pd.Series]: 对齐后的结果，如果验证失败则返回 None
+        """
+        if result is None:
+            return None
+        
+        # 确保索引对齐
+        if not result.index.equals(self.data_df.index):
+            try:
+                # 尝试对齐索引 - 缓存可能包含更多股票/日期
+                common_idx = result.index.intersection(self.data_df.index)
+                if len(common_idx) > len(self.data_df.index) * 0.5:  # 至少50%匹配
+                    result = result.reindex(self.data_df.index)
+                    logger.debug(f"    索引对齐: 共同索引 {len(common_idx)}, 目标 {len(self.data_df.index)}")
+                else:
+                    logger.warning(f"    ⚠ 缓存索引匹配率过低 ({len(common_idx)}/{len(self.data_df.index)}), 将重新计算")
+                    return None
+            except Exception as e:
+                logger.warning(f"    ⚠ 索引对齐失败: {e}, 将重新计算")
+                return None
+        
+        # 验证数据有效性
+        if result is None or len(result) == 0 or result.isna().all():
+            return None
+        
+        return result
 
 
 class CustomFactorDataLoader:

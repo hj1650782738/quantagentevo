@@ -10,7 +10,7 @@ from alphaagent.core.prompts import Prompts
 from alphaagent.core.proposal import Hypothesis, Scenario, Trace
 from alphaagent.core.experiment import Experiment
 from alphaagent.scenarios.qlib.experiment.factor_experiment import QlibFactorExperiment
-from alphaagent.oai.llm_utils import APIBackend
+from alphaagent.oai.llm_utils import APIBackend, robust_json_parse
 import os
 import pandas as pd
 from alphaagent.log import logger
@@ -76,14 +76,14 @@ class QlibFactorHypothesisGen(FactorHypothesisGen):
         return context_dict, True
 
     def convert_response(self, response: str) -> Hypothesis:
-        response_dict = json.loads(response)
+        response_dict = robust_json_parse(response)
         hypothesis = QlibFactorHypothesis(
-            hypothesis=response_dict["hypothesis"],
-            reason=response_dict["reason"],
-            concise_reason=response_dict["concise_reason"],
-            concise_observation=response_dict["concise_observation"],
-            concise_justification=response_dict["concise_justification"],
-            concise_knowledge=response_dict["concise_knowledge"],
+            hypothesis=response_dict.get("hypothesis", ""),
+            reason=response_dict.get("reason", ""),
+            concise_reason=response_dict.get("concise_reason", ""),
+            concise_observation=response_dict.get("concise_observation", ""),
+            concise_justification=response_dict.get("concise_justification", ""),
+            concise_knowledge=response_dict.get("concise_knowledge", ""),
         )
         return hypothesis
 
@@ -119,14 +119,17 @@ class QlibFactorHypothesis2Experiment(FactorHypothesis2Experiment):
         }, True
 
     def convert_response(self, response: str, trace: Trace) -> FactorExperiment:
-        response_dict = json.loads(response)
+        response_dict = robust_json_parse(response)
         tasks = []
 
         for factor_name in response_dict:
-            description = response_dict[factor_name]["description"]
-            formulation = response_dict[factor_name]["formulation"]
-            # expression = response_dict[factor_name]["expression"]
-            variables = response_dict[factor_name]["variables"]
+            factor_data = response_dict.get(factor_name, {})
+            if not isinstance(factor_data, dict):
+                continue
+            description = factor_data.get("description", "")
+            formulation = factor_data.get("formulation", "")
+            # expression = factor_data.get("expression", "")
+            variables = factor_data.get("variables", {})
             tasks.append(
                 FactorTask(
                     factor_name=factor_name,
@@ -198,7 +201,7 @@ class AlphaAgentHypothesisGen(FactorHypothesisGen):
         将大模型返回的 JSON 结果转换为 AlphaAgentHypothesis。
         为了增强鲁棒性，这里对缺失字段使用默认空字符串，避免 KeyError 中断整个实验流程。
         """
-        response_dict = json.loads(response)
+        response_dict = robust_json_parse(response)
         # 使用 get 防止部分字段缺失导致 KeyError
         hypothesis = AlphaAgentHypothesis(
             hypothesis=response_dict.get("hypothesis", ""),
@@ -338,12 +341,19 @@ class AlphaAgentHypothesis2FactorExpression(FactorHypothesis2Experiment):
                 break
                 
             resp = APIBackend().build_messages_and_create_chat_completion(user_prompt, system_prompt, json_mode=json_flag)
-            response_dict = json.loads(resp)
+            try:
+                response_dict = robust_json_parse(resp)
+            except json.JSONDecodeError as e:
+                logger.warning(f"JSON 解析失败: {e}, 重试中...")
+                continue
             proposed_names = []
             proposed_exprs = []
             
             for i, factor_name in enumerate(response_dict):
-                expr = response_dict[factor_name]["expression"]
+                factor_data = response_dict.get(factor_name, {})
+                if not isinstance(factor_data, dict):
+                    continue
+                expr = factor_data.get("expression", "")
                 
                 # Check if expression is parsable
                 if not self.factor_regulator.is_parsable(expr):
@@ -424,14 +434,17 @@ class AlphaAgentHypothesis2FactorExpression(FactorHypothesis2Experiment):
     
 
     def convert_response(self, response: str, trace: Trace) -> FactorExperiment:
-        response_dict = json.loads(response)
+        response_dict = robust_json_parse(response)
         tasks = []
 
         for factor_name in response_dict:
-            description = response_dict[factor_name]["description"]
-            formulation = response_dict[factor_name]["formulation"]
-            expression = response_dict[factor_name]["expression"]
-            variables = response_dict[factor_name]["variables"]
+            factor_data = response_dict.get(factor_name, {})
+            if not isinstance(factor_data, dict):
+                continue
+            description = factor_data.get("description", "")
+            formulation = factor_data.get("formulation", "")
+            expression = factor_data.get("expression", "")
+            variables = factor_data.get("variables", {})
             tasks.append(
                 FactorTask(
                     factor_name=factor_name,
