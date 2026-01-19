@@ -377,10 +377,13 @@ def run_evolution_loop(
     cleanup_on_finish = bool(evolution_cfg.get("cleanup_on_finish", False))
     
     # 生成初始方向
+    # 检查 planning.enabled 配置
+    planning_enabled = bool(planning_cfg.get("enabled", False))
     prompt_file = planning_cfg.get("prompt_file") or "planning_prompts.yaml"
     prompt_path = Path(__file__).parent / str(prompt_file)
     
-    if initial_direction:
+    if planning_enabled and initial_direction:
+        # planning 启用时：使用 LLM 生成多个方向
         directions = generate_parallel_directions(
             initial_direction=initial_direction,
             n=num_directions,
@@ -389,8 +392,12 @@ def run_evolution_loop(
             use_llm=bool(planning_cfg.get("use_llm", True)),
             allow_fallback=bool(planning_cfg.get("allow_fallback", True)),
         )
-    else:
+    elif planning_enabled:
+        # planning 启用但无初始方向：使用默认方向列表
         directions = [None] * num_directions
+    else:
+        # planning 禁用：只使用单一方向
+        directions = [initial_direction] if initial_direction else [None]
     
     logger.info(f"生成了 {len(directions)} 个探索方向")
     for i, d in enumerate(directions):
