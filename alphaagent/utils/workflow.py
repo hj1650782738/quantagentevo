@@ -55,7 +55,8 @@ class LoopMeta(type):
         """
         steps = LoopMeta._get_steps(bases)  # all the base classes of parents
         for name, attr in attrs.items():
-            if not name.startswith("__") and isinstance(attr, Callable):
+            # 排除以下划线开头的方法（私有方法和受保护方法）
+            if not name.startswith("_") and isinstance(attr, Callable):
                 if name not in steps:
                     # NOTE: if we override the step in the subclass
                     # Then it is not the new step. So we skip it.
