@@ -846,7 +846,7 @@ class APIBackend:
                     try:
                         json.loads(fixed_resp)
                         resp = fixed_resp
-                        logger.debug(f"已修复 JSON 格式问题")
+                        logger.info(f"已修复 JSON 格式问题")
                     except json.JSONDecodeError as e2:
                         # 如果仍然失败，记录警告但不抛出异常，让后续代码尝试处理
                         logger.warning(f"JSON 修复失败: {e2}，继续使用原始响应")
