@@ -12,8 +12,16 @@ import pandas as pd
 
 def list_all_experiments():
     """列出所有可用的实验"""
-    log_dir = Path("/home/tjxy/quantagent/AlphaAgent/log")
-    exps = sorted([d for d in log_dir.iterdir() if d.is_dir() and d.name.startswith("2026-")], reverse=True)
+    # 搜索新旧两个日志目录
+    log_dirs = [
+        Path("/mnt/DATA/quantagent/AlphaAgent/log"),  # 新路径
+        Path("/home/tjxy/quantagent/AlphaAgent/log"),  # 旧路径（兼容历史数据）
+    ]
+    exps = []
+    for log_dir in log_dirs:
+        if log_dir.exists():
+            exps.extend([d for d in log_dir.iterdir() if d.is_dir() and d.name.startswith("2026-")])
+    exps = sorted(exps, key=lambda x: x.name, reverse=True)
     
     if not exps:
         print("❌ 未找到实验目录")
@@ -105,21 +113,32 @@ def get_latest_experiment(exp_id=None):
     Returns:
         Path: 实验目录路径
     """
-    log_dir = Path("/home/tjxy/quantagent/AlphaAgent/log")
+    # 搜索新旧两个日志目录
+    log_dirs = [
+        Path("/mnt/DATA/quantagent/AlphaAgent/log"),  # 新路径
+        Path("/home/tjxy/quantagent/AlphaAgent/log"),  # 旧路径（兼容历史数据）
+    ]
     
-    # 如果指定了实验ID，直接返回该实验目录
+    # 如果指定了实验ID，在所有日志目录中查找
     if exp_id:
+        for log_dir in log_dirs:
         exp_dir = log_dir / exp_id
         if exp_dir.exists() and exp_dir.is_dir():
             return exp_dir
-        else:
             print(f"❌ 实验目录不存在: {exp_id}")
-            print(f"   请检查路径: {exp_dir}")
+        print(f"   已搜索路径:")
+        for log_dir in log_dirs:
+            print(f"     - {log_dir / exp_id}")
             print(f"\n💡 提示: 使用 --list 参数查看所有可用实验")
             sys.exit(1)
     
-    # 否则返回最新的实验目录
-    exps = sorted([d for d in log_dir.iterdir() if d.is_dir() and d.name.startswith("2026-")], reverse=True)
+    # 否则返回最新的实验目录（从所有日志目录中查找）
+    exps = []
+    for log_dir in log_dirs:
+        if log_dir.exists():
+            exps.extend([d for d in log_dir.iterdir() if d.is_dir() and d.name.startswith("2026-")])
+    exps = sorted(exps, key=lambda x: x.name, reverse=True)
+    
     if not exps:
         print("❌ 未找到实验目录")
         sys.exit(1)
@@ -493,20 +512,45 @@ def show_feedbacks(exp_dir):
         except Exception as e:
             print(f"⚠️  读取反馈文件 {fb_file} 时出错: {e}", file=sys.stderr)
 
+def get_all_workspace_dirs():
+    """
+    动态发现所有工作空间目录
+    支持 RD-Agent_workspace 和 RD-Agent_workspace_{EXPERIMENT_ID} 格式
+    """
+    workspace_base_dirs = [
+        Path("/mnt/DATA/quantagent/AlphaAgent"),  # 新路径基础目录
+        Path("/home/tjxy/quantagent/AlphaAgent/git_ignore_folder"),  # 旧路径基础目录
+    ]
+    
+    workspace_dirs = []
+    for base_dir in workspace_base_dirs:
+        if not base_dir.exists():
+            continue
+        # 查找所有匹配 RD-Agent_workspace* 的目录
+        for ws_dir in base_dir.iterdir():
+            if ws_dir.is_dir() and ws_dir.name.startswith("RD-Agent_workspace"):
+                workspace_dirs.append(ws_dir)
+    
+    return workspace_dirs
+
+
 def show_backtest_results(exp_dir):
     """显示回测结果"""
-    workspace_dir = Path("/home/tjxy/quantagent/AlphaAgent/git_ignore_folder/RD-Agent_workspace")
-    if not workspace_dir.exists():
+    # 动态发现所有工作空间目录（支持 EXPERIMENT_ID 隔离）
+    workspace_dirs = get_all_workspace_dirs()
+    
+    if not workspace_dirs:
         print("❌ 回测工作空间目录不存在")
         return
     
-    # 查找所有有回测结果的工作空间
+    # 查找所有有回测结果的工作空间（从所有 workspace 目录中搜索）
     workspaces = []
-    for ws_dir in workspace_dir.iterdir():
-        if ws_dir.is_dir():
-            csv_file = ws_dir / "qlib_res.csv"
-            if csv_file.exists():
-                workspaces.append((ws_dir, csv_file.stat().st_mtime))
+    for workspace_dir in workspace_dirs:
+        for ws_dir in workspace_dir.iterdir():
+            if ws_dir.is_dir():
+                csv_file = ws_dir / "qlib_res.csv"
+                if csv_file.exists():
+                    workspaces.append((ws_dir, csv_file.stat().st_mtime))
     
     if not workspaces:
         print("⚠️  未找到回测结果")

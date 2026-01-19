@@ -65,6 +65,7 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
         trajectory_id: str = "",
         parent_trajectory_ids: list = None,
         direction_id: int = 0,
+        round_idx: int = 0,
     ):
         with logger.tag("init"):
             self.use_local = use_local
@@ -77,6 +78,7 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
             self.trajectory_id = trajectory_id  # 轨迹ID
             self.parent_trajectory_ids = parent_trajectory_ids or []  # 父代轨迹ID列表
             self.direction_id = direction_id  # 方向ID
+            self.round_idx = round_idx  # 进化轮次: 0=original, 1=mutation, 2=crossover, ...
             
             # 用于收集轨迹数据
             self._last_hypothesis = None
@@ -87,7 +89,7 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
             if potential_direction:
                 logger.info(f"初始方向: {potential_direction}")
             if evolution_phase != "original":
-                logger.info(f"进化阶段: {evolution_phase}, 轨迹ID: {trajectory_id}")
+                logger.info(f"进化阶段: {evolution_phase}, 轮次: {round_idx}, 轨迹ID: {trajectory_id}")
                 
             scen: Scenario = import_class(PROP_SETTING.scen)(use_local=use_local)
             logger.log_object(scen, tag="scenario")
@@ -214,8 +216,8 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
                         experiment_id = part
                         break
             
-            # 获取当前轮次
-            round_number = self.loop_idx + 1
+            # 获取当前轮次（使用进化控制器的 round_idx）
+            round_number = self.round_idx
             
             # 获取假设文本
             hypothesis_text = None
@@ -232,7 +234,14 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
             parent_trajectory_ids = getattr(self, 'parent_trajectory_ids', [])
             
             # 创建因子库管理器并保存因子
-            library_path = project_root / "all_factors_library.json"
+            # 支持通过环境变量 FACTOR_LIBRARY_SUFFIX 自定义输出文件名
+            import os
+            library_suffix = os.environ.get('FACTOR_LIBRARY_SUFFIX', '')
+            if library_suffix:
+                library_filename = f"all_factors_library_{library_suffix}.json"
+            else:
+                library_filename = "all_factors_library.json"
+            library_path = project_root / library_filename
             manager = FactorLibraryManager(str(library_path))
             manager.add_factors_from_experiment(
                 experiment=prev_out["factor_backtest"],
@@ -271,6 +280,7 @@ class AlphaAgentLoop(LoopBase, metaclass=LoopMeta):
             "trajectory_id": self.trajectory_id,
             "parent_trajectory_ids": self.parent_trajectory_ids,
             "loop_idx": self.loop_idx,
+            "round_idx": self.round_idx,
         }
 
 

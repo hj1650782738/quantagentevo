@@ -129,7 +129,7 @@ model:
   # LGBModel 参数
   params:
     loss: "mse"
-    learning_rate: 0.05        # 降低学习率，让模型更稳定学习
+    learning_rate: 0.1         # 提高学习率，加速收敛
     max_depth: 8
     num_leaves: 210
     colsample_bytree: 0.8879
@@ -139,8 +139,10 @@ model:
     num_threads: 20
     seed: 42
     random_state: 42
-    early_stopping_round: 50   # 添加早停轮数，防止第1轮就停止
-    num_boost_round: 500       # 增加最大迭代轮数
+    early_stopping_round: 50  # 增加早停轮数，给更多机会改进
+    num_boost_round: 500      # 增加最大迭代轮数
+    min_child_samples: 100     # 叶节点最小样本数，防止过拟合
+    feature_fraction_bynode: 0.8  # 每个节点随机选择特征
 
 ######################################################################
 # 5. 回测与组合配置（backtest）
@@ -185,7 +187,12 @@ llm:
   
   # 是否缓存计算结果
   cache_results: true
-  cache_dir: "./factor_cache"
+  # 缓存目录 (使用 /mnt/DATA 存储，节省根目录空间)
+  cache_dir: "/mnt/DATA/quantagent/AlphaAgent/factor_cache"
+  
+  # 是否自动从主程序日志中提取缓存
+  # 启用后，回测时会自动检查并提取主程序已计算的因子
+  auto_extract_cache: true
   
   # 调试模式（输出更多日志）
   debug: false
@@ -195,8 +202,8 @@ llm:
 ######################################################################
 
 factor_calculation:
-  # 因子数据保存路径
-  output_dir: "./computed_factors"
+  # 因子数据保存路径（迁移到 /mnt/DATA）
+  output_dir: "/mnt/DATA/quantagent/AlphaAgent/computed_factors"
   
   # 是否保存中间结果
   save_intermediate: true

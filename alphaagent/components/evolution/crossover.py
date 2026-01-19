@@ -305,7 +305,9 @@ Please propose your fusion hypothesis based on the above crossover guidance.
         candidates: list[StrategyTrajectory],
         crossover_size: int = 2,
         crossover_n: int = 3,
-        prefer_diverse: bool = True
+        prefer_diverse: bool = True,
+        selection_strategy: str = "best",
+        top_percent_threshold: float = 0.3
     ) -> list[list[StrategyTrajectory]]:
         """
         Select parent groups for crossover.
@@ -315,6 +317,13 @@ Please propose your fusion hypothesis based on the above crossover guidance.
             crossover_size: Number of parents per group
             crossover_n: Number of groups to create
             prefer_diverse: Whether to prefer combinations from different directions
+            selection_strategy: Parent selection strategy:
+                - "best": Prioritize best-performing trajectories
+                - "random": Random selection
+                - "weighted": Performance-weighted sampling (higher = higher weight)
+                - "weighted_inverse": Inverse performance-weighted (lower = higher weight)
+                - "top_percent_plus_random": Top N% guaranteed + random from rest
+            top_percent_threshold: Threshold for top_percent_plus_random strategy (default 0.3)
             
         Returns:
             List of parent groups
@@ -325,8 +334,19 @@ Please propose your fusion hypothesis based on the above crossover guidance.
         if len(candidates) < crossover_size:
             return []
         
-        # Generate all possible combinations
-        all_combos = list(itertools.combinations(candidates, crossover_size))
+        # Pre-select candidates based on strategy
+        selected_candidates = self._select_candidates_by_strategy(
+            candidates, 
+            selection_strategy, 
+            top_percent_threshold,
+            crossover_n * crossover_size  # Need enough for all groups
+        )
+        
+        # Generate all possible combinations from selected candidates
+        all_combos = list(itertools.combinations(selected_candidates, crossover_size))
+        
+        if not all_combos:
+            return []
         
         if prefer_diverse:
             # Score combinations by diversity
@@ -349,5 +369,140 @@ Please propose your fusion hypothesis based on the above crossover guidance.
             # Random selection
             random.shuffle(all_combos)
             selected = [list(combo) for combo in all_combos[:crossover_n]]
+        
+        return selected
+    
+    def _select_candidates_by_strategy(
+        self,
+        candidates: list[StrategyTrajectory],
+        strategy: str,
+        top_percent_threshold: float,
+        num_needed: int
+    ) -> list[StrategyTrajectory]:
+        """
+        Pre-select candidates based on selection strategy.
+        
+        Args:
+            candidates: All available trajectories
+            strategy: Selection strategy
+            top_percent_threshold: Threshold for top_percent_plus_random
+            num_needed: Minimum number of candidates needed
+            
+        Returns:
+            List of selected candidates
+        """
+        import random
+        
+        if len(candidates) <= num_needed:
+            return candidates
+        
+        # Sort by primary metric (descending)
+        sorted_candidates = sorted(
+            candidates, 
+            key=lambda t: t.get_primary_metric() or 0, 
+            reverse=True
+        )
+        
+        if strategy == "best":
+            # Return top performers
+            return sorted_candidates[:num_needed]
+        
+        elif strategy == "random":
+            # Random selection
+            return random.sample(candidates, min(num_needed, len(candidates)))
+        
+        elif strategy == "weighted":
+            # Performance-weighted sampling (higher performance = higher weight)
+            return self._weighted_sample(sorted_candidates, num_needed, inverse=False)
+        
+        elif strategy == "weighted_inverse":
+            # Inverse performance-weighted sampling (lower performance = higher weight)
+            # 参考 EvoControl 的 _weighted_select_labels 策略
+            return self._weighted_sample(sorted_candidates, num_needed, inverse=True)
+        
+        elif strategy == "top_percent_plus_random":
+            # Top N% guaranteed + random from rest
+            top_n = max(1, int(len(candidates) * top_percent_threshold))
+            top_candidates = sorted_candidates[:top_n]
+            rest_candidates = sorted_candidates[top_n:]
+            
+            # If we need more, randomly sample from the rest
+            still_needed = num_needed - len(top_candidates)
+            if still_needed > 0 and rest_candidates:
+                random_picks = random.sample(
+                    rest_candidates, 
+                    min(still_needed, len(rest_candidates))
+                )
+                return top_candidates + random_picks
+            return top_candidates
+        
+        else:
+            # Default to best
+            logger.warning(f"Unknown selection strategy: {strategy}, using 'best'")
+            return sorted_candidates[:num_needed]
+    
+    def _weighted_sample(
+        self,
+        sorted_candidates: list[StrategyTrajectory],
+        num_needed: int,
+        inverse: bool = False
+    ) -> list[StrategyTrajectory]:
+        """
+        Weighted sampling based on performance.
+        
+        Args:
+            sorted_candidates: Candidates sorted by performance (descending)
+            num_needed: Number to select
+            inverse: If True, lower performance = higher weight (encourages exploration)
+            
+        Returns:
+            List of selected candidates
+        """
+        import random
+        
+        if len(sorted_candidates) <= num_needed:
+            return sorted_candidates
+        
+        # Calculate weights
+        metrics = [t.get_primary_metric() or 0 for t in sorted_candidates]
+        
+        # Normalize metrics to [0, 1] range
+        min_m = min(metrics) if metrics else 0
+        max_m = max(metrics) if metrics else 1
+        range_m = max_m - min_m if max_m > min_m else 1
+        
+        normalized = [(m - min_m) / range_m for m in metrics]
+        
+        if inverse:
+            # Lower performance = higher weight (for exploration)
+            # 参考 EvoControl: performance 越低权重越高
+            weights = [1 - n + 0.1 for n in normalized]  # +0.1 to avoid zero weight
+        else:
+            # Higher performance = higher weight
+            weights = [n + 0.1 for n in normalized]  # +0.1 to avoid zero weight
+        
+        # Normalize weights to sum to 1
+        total_weight = sum(weights)
+        weights = [w / total_weight for w in weights]
+        
+        # Weighted sampling without replacement
+        selected = []
+        remaining = list(zip(sorted_candidates, weights))
+        
+        for _ in range(min(num_needed, len(sorted_candidates))):
+            if not remaining:
+                break
+            
+            candidates_left, weights_left = zip(*remaining)
+            # Re-normalize weights
+            total = sum(weights_left)
+            probs = [w / total for w in weights_left]
+            
+            # Sample one
+            chosen_idx = random.choices(range(len(candidates_left)), weights=probs, k=1)[0]
+            selected.append(candidates_left[chosen_idx])
+            
+            # Remove chosen from remaining
+            remaining = [(c, w) for i, (c, w) in enumerate(remaining) if i != chosen_idx]
         
         return selected

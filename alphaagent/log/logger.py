@@ -55,10 +55,13 @@ class AgentLog(SingletonBaseClass):
     #   feedback = logger.get_reps()
     _tag: str = ""
 
+    # 默认日志目录迁移到 /mnt/DATA 以节省根目录空间
+    DEFAULT_LOG_ROOT = Path("/mnt/DATA/quantagent/AlphaAgent/log")
+    
     def __init__(self, log_trace_path: Union[str, None] = RD_AGENT_SETTINGS.log_trace_path) -> None:
         if log_trace_path is None:
             timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S-%f")
-            self.log_trace_path = Path.cwd() / "log" / timestamp
+            self.log_trace_path = self.DEFAULT_LOG_ROOT / timestamp
         else:
             self.log_trace_path = Path(log_trace_path)
 

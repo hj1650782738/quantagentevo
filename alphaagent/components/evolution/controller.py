@@ -40,6 +40,19 @@ class EvolutionConfig:
     # Whether to prefer diverse crossover combinations
     prefer_diverse_crossover: bool = True
     
+    # Parent selection strategy for crossover
+    # 父代选择策略：
+    # - "best": 优先选择表现最好的轨迹
+    # - "random": 随机选择
+    # - "weighted": 性能加权采样（性能越高权重越高）
+    # - "weighted_inverse": 逆性能加权采样（性能越低权重越高，鼓励探索）
+    # - "top_percent_plus_random": 评价前 N% 一定被选中，剩余随机填充
+    parent_selection_strategy: str = "best"
+    
+    # Top percent threshold (used when parent_selection_strategy = "top_percent_plus_random")
+    # 前百分比阈值
+    top_percent_threshold: float = 0.3
+    
     # Whether to enable parallel execution within each round
     # 是否启用轮次内并行执行
     parallel_enabled: bool = False
@@ -424,7 +437,9 @@ class EvolutionController:
             candidates=candidates,
             crossover_size=self.config.crossover_size,
             crossover_n=self.config.crossover_n,
-            prefer_diverse=self.config.prefer_diverse_crossover
+            prefer_diverse=self.config.prefer_diverse_crossover,
+            selection_strategy=self.config.parent_selection_strategy,
+            top_percent_threshold=self.config.top_percent_threshold
         )
         self._crossover_idx = 0
         logger.info(f"Prepared {len(self._crossover_groups)} crossover groups from {len(candidates)} candidates")
@@ -650,6 +665,21 @@ class EvolutionController:
                 'ICIR': ['ICIR', 'icir'],
                 'RankIC': ['RankIC', 'Rank IC', 'rank_ic'],
                 'RankICIR': ['RankICIR', 'Rank ICIR', 'rank_icir'],
+                'annualized_return': [
+                    '1day.excess_return_without_cost.annualized_return',
+                    'annualized_return',
+                    'Annualized Return'
+                ],
+                'information_ratio': [
+                    '1day.excess_return_without_cost.information_ratio',
+                    'information_ratio',
+                    'Information Ratio'
+                ],
+                'max_drawdown': [
+                    '1day.excess_return_without_cost.max_drawdown',
+                    'max_drawdown',
+                    'Max Drawdown'
+                ],
             }
             
             if isinstance(result, pd.DataFrame):

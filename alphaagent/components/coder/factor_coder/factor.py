@@ -127,22 +127,22 @@ class FactorFBWorkspace(FBWorkspace):
             else:
                 return self.FB_CODE_NOT_SET, None
         with FileLock(self.workspace_path / "execution.lock"):
-            if self.target_task.version == 1:
-                source_data_path = (
-                    Path(
-                        FACTOR_COSTEER_SETTINGS.data_folder_debug,
-                    )
-                    if data_type == "Debug"  # FIXME: (yx) don't think we should use a debug tag for this.
-                    else Path(
-                        FACTOR_COSTEER_SETTINGS.data_folder,
-                    )
+            # 设置数据路径 - 对所有版本都需要
+            source_data_path = (
+                Path(
+                    FACTOR_COSTEER_SETTINGS.data_folder_debug,
                 )
+                if data_type == "Debug"  # FIXME: (yx) don't think we should use a debug tag for this.
+                else Path(
+                    FACTOR_COSTEER_SETTINGS.data_folder,
+                )
+            )
 
-                # 确保使用绝对路径
-                if not source_data_path.is_absolute():
-                    source_data_path = self.workspace_path.parent.parent.parent / source_data_path
-                else:
-                    source_data_path = Path(source_data_path).absolute()
+            # 确保使用绝对路径
+            if not source_data_path.is_absolute():
+                source_data_path = self.workspace_path.parent.parent.parent / source_data_path
+            else:
+                source_data_path = Path(source_data_path).absolute()
 
             source_data_path.mkdir(exist_ok=True, parents=True)
             code_path = self.workspace_path / f"factor.py"

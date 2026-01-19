@@ -107,6 +107,24 @@ class ConditionalNode(Node):
         result.append(self.false_expr.tree_str(level + 1))
         return "\n".join(result)
 
+@dataclass
+class UnaryOpNode(Node):
+    """一元运算符节点，支持 -x 这样的表达式"""
+    op: str
+    operand: Node
+    
+    def __str__(self):
+        return f"({self.op}{str(self.operand)})"
+        
+    def _node_str(self):
+        return f"UNARY({self.op})"
+        
+    def tree_str(self, level: int = 0) -> str:
+        indent = "  " * level
+        result = [f"{indent}{self._node_str()}"]
+        result.append(self.operand.tree_str(level + 1))
+        return "\n".join(result)
+
 # Basic elements definition
 var = Combine(Optional(Literal("$")) + Word(alphas, alphanums + "_"))
 number = Regex(r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?")
@@ -173,6 +191,21 @@ def create_conditional_node(tokens):
         unwrap(tokens[4])
     )
 
+def create_unary_op_node(tokens):
+    """创建一元运算符节点，处理 -x 这样的表达式"""
+    tokens = tokens[0]
+    def unwrap(arg):
+        if isinstance(arg, (list, ParseResults)):
+            if len(arg) == 1:
+                return unwrap(arg[0])
+            return [unwrap(x) for x in arg]
+        return arg
+    
+    # tokens 格式: ['-', operand]
+    op = tokens[0]
+    operand = unwrap(tokens[1])
+    return UnaryOpNode(op, operand)
+
 # Expression parser definition
 expr = Forward()
 
@@ -187,10 +220,14 @@ function_call.setParseAction(create_function_node)
 # Operands
 operand = function_call | var | number | ("(" + expr + ")").setParseAction(lambda tokens: tokens[1])
 
+# Unary operators (highest precedence)
+unary_minus = Literal("-")
+
 # Complete expression
 expr <<= infixNotation(
     operand,
     [
+        (unary_minus, 1, opAssoc.RIGHT, create_unary_op_node),  # 一元负号，最高优先级
         (mul_div, 2, opAssoc.LEFT, create_binary_op_node),
         (add_sub, 2, opAssoc.LEFT, create_binary_op_node),
         (comparison, 2, opAssoc.LEFT, create_binary_op_node),

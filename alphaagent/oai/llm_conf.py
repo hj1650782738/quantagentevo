@@ -49,7 +49,7 @@ class LLMSettings(ExtendedBaseSettings):
         100000  # 100000 is the maximum limit of gpt4, which might increase in the future version of gpt
     )
     default_system_prompt: str = "You are an AI assistant who helps to answer user's questions."
-    factor_mining_timeout: int = 36000 # 10小时，单位：秒
+    factor_mining_timeout: int = 999999 # 约16.7小时，单位：秒
 
     # Embedding configs
     embedding_openai_api_key: str = ""

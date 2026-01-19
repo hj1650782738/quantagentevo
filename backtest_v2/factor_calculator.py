@@ -155,13 +155,29 @@ Only the following operations are allowed in expressions:
             logger.info(f"  计算因子: {factor_name}")
             
             try:
-                # 首先尝试直接使用表达式解析器
+                # 首先检查缓存
+                if self.llm_config.get('cache_results', True):
+                    cached_result = self._load_from_cache(factor_expr)
+                    if cached_result is not None:
+                        results[factor_name] = cached_result
+                        success_count += 1
+                        valid_count = cached_result.notna().sum()
+                        total_count = len(cached_result)
+                        logger.info(f"    ✓ 从缓存加载 (有效数据: {valid_count}/{total_count})")
+                        continue
+                
+                # 缓存未命中，尝试直接使用表达式解析器
                 factor_value = self._calculate_with_parser(factor_expr)
                 
                 if factor_value is not None:
                     results[factor_name] = factor_value
                     success_count += 1
-                    logger.info(f"    ✓ 表达式解析成功")
+                    valid_count = factor_value.notna().sum()
+                    total_count = len(factor_value)
+                    logger.info(f"    ✓ 成功 (有效数据: {valid_count}/{total_count})")
+                    # 保存到缓存
+                    if self.llm_config.get('cache_results', True):
+                        self._save_to_cache(factor_expr, factor_value)
                 else:
                     # 如果解析失败，使用 LLM
                     if self.llm_config.get('enabled', True):

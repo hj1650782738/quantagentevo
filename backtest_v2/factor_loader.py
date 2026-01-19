@@ -364,19 +364,20 @@ class FactorLoader:
         """
         加载自定义因子库
         
+        所有自定义因子都走自定义计算流程 (使用 expr_parser + function_lib)
+        不再区分 Qlib 兼容与否
+        
         Returns:
             Tuple[Dict[str, str], List[Dict]]:
-                - qlib_compatible: Qlib兼容的因子
-                - needs_llm: 需要LLM计算的因子
+                - qlib_compatible: 空字典 (所有因子走自定义计算)
+                - custom_factors: 所有因子列表
         """
         custom_config = self.factor_source_config.get('custom', {})
         json_files = custom_config.get('json_files', [])
         quality_filter = custom_config.get('quality_filter')
         max_factors = custom_config.get('max_factors')
-        use_llm = custom_config.get('use_llm_for_incompatible', True)
         
-        qlib_compatible = {}
-        needs_llm = []
+        custom_factors = []
         
         for json_file in json_files:
             file_path = Path(json_file)
@@ -384,24 +385,57 @@ class FactorLoader:
                 logger.warning(f"  ⚠ 因子库文件不存在: {json_file}")
                 continue
             
-            compatible, incompatible = self._parse_factor_json(
-                file_path, quality_filter
-            )
-            qlib_compatible.update(compatible)
-            if use_llm:
-                needs_llm.extend(incompatible)
+            factors = self._parse_all_factors_from_json(file_path, quality_filter)
+            custom_factors.extend(factors)
         
         # 限制因子数量
-        if max_factors:
-            if len(qlib_compatible) > max_factors:
-                keys = list(qlib_compatible.keys())[:max_factors]
-                qlib_compatible = {k: qlib_compatible[k] for k in keys}
-            remaining = max_factors - len(qlib_compatible)
-            if remaining > 0 and len(needs_llm) > remaining:
-                needs_llm = needs_llm[:remaining]
+        if max_factors and len(custom_factors) > max_factors:
+            custom_factors = custom_factors[:max_factors]
         
-        logger.info(f"  ✓ 加载自定义因子: {len(qlib_compatible)} 个Qlib兼容, {len(needs_llm)} 个需要LLM计算")
-        return qlib_compatible, needs_llm
+        logger.info(f"  ✓ 加载自定义因子: {len(custom_factors)} 个 (使用自定义计算器)")
+        
+        # 返回空的 qlib_compatible，所有因子走自定义计算
+        return {}, custom_factors
+    
+    def _parse_all_factors_from_json(self, file_path: Path, 
+                                     quality_filter: Optional[str] = None) -> List[Dict]:
+        """
+        解析 JSON 文件中的所有因子
+        
+        Args:
+            file_path: JSON文件路径
+            quality_filter: 质量过滤器
+            
+        Returns:
+            List[Dict]: 因子列表
+        """
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        factors = data.get('factors', {})
+        result = []
+        
+        for factor_id, factor_info in factors.items():
+            # 质量过滤
+            if quality_filter:
+                factor_quality = factor_info.get('quality', '')
+                if factor_quality != quality_filter:
+                    continue
+            
+            factor_name = factor_info.get('factor_name', factor_id)
+            factor_expr = factor_info.get('factor_expression', '')
+            
+            if not factor_expr:
+                continue
+            
+            result.append({
+                'factor_id': factor_id,
+                'factor_name': factor_name,
+                'factor_expression': factor_expr,
+                'factor_description': factor_info.get('factor_description', ''),
+            })
+        
+        return result
     
     def _load_combined_factors(self) -> Tuple[Dict[str, str], List[Dict]]:
         """加载组合因子（官方 + 自定义）"""

@@ -846,7 +846,7 @@ def TS_PCTCHANGE(df: pd.DataFrame, p: int = 1):
     返回:
         pd.DataFrame: 百分比变化结果
     """
-    return df.groupby('instrument').transform(lambda x: x.pct_change(periods=p).fillna(0))
+    return df.groupby('instrument').transform(lambda x: x.pct_change(periods=p, fill_method=None).fillna(0))
 
 
 def ADD(df1, df2):

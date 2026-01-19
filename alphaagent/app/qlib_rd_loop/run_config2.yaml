@@ -14,7 +14,7 @@
 planning:
   # Enable "parallel planning" feature: expand initial direction into N exploration directions
   # 启用"并行规划"功能：将初始方向扩展为N个探索方向
-  enabled: true
+  enabled: false
   # Number of parallel directions: planning generates this many exploration directions
   # 并行方向数量：规划生成多少个探索方向
   num_directions: 10  #超参
@@ -41,7 +41,7 @@ planning:
 execution:
   # Maximum loop iterations: multiplied with steps_per_loop to get step_n (when step_n not specified)
   # 最大循环迭代次数：与steps_per_loop相乘得到step_n（当step_n未指定时）
-  max_loops: 11
+  max_loops: 5
   # Steps per loop: fixed at 5 (propose/construct/calculate/backtest/feedback)
   # 每循环步数：固定为5（提出假设/构建因子/计算/回测/反馈）
   steps_per_loop: 5
@@ -75,7 +75,7 @@ evolution:
   # When enabled, overrides traditional planning + parallel execution mode
   # 启用进化模式
   # 启用时，将覆盖传统的规划+并行执行模式
-  enabled: true
+  enabled: false
   
   # Maximum evolution rounds (including original, mutation, and crossover rounds)
   # Flow: round 0 = original, round 1 = mutation, round 2 = crossover, ...

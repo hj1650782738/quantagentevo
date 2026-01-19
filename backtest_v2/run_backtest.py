@@ -30,6 +30,13 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# 加载 .env 文件
+from dotenv import load_dotenv
+env_file = project_root / ".env"
+if env_file.exists():
+    load_dotenv(env_file)
+    print(f"✓ 已加载环境变量: {env_file}")
+
 # 设置日志
 logging.basicConfig(
     level=logging.INFO,

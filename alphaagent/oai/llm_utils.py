@@ -638,14 +638,31 @@ class APIBackend:
                     time.sleep(batch_wait_seconds)
         return [content_to_embedding_dict[content] for content in input_content_list]
 
-    def _build_log_messages(self, messages: list[dict]) -> str:
+    def _build_log_messages(self, messages: list[dict], max_prompt_length: int = 200) -> str:
+        """
+        构建日志消息。
+        
+        Args:
+            messages: 消息列表
+            max_prompt_length: prompt（system/user）内容的最大显示长度，默认200字符。
+                              assistant 角色（LLM返回）的内容始终完整显示。
+        """
         log_messages = ""
         for m in messages:
+            role = m['role']
+            content = m['content']
+            
+            # 对 system 和 user role 的 prompt 进行截断，assistant 保持完整
+            if role in ('system', 'user') and len(content) > max_prompt_length:
+                display_content = content[:max_prompt_length] + f"... [truncated, total {len(content)} chars]"
+            else:
+                display_content = content
+            
             log_messages += (
                 f"\n{LogColors.MAGENTA}{LogColors.BOLD}Role:{LogColors.END}"
-                f"{LogColors.CYAN}{m['role']}{LogColors.END}\n"
+                f"{LogColors.CYAN}{role}{LogColors.END}\n"
                 f"{LogColors.MAGENTA}{LogColors.BOLD}Content:{LogColors.END} "
-                f"{LogColors.CYAN}{m['content']}{LogColors.END}\n"
+                f"{LogColors.CYAN}{display_content}{LogColors.END}\n"
             )
         return log_messages
 
@@ -806,7 +823,33 @@ class APIBackend:
                 json_start = resp.find('{')
                 json_end = resp.rfind('}') + 1
                 resp = resp[json_start:json_end]
-                json.loads(resp)
+                # 尝试解析 JSON，如果失败则尝试修复
+                try:
+                    json.loads(resp)
+                except json.JSONDecodeError as e:
+                    import re
+                    error_msg = str(e).lower()
+                    # 尝试修复常见的 JSON 格式问题
+                    fixed_resp = resp
+                    
+                    # 修复 LaTeX 中的反斜杠问题：
+                    # \text, \frac 等 LaTeX 命令中的 \t, \f 会被误解释为转义字符
+                    # 将 \text 替换为 \\text，\frac 替换为 \\frac 等
+                    latex_commands = ['text', 'frac', 'left', 'right', 'times', 'cdot', 'sqrt', 'sum', 'prod', 'int']
+                    for cmd in latex_commands:
+                        # 只替换单反斜杠的情况（不是已经是双反斜杠的）
+                        fixed_resp = re.sub(r'(?<!\\)\\(' + cmd + r')', r'\\\\\1', fixed_resp)
+                    
+                    # 修复其他无效转义：\_ \{ \} \[ \] 等
+                    fixed_resp = re.sub(r'(?<!\\)\\([_\{\}\[\]])', r'\\\\\1', fixed_resp)
+                    
+                    try:
+                        json.loads(fixed_resp)
+                        resp = fixed_resp
+                        logger.debug(f"已修复 JSON 格式问题")
+                    except json.JSONDecodeError as e2:
+                        # 如果仍然失败，记录警告但不抛出异常，让后续代码尝试处理
+                        logger.warning(f"JSON 修复失败: {e2}，继续使用原始响应")
         if self.dump_chat_cache:
             self.cache.chat_set(input_content_json, resp)
         return resp, finish_reason

@@ -1,5 +1,28 @@
 #!/bin/bash
 # AlphaAgent 实验运行脚本
+#
+# 用法：
+#   bash 运行实验.sh "初始方向"                      # 输出到 all_factors_library.json
+#   bash 运行实验.sh "初始方向" "后缀"               # 输出到 all_factors_library_后缀.json
+#
+# 示例：
+#   bash 运行实验.sh "价量因子挖掘"                  # → all_factors_library.json
+#   bash 运行实验.sh "价量因子挖掘" "QA_exp1"        # → all_factors_library_QA_exp1.json
+#
+# 指定模型运行：
+#   MODEL_PRESET=gemini bash 运行实验.sh "方向"      # 使用 Gemini (默认)
+#   MODEL_PRESET=deepseek bash 运行实验.sh "方向"    # 使用 DeepSeek V3.2
+#   MODEL_PRESET=claude bash 运行实验.sh "方向"      # 使用 Claude Sonnet 4.5
+#   MODEL_PRESET=gpt bash 运行实验.sh "方向"         # 使用 GPT-5.2
+#
+# 或直接指定模型名称：
+#   REASONING_MODEL=deepseek/deepseek-v3.2 CHAT_MODEL=deepseek/deepseek-v3.2 bash 运行实验.sh "方向"
+#
+# 并行运行多个实验：
+#   # 实验1 - 使用 Gemini
+#   MODEL_PRESET=gemini EXPERIMENT_ID=exp1 bash 运行实验.sh "方向1" "exp1"
+#   # 实验2 - 使用 DeepSeek (在另一个终端)
+#   MODEL_PRESET=deepseek EXPERIMENT_ID=exp2 bash 运行实验.sh "方向2" "exp2"
 
 cd /home/tjxy/quantagent
 
@@ -23,10 +46,92 @@ echo ""
 # 进入 AlphaAgent 目录
 cd AlphaAgent
 
+# =============================================================================
+# 模型预设配置
+# =============================================================================
+# 可通过 MODEL_PRESET 环境变量快速切换模型
+# 支持的预设: gemini (默认), deepseek, claude, gpt
+# 也可直接通过 REASONING_MODEL 和 CHAT_MODEL 环境变量覆盖
+# =============================================================================
+MODEL_PRESET=${MODEL_PRESET:-""}
+
+if [ -n "${MODEL_PRESET}" ]; then
+    case "${MODEL_PRESET}" in
+        gemini)
+            export REASONING_MODEL="google/gemini-3-flash-preview"
+            export CHAT_MODEL="google/gemini-3-flash-preview"
+            echo "🤖 模型预设: Gemini 3 Flash Preview"
+            ;;
+        deepseek)
+            export REASONING_MODEL="deepseek/deepseek-v3.2"
+            export CHAT_MODEL="deepseek/deepseek-v3.2"
+            echo "🤖 模型预设: DeepSeek V3.2"
+            ;;
+        claude)
+            export REASONING_MODEL="anthropic/claude-sonnet-4.5"
+            export CHAT_MODEL="anthropic/claude-sonnet-4.5"
+            echo "🤖 模型预设: Claude Sonnet 4.5"
+            ;;
+        gpt)
+            export REASONING_MODEL="openai/gpt-5.2"
+            export CHAT_MODEL="openai/gpt-5.2"
+            echo "🤖 模型预设: GPT-5.2"
+            ;;
+        *)
+            echo "⚠️ 未知的模型预设: ${MODEL_PRESET}"
+            echo "   支持的预设: gemini, deepseek, claude, gpt"
+            echo "   将使用 .env 文件中的默认配置"
+            ;;
+    esac
+fi
+
+# 显示当前使用的模型
+if [ -n "${REASONING_MODEL}" ]; then
+    echo "   推理模型: ${REASONING_MODEL}"
+fi
+if [ -n "${CHAT_MODEL}" ]; then
+    echo "   对话模型: ${CHAT_MODEL}"
+fi
+echo ""
+
 # 运行实验
 # 默认从配置文件读取参数：alphaagent/app/qlib_rd_loop/run_config.yaml
 CONFIG_PATH=${CONFIG_PATH:-"alphaagent/app/qlib_rd_loop/run_config.yaml"}
 STEP_N=${STEP_N:-""}
+
+# 实验隔离配置 - 每次实验自动生成独立的工作空间和缓存目录
+# 可以通过 EXPERIMENT_ID 环境变量手动指定，否则自动生成时间戳ID
+# 设置 EXPERIMENT_ID=shared 可以使用共享的默认目录（向后兼容）
+if [ -z "${EXPERIMENT_ID}" ]; then
+    # 自动生成基于时间戳的实验ID: exp_YYYYMMDD_HHMMSS
+    EXPERIMENT_ID="exp_$(date +%Y%m%d_%H%M%S)"
+fi
+
+if [ "${EXPERIMENT_ID}" != "shared" ]; then
+    export WORKSPACE_PATH="/mnt/DATA/quantagent/AlphaAgent/RD-Agent_workspace_${EXPERIMENT_ID}"
+    export PICKLE_CACHE_FOLDER_PATH_STR="/mnt/DATA/quantagent/AlphaAgent/pickle_cache_${EXPERIMENT_ID}"
+    echo "🔀 实验隔离模式: EXPERIMENT_ID=${EXPERIMENT_ID}"
+    echo "   工作空间: ${WORKSPACE_PATH}"
+    echo "   缓存目录: ${PICKLE_CACHE_FOLDER_PATH_STR}"
+    # 自动创建目录
+    mkdir -p "${WORKSPACE_PATH}"
+    mkdir -p "${PICKLE_CACHE_FOLDER_PATH_STR}"
+else
+    echo "📁 使用共享目录模式 (EXPERIMENT_ID=shared)"
+fi
+
+# 解析参数
+DIRECTION="$1"
+LIBRARY_SUFFIX="$2"
+
+# 设置因子库输出路径（通过环境变量传递）
+if [ -n "${LIBRARY_SUFFIX}" ]; then
+    export FACTOR_LIBRARY_SUFFIX="${LIBRARY_SUFFIX}"
+    LIBRARY_FILE="all_factors_library_${LIBRARY_SUFFIX}.json"
+else
+    export FACTOR_LIBRARY_SUFFIX=""
+    LIBRARY_FILE="all_factors_library.json"
+fi
 
 # 回测配置说明
 # 数据时间范围: 2016-01-01 ~ 2025-12-31
@@ -40,11 +145,12 @@ STEP_N=${STEP_N:-""}
 
 echo "🚀 开始运行实验..."
 echo "📄 配置文件: ${CONFIG_PATH}"
+echo "📂 因子库输出: ${LIBRARY_FILE}"
 echo "📅 回测时间: 2022-01-01 ~ 2025-12-31"
 echo "----------------------------------------"
 if [ -n "${STEP_N}" ]; then
-  alphaagent mine --direction "$1" --step_n "${STEP_N}" --config_path "${CONFIG_PATH}"
+  alphaagent mine --direction "${DIRECTION}" --step_n "${STEP_N}" --config_path "${CONFIG_PATH}"
 else
-  alphaagent mine --direction "$1" --config_path "${CONFIG_PATH}"
+  alphaagent mine --direction "${DIRECTION}" --config_path "${CONFIG_PATH}"
 fi
 

@@ -4,10 +4,14 @@
 
 功能:
 1. 加载因子（官方/自定义）
-2. 计算自定义因子值
+2. 计算自定义因子值 (使用 AlphaAgent 表达式解析器)
 3. 训练模型
 4. 执行回测
 5. 计算评估指标
+
+支持两种模式:
+- 官方因子模式: 使用 Qlib 内置的 DataLoader
+- 自定义因子模式: 使用 expr_parser + function_lib 计算因子值
 """
 
 import json
@@ -64,7 +68,8 @@ class BacktestRunner:
     def run(self, 
             factor_source: Optional[str] = None,
             factor_json: Optional[List[str]] = None,
-            experiment_name: Optional[str] = None) -> Dict:
+            experiment_name: Optional[str] = None,
+            output_name: Optional[str] = None) -> Dict:
         """
         执行完整回测流程
         
@@ -72,6 +77,7 @@ class BacktestRunner:
             factor_source: 因子源类型 (覆盖配置文件)
             factor_json: 自定义因子 JSON 文件路径列表 (覆盖配置文件)
             experiment_name: 实验名称 (覆盖配置文件)
+            output_name: 输出文件名前缀 (可选，默认使用因子库文件名)
             
         Returns:
             Dict: 回测结果指标
@@ -87,11 +93,18 @@ class BacktestRunner:
         if factor_json:
             self.config['factor_source']['custom']['json_files'] = factor_json
         
-        exp_name = experiment_name or self.config['experiment']['name']
+        # 自动从因子库文件名生成输出名称
+        if output_name is None and factor_json:
+            # 取第一个因子库文件名（去掉扩展名）
+            output_name = Path(factor_json[0]).stem
+        
+        exp_name = experiment_name or output_name or self.config['experiment']['name']
         rec_name = self.config['experiment']['recorder']
         
         print(f"\n{'='*70}")
         print(f"🚀 开始回测: {exp_name}")
+        if factor_json:
+            print(f"📁 因子库: {factor_json[0]}")
         print(f"{'='*70}\n")
         
         # 1. 加载因子
@@ -122,7 +135,8 @@ class BacktestRunner:
         
         # 6. 保存结果
         self._save_results(metrics, exp_name, factor_source or self.config['factor_source']['type'], 
-                          len(factor_expressions) + len(custom_factors), total_time)
+                          len(factor_expressions) + len(custom_factors), total_time,
+                          output_name=output_name)
         
         return metrics
     
@@ -134,30 +148,106 @@ class BacktestRunner:
         return loader.load_factors()
     
     def _compute_custom_factors(self, factors: List[Dict]) -> Optional[pd.DataFrame]:
-        """计算自定义因子"""
-        from .factor_calculator import FactorCalculator, QlibDataProvider
+        """
+        计算自定义因子
+        使用 AlphaAgent 的 expr_parser 和 function_lib
+        支持从缓存加载预计算的因子值
+        """
+        from .custom_factor_calculator import CustomFactorCalculator, get_qlib_stock_data
+        from pathlib import Path
         
         # 获取数据
-        data_provider = QlibDataProvider(self.config)
-        data_df = data_provider.get_stock_data()
+        print("  获取股票数据...")
+        data_df = get_qlib_stock_data(self.config)
         
-        # 计算因子
-        calculator = FactorCalculator(self.config, data_df)
-        return calculator.calculate_factors(factors)
+        if data_df is None or data_df.empty:
+            logger.error("无法获取股票数据")
+            return None
+        
+        logger.info(f"  ✓ 加载股票数据: {len(data_df)} 条记录")
+        
+        # 获取缓存配置
+        llm_config = self.config.get('llm', {})
+        cache_dir = llm_config.get('cache_dir')
+        if cache_dir:
+            cache_dir = Path(cache_dir)
+        
+        # 是否自动从主程序日志提取缓存
+        auto_extract = llm_config.get('auto_extract_cache', True)
+        
+        # 创建计算器 (传递缓存目录和自动提取配置)
+        calculator = CustomFactorCalculator(data_df, cache_dir=cache_dir, auto_extract_cache=auto_extract)
+        
+        # 计算因子 (会优先检查缓存，缓存不存在会自动提取)
+        result_df = calculator.calculate_factors_batch(factors, use_cache=True)
+        
+        # 验证结果
+        if result_df is None:
+            logger.error("因子计算返回 None")
+            return None
+        
+        if not isinstance(result_df, pd.DataFrame):
+            logger.error(f"因子计算返回类型错误: {type(result_df)}")
+            return None
+        
+        if result_df.empty:
+            logger.error("因子计算结果为空 DataFrame")
+            return None
+        
+        # 确保索引正确
+        if not isinstance(result_df.index, pd.MultiIndex):
+            logger.warning("因子数据索引不是 MultiIndex，尝试修复...")
+            # 尝试使用原始数据的索引
+            if isinstance(data_df.index, pd.MultiIndex):
+                result_df.index = data_df.index
+        
+        logger.info(f"  ✓ 因子计算完成: {len(result_df.columns)} 个因子, {len(result_df)} 行数据")
+        
+        return result_df
     
     def _create_dataset(self, 
                        factor_expressions: Dict[str, str],
                        computed_factors: Optional[pd.DataFrame] = None):
-        """创建 Qlib 数据集"""
+        """
+        创建 Qlib 数据集
+        
+        支持两种模式:
+        1. 纯 Qlib 因子模式: 使用 QlibDataLoader
+        2. 自定义因子模式: 使用预计算的因子值 + StaticDataLoader
+        """
         from qlib.data.dataset import DatasetH
         from qlib.data.dataset.handler import DataHandlerLP
         
         data_config = self.config['data']
         dataset_config = self.config['dataset']
         
-        # 准备因子表达式列表
+        # 检查 computed_factors 的有效性
+        has_computed_factors = False
+        if computed_factors is not None:
+            if isinstance(computed_factors, pd.DataFrame):
+                # 检查是否有数据
+                if len(computed_factors) > 0 and len(computed_factors.columns) > 0:
+                    has_computed_factors = True
+                    logger.info(f"  检测到预计算因子: {len(computed_factors.columns)} 个因子, {len(computed_factors)} 行数据")
+                else:
+                    logger.warning(f"  预计算因子 DataFrame 为空: {computed_factors.shape}")
+            else:
+                logger.warning(f"  预计算因子类型不正确: {type(computed_factors)}")
+        
+        # 如果有计算好的自定义因子，优先使用自定义因子模式
+        if has_computed_factors:
+            print("  使用自定义因子模式 (预计算因子值)...")
+            return self._create_dataset_with_computed_factors(
+                factor_expressions, computed_factors
+            )
+        
+        # 纯 Qlib 因子模式
         expressions = list(factor_expressions.values())
         names = list(factor_expressions.keys())
+        
+        # 检查是否有有效的因子
+        if not expressions:
+            raise ValueError("没有可用的因子表达式。如果使用自定义因子，请确保因子计算成功。")
         
         handler_config = {
             'start_time': data_config['start_time'],
@@ -185,8 +275,236 @@ class BacktestRunner:
         print(f"  训练集: {dataset_config['segments']['train']}")
         print(f"  验证集: {dataset_config['segments']['valid']}")
         print(f"  测试集: {dataset_config['segments']['test']}")
+        print(f"  因子数量: {len(expressions)}")
         
         return dataset
+    
+    def _create_dataset_with_computed_factors(self,
+                                              factor_expressions: Dict[str, str],
+                                              computed_factors: pd.DataFrame):
+        """
+        使用预计算的因子值创建数据集
+        
+        这种模式下:
+        1. 先计算标签
+        2. 将因子值和标签合并
+        3. 使用自定义 DataHandler 加载数据
+        """
+        from qlib.data.dataset import DatasetH
+        from qlib.data.dataset.handler import DataHandler
+        from qlib.data import D
+        
+        data_config = self.config['data']
+        dataset_config = self.config['dataset']
+        
+        print(f"  计算因子数量: {len(computed_factors.columns)}")
+        
+        # 计算标签
+        print("  计算标签...")
+        label_expr = dataset_config['label']
+        label_df = self._compute_label(label_expr)
+        
+        # 合并 Qlib 兼容因子 (如果有)
+        all_feature_dfs = [computed_factors]
+        
+        if factor_expressions:
+            print(f"  加载 {len(factor_expressions)} 个 Qlib 兼容因子...")
+            qlib_factors = self._load_qlib_factors(factor_expressions)
+            if qlib_factors is not None and not qlib_factors.empty:
+                all_feature_dfs.append(qlib_factors)
+        
+        # 合并所有因子
+        features_df = pd.concat(all_feature_dfs, axis=1)
+        
+        # 去除重复列
+        features_df = features_df.loc[:, ~features_df.columns.duplicated()]
+        
+        print(f"  总因子数量: {len(features_df.columns)}")
+        
+        # 合并特征和标签
+        # 确保索引对齐
+        common_index = features_df.index.intersection(label_df.index)
+        features_df = features_df.loc[common_index]
+        label_df = label_df.loc[common_index]
+        
+        print(f"  数据行数: {len(features_df)}")
+        
+        # 直接使用 DataHandler 构建数据集
+        # 合并 feature 和 label
+        combined_df = pd.concat([features_df, label_df], axis=1)
+        
+        # 应用预处理
+        from qlib.data.dataset.processor import Fillna, ProcessInf, CSRankNorm, DropnaLabel
+        
+        print("  应用数据预处理...")
+        
+        # 分离 feature 和 label 列
+        feature_cols = list(features_df.columns)
+        label_cols = list(label_df.columns)
+        
+        # 处理 feature
+        combined_df[feature_cols] = combined_df[feature_cols].fillna(0)
+        combined_df[feature_cols] = combined_df[feature_cols].replace([np.inf, -np.inf], 0)
+        
+        # 对 feature 做 CSRankNorm
+        for col in feature_cols:
+            combined_df[col] = combined_df.groupby(level='datetime')[col].transform(
+                lambda x: (x.rank(pct=True) - 0.5) if len(x) > 1 else 0
+            )
+        
+        # 处理 label - 删除 label 为 NaN 的行
+        combined_df = combined_df.dropna(subset=label_cols)
+        
+        # 对 label 做 CSRankNorm  
+        for col in label_cols:
+            combined_df[col] = combined_df.groupby(level='datetime')[col].transform(
+                lambda x: (x.rank(pct=True) - 0.5) if len(x) > 1 else 0
+            )
+        
+        print(f"  预处理后数据行数: {len(combined_df)}")
+        
+        # 使用多级列索引标识 feature 和 label (Qlib 标准格式)
+        # 重构 DataFrame 列为 MultiIndex: (col_set, col_name)
+        feature_tuples = [('feature', col) for col in feature_cols]
+        label_tuples = [('label', col) for col in label_cols]
+        
+        combined_df_multi = combined_df.copy()
+        combined_df_multi.columns = pd.MultiIndex.from_tuples(
+            feature_tuples + label_tuples
+        )
+        
+        # 构建自定义 DataHandler
+        class PrecomputedDataHandler(DataHandler):
+            """使用预计算数据的 DataHandler"""
+            
+            def __init__(self, data_df, segments):
+                self._data = data_df
+                self._segments = segments
+            
+            @property
+            def data_loader(self):
+                return None
+            
+            @property
+            def instruments(self):
+                return list(self._data.index.get_level_values('instrument').unique())
+            
+            def fetch(self, selector=None, level='datetime', col_set='feature', 
+                     data_key=None, squeeze=False, proc_func=None):
+                """获取数据"""
+                # 根据 col_set 选择列
+                if col_set in ('feature', 'label'):
+                    result = self._data[col_set].copy()
+                elif col_set == '__all' or col_set is None:
+                    result = self._data.copy()
+                else:
+                    # col_set 可能是列名列表
+                    if isinstance(col_set, (list, tuple)):
+                        result = self._data[list(col_set)].copy()
+                    else:
+                        result = self._data.copy()
+                
+                # 过滤日期范围
+                if selector is not None:
+                    if isinstance(selector, tuple) and len(selector) == 2:
+                        start, end = selector
+                        dates = result.index.get_level_values('datetime')
+                        mask = (dates >= pd.Timestamp(start)) & (dates <= pd.Timestamp(end))
+                        result = result.loc[mask]
+                    elif isinstance(selector, slice):
+                        dates = result.index.get_level_values('datetime')
+                        start = selector.start
+                        end = selector.stop
+                        if start is not None and end is not None:
+                            mask = (dates >= pd.Timestamp(start)) & (dates <= pd.Timestamp(end))
+                            result = result.loc[mask]
+                
+                if squeeze and result.shape[1] == 1:
+                    result = result.iloc[:, 0]
+                
+                return result
+            
+            def get_cols(self, col_set='feature'):
+                """获取列名"""
+                if col_set in self._data.columns.get_level_values(0):
+                    return list(self._data[col_set].columns)
+                return list(self._data.columns.get_level_values(1))
+            
+            def setup_data(self, **kwargs):
+                pass
+            
+            def config(self, **kwargs):
+                pass
+        
+        # 创建 handler
+        handler = PrecomputedDataHandler(combined_df_multi, dataset_config['segments'])
+        
+        # 创建数据集
+        dataset = DatasetH(
+            handler=handler,
+            segments=dataset_config['segments']
+        )
+        
+        print(f"  训练集: {dataset_config['segments']['train']}")
+        print(f"  验证集: {dataset_config['segments']['valid']}")
+        print(f"  测试集: {dataset_config['segments']['test']}")
+        
+        return dataset
+    
+    def _compute_label(self, label_expr: str) -> pd.DataFrame:
+        """
+        计算标签
+        
+        使用 Qlib 原生方式计算标签（因为标签需要向前看）
+        """
+        from qlib.data import D
+        
+        data_config = self.config['data']
+        
+        print(f"  标签表达式: {label_expr}")
+        
+        stock_list = D.instruments(data_config['market'])
+        
+        # 使用 Qlib 计算标签
+        label_df = D.features(
+            stock_list,
+            [label_expr],
+            start_time=data_config['start_time'],
+            end_time=data_config['end_time'],
+            freq='day'
+        )
+        
+        label_df.columns = ['LABEL0']
+        
+        print(f"  标签数据行数: {len(label_df)}")
+        
+        return label_df
+    
+    def _load_qlib_factors(self, factor_expressions: Dict[str, str]) -> Optional[pd.DataFrame]:
+        """加载 Qlib 兼容的因子"""
+        from qlib.data import D
+        
+        data_config = self.config['data']
+        
+        try:
+            stock_list = D.instruments(data_config['market'])
+            
+            expressions = list(factor_expressions.values())
+            names = list(factor_expressions.keys())
+            
+            df = D.features(
+                stock_list,
+                expressions,
+                start_time=data_config['start_time'],
+                end_time=data_config['end_time'],
+                freq='day'
+            )
+            
+            df.columns = names
+            return df
+        except Exception as e:
+            logger.warning(f"加载 Qlib 因子失败: {e}")
+            return None
     
     def _train_and_backtest(self, dataset, exp_name: str, rec_name: str) -> Dict:
         """训练模型并执行回测"""
@@ -399,12 +717,17 @@ class BacktestRunner:
         print(f"{'='*70}\n")
     
     def _save_results(self, metrics: Dict, exp_name: str, 
-                     factor_source: str, num_factors: int, elapsed: float):
+                     factor_source: str, num_factors: int, elapsed: float,
+                     output_name: Optional[str] = None):
         """保存结果"""
         output_dir = Path(self.config['experiment'].get('output_dir', './backtest_v2_results'))
         output_dir.mkdir(parents=True, exist_ok=True)
         
-        output_file = self.config['experiment']['output_metrics_file']
+        # 使用自定义输出名称或配置中的默认名称
+        if output_name:
+            output_file = f"{output_name}_backtest_metrics.json"
+        else:
+            output_file = self.config['experiment']['output_metrics_file']
         output_path = output_dir / output_file
         
         result_data = {
@@ -426,3 +749,33 @@ class BacktestRunner:
             json.dump(result_data, f, ensure_ascii=False, indent=2)
         
         print(f"✓ 结果已保存到: {output_path}\n")
+        
+        # 同时追加到汇总文件
+        summary_file = output_dir / "batch_summary.json"
+        summary_data = []
+        if summary_file.exists():
+            try:
+                with open(summary_file, 'r', encoding='utf-8') as f:
+                    summary_data = json.load(f)
+            except:
+                summary_data = []
+        
+        # 添加当前结果到汇总
+        summary_entry = {
+            "name": output_name or exp_name,
+            "num_factors": num_factors,
+            "IC": metrics.get('IC'),
+            "ICIR": metrics.get('ICIR'),
+            "Rank_IC": metrics.get('Rank IC'),
+            "Rank_ICIR": metrics.get('Rank ICIR'),
+            "annualized_return": metrics.get('annualized_return'),
+            "information_ratio": metrics.get('information_ratio'),
+            "max_drawdown": metrics.get('max_drawdown'),
+            "elapsed_seconds": elapsed
+        }
+        summary_data.append(summary_entry)
+        
+        with open(summary_file, 'w', encoding='utf-8') as f:
+            json.dump(summary_data, f, ensure_ascii=False, indent=2)
+        
+        print(f"✓ 已追加到汇总: {summary_file}")

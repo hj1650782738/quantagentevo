@@ -151,6 +151,7 @@ def _run_evolution_task(
         trajectory_id=trajectory_id,
         parent_trajectory_ids=parent_ids,
         direction_id=direction_id,
+        round_idx=round_idx,
     )
     model_loop.user_initial_direction = user_direction
     
@@ -359,6 +360,10 @@ def run_evolution_loop(
     steps_per_loop = int(exec_cfg.get("steps_per_loop", 5))
     use_local = bool(exec_cfg.get("use_local", True))
     
+    # 父代选择策略配置
+    parent_selection_strategy = str(evolution_cfg.get("parent_selection_strategy", "best"))
+    top_percent_threshold = float(evolution_cfg.get("top_percent_threshold", 0.3))
+    
     # 使用当前实验的日志目录作为轨迹池根目录，确保多实验隔离
     # logger.log_trace_path 是每个实验的专属目录（如 log/2026-01-16_10-01-59-778290/）
     log_root = str(logger.log_trace_path)
@@ -405,6 +410,8 @@ def run_evolution_loop(
         crossover_size=crossover_size,
         crossover_n=crossover_n,
         prefer_diverse_crossover=True,
+        parent_selection_strategy=parent_selection_strategy,
+        top_percent_threshold=top_percent_threshold,
         parallel_enabled=parallel_enabled,
         pool_save_path=str(pool_save_path),
         mutation_prompt_path=str(mutation_prompt_path) if mutation_prompt_path.exists() else None,
@@ -419,6 +426,8 @@ def run_evolution_loop(
     logger.info("开始进化循环")
     logger.info(f"配置: directions={len(directions)}, max_rounds={max_rounds}, "
                f"crossover_size={crossover_size}, crossover_n={crossover_n}")
+    logger.info(f"父代选择策略: {parent_selection_strategy}" + 
+               (f" (top_percent={top_percent_threshold})" if parent_selection_strategy == "top_percent_plus_random" else ""))
     logger.info(f"并行执行: {'启用' if parallel_enabled else '禁用'}")
     logger.info("="*60)
     
