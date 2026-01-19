@@ -584,6 +584,15 @@ def main(path=None, step_n=100, direction=None, stop_event=None, config_path=Non
 
     """
     try:
+        # 显示当前实验的缓存和工作空间配置
+        from alphaagent.core.conf import RD_AGENT_SETTINGS
+        logger.info("="*60)
+        logger.info("实验配置")
+        logger.info(f"  工作空间: {RD_AGENT_SETTINGS.workspace_path}")
+        logger.info(f"  缓存目录: {RD_AGENT_SETTINGS.pickle_cache_folder_path_str}")
+        logger.info(f"  启用缓存: {RD_AGENT_SETTINGS.cache_with_pickle}")
+        logger.info("="*60)
+        
         config_default = Path(__file__).parent / "run_config.yaml"
         config_file = Path(config_path) if config_path else config_default
         run_cfg = load_run_config(config_file)
