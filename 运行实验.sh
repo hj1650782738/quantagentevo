@@ -11,9 +11,11 @@
 #
 # 指定模型运行：
 #   MODEL_PRESET=gemini bash 运行实验.sh "方向"      # 使用 Gemini (默认)
-#   MODEL_PRESET=deepseek bash 运行实验.sh "方向"    # 使用 DeepSeek V3.2
+#   MODEL_PRESET=deepseek bash 运行实验.sh "方向"    # 使用 DeepSeek V3.2 (OpenRouter)
+#   MODEL_PRESET=deepseek_aliyun bash 运行实验.sh "方向"  # 使用 DeepSeek V3.2 (阿里云 DashScope)
 #   MODEL_PRESET=claude bash 运行实验.sh "方向"      # 使用 Claude Sonnet 4.5
 #   MODEL_PRESET=gpt bash 运行实验.sh "方向"         # 使用 GPT-5.2
+#   MODEL_PRESET=qwen bash 运行实验.sh "方向"        # 使用 Qwen3-235B (阿里云 DashScope)
 #
 # 或直接指定模型名称：
 #   REASONING_MODEL=deepseek/deepseek-v3.2 CHAT_MODEL=deepseek/deepseek-v3.2 bash 运行实验.sh "方向"
@@ -50,7 +52,7 @@ cd AlphaAgent
 # 模型预设配置
 # =============================================================================
 # 可通过 MODEL_PRESET 环境变量快速切换模型
-# 支持的预设: gemini (默认), deepseek, claude, gpt
+# 支持的预设: gemini (默认), deepseek, deepseek_aliyun, claude, gpt, qwen
 # 也可直接通过 REASONING_MODEL 和 CHAT_MODEL 环境变量覆盖
 # =============================================================================
 MODEL_PRESET=${MODEL_PRESET:-""}
@@ -58,14 +60,22 @@ MODEL_PRESET=${MODEL_PRESET:-""}
 if [ -n "${MODEL_PRESET}" ]; then
     case "${MODEL_PRESET}" in
         gemini)
-            export REASONING_MODEL="google/gemini-3-flash-preview"
-            export CHAT_MODEL="google/gemini-3-flash-preview"
-            echo "🤖 模型预设: Gemini 3 Flash Preview"
+            export REASONING_MODEL="google/gemini-3-pro-preview"
+            export CHAT_MODEL="google/gemini-3-pro-preview"
+            echo "🤖 模型预设: Gemini 3 Pro Preview"
             ;;
         deepseek)
             export REASONING_MODEL="deepseek/deepseek-v3.2"
             export CHAT_MODEL="deepseek/deepseek-v3.2"
-            echo "🤖 模型预设: DeepSeek V3.2"
+            echo "🤖 模型预设: DeepSeek V3.2 (OpenRouter)"
+            ;;
+        deepseek_aliyun)
+            # 使用阿里云 DashScope API 调用 DeepSeek V3.2
+            export REASONING_MODEL="deepseek-v3.2"
+            export CHAT_MODEL="deepseek-v3.2"
+            export OPENAI_API_KEY="${DASHSCOPE_API_KEY:-sk-a5d702e8c666478a84491ae8d28405bd}"
+            export OPENAI_BASE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
+            echo "🤖 模型预设: DeepSeek V3.2 (阿里云 DashScope)"
             ;;
         claude)
             export REASONING_MODEL="anthropic/claude-sonnet-4.5"
@@ -77,9 +87,17 @@ if [ -n "${MODEL_PRESET}" ]; then
             export CHAT_MODEL="openai/gpt-5.2"
             echo "🤖 模型预设: GPT-5.2"
             ;;
+        qwen)
+            # 使用 DashScope API (instruct 版本支持 JSON 模式)
+            export REASONING_MODEL="qwen3-235b-a22b-instruct-2507"
+            export CHAT_MODEL="qwen3-235b-a22b-instruct-2507"
+            export OPENAI_API_KEY="${DASHSCOPE_API_KEY:-sk-a5d702e8c666478a84491ae8d28405bd}"
+            export OPENAI_BASE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
+            echo "🤖 模型预设: Qwen3-235B Instruct (DashScope)"
+            ;;
         *)
             echo "⚠️ 未知的模型预设: ${MODEL_PRESET}"
-            echo "   支持的预设: gemini, deepseek, claude, gpt"
+            echo "   支持的预设: gemini, deepseek, deepseek_aliyun, claude, gpt, qwen"
             echo "   将使用 .env 文件中的默认配置"
             ;;
     esac
@@ -106,6 +124,8 @@ if [ -z "${EXPERIMENT_ID}" ]; then
     # 自动生成基于时间戳的实验ID: exp_YYYYMMDD_HHMMSS
     EXPERIMENT_ID="exp_$(date +%Y%m%d_%H%M%S)"
 fi
+# 导出 EXPERIMENT_ID 供 Python 子进程使用（用于因子缓存路径记录）
+export EXPERIMENT_ID
 
 if [ "${EXPERIMENT_ID}" != "shared" ]; then
     export WORKSPACE_PATH="/mnt/DATA/quantagent/AlphaAgent/RD-Agent_workspace_${EXPERIMENT_ID}"
