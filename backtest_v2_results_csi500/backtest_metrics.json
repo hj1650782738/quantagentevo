@@ -1,0 +1,23 @@
+{
+  "experiment_name": "csi500_alpha360",
+  "factor_source": "alpha360",
+  "num_factors": 66,
+  "metrics": {
+    "IC": 0.012343966319625197,
+    "ICIR": 0.08813409833400566,
+    "Rank IC": 0.04734819990583373,
+    "Rank ICIR": 0.3535443147532463,
+    "annualized_return": 0.07271353380765824,
+    "information_ratio": 0.8971571401673452,
+    "max_drawdown": -0.12936716373596568,
+    "calmar_ratio": 0.5620710210209469
+  },
+  "config": {
+    "data_range": "2016-01-01 ~ 2025-12-26",
+    "test_range": "2022-01-01 ~ 2025-12-26",
+    "backtest_range": "2022-01-01 ~ 2025-12-26",
+    "market": "csi500",
+    "benchmark": "SH000905"
+  },
+  "elapsed_seconds": 79.88490128517151
+}

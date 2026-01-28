@@ -67,6 +67,7 @@ factor_source:
 data:
   # Qlib 数据源路径
   provider_uri: "/home/tjxy/.qlib/qlib_data/cn_data"
+  region: "cn"
   
   # 市场标的：例如 "csi300", "csi500", "all"
   market: "csi300"

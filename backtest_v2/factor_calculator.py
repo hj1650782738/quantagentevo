@@ -448,12 +448,15 @@ class QlibDataProvider:
             return
             
         import qlib
-        from qlib.config import REG_CN
+        from qlib.config import REG_CN, REG_US
         
         provider_uri = self.data_config.get('provider_uri', '~/.qlib/qlib_data/cn_data')
-        qlib.init(provider_uri=provider_uri, region=REG_CN)
+        region_str = self.data_config.get('region', 'cn')
+        region = REG_US if region_str == 'us' else REG_CN
+        
+        qlib.init(provider_uri=provider_uri, region=region)
         self._initialized = True
-        logger.info(f"✓ Qlib 初始化完成: {provider_uri}")
+        logger.info(f"✓ Qlib 初始化完成: {provider_uri} (region={region_str})")
         
     def get_stock_data(self, 
                       start_time: Optional[str] = None,

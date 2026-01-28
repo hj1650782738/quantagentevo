@@ -1,0 +1,194 @@
+{
+  "qa_top": [
+    {
+      "name": "GapZ10_Overnight_vs_TR",
+      "rank_ic": 0.0793414093652278,
+      "ic": 0.0334939927924533,
+      "desc": "Normalized overnight gap magnitude: absolute overnight log-return divided by the 10-day mean of true range scaled by prior close. Higher values represent unusually large gaps relative to recent vol...",
+      "hyp": "Hypothesis: Short-horizon returns are regime-driven by open/close decomposition: when the last 10 trading days’ total close-to-close movement is dominated by overnight gaps (high OvernightShare10) and the latest gap size is large relative to recent normaliz...",
+      "expr": "ABS(LOG($open/(DELAY($close,1)+1e-8)))/(TS_MEAN(MAX($high-$low,MAX(ABS($high-DELAY($close,1)),ABS($low-DELAY($close,1))))/(DELAY($close,1..."
+    },
+    {
+      "name": "Gap_IntradayAcceptanceScore_20D",
+      "rank_ic": 0.0743974939042489,
+      "ic": 0.0330087249457898,
+      "desc": "Regime-free gap response score: uses intraday direction as the acceptance/rejection indicator and scales it by overnight gap magnitude relative to 20D volatility. If intraday return opposes the gap...",
+      "hyp": "Hypothesis: Overnight gap moves are often opening-auction mispricings that partially mean-revert during the next regular session: when the overnight return rON_t=log(open_t/close_{t-1}) is extreme relative to recent volatility and the day’s candlestick indi...",
+      "expr": "SIGN(LOG($close/($open+1e-8))) * ABS(LOG($open/(DELAY($close,1)+1e-8))) /(TS_STD($return,20)+1e-8)"
+    },
+    {
+      "name": "Gap_IntradayAcceptance_VolWeighted_20D",
+      "rank_ic": 0.0605740380224583,
+      "ic": 0.0314057825594008,
+      "desc": "Same acceptance/rejection logic as the intraday score, additionally weighted by abnormal volume (log volume vs 20D mean) to emphasize gaps accompanied by unusually high participation, consistent wi...",
+      "hyp": "Hypothesis: Overnight gap moves are often opening-auction mispricings that partially mean-revert during the next regular session: when the overnight return rON_t=log(open_t/close_{t-1}) is extreme relative to recent volatility and the day’s candlestick indi...",
+      "expr": "SIGN(LOG($close/($open+1e-8))) * ABS(LOG($open/(DELAY($close,1)+1e-8))) /(TS_STD($return,20)+1e-8) * LOG($volume/(TS_MEAN($volume,20)+1e-8))"
+    },
+    {
+      "name": "CleanTrend_Continuation_Score_RS10_KLEN10_WVMA5",
+      "rank_ic": 0.0590275890380667,
+      "ic": 0.0266874500703609,
+      "desc": "Continuation score that is high when the 10-day log-close trend is directionally consistent (low regression-residual volatility) while intraday range expansion (KLEN10) and volume-weighted short-te...",
+      "hyp": "Hypothesis: In a short-horizon regime where the last-10-trading-day price path is well-approximated by a linear trend (high RSQR10), subsequent 5/10-day returns are more likely to continue in the direction of the recent trend when both intraday range expans...",
+      "expr": "ZSCORE(SIGN(REGBETA(LOG($close),SEQUENCE(10),10))*INV(TS_STD(REGRESI(LOG($close),SEQUENCE(10),10),10)+1e-8)) - ZSCORE(TS_MEAN(($high-$low..."
+    },
+    {
+      "name": "OrderlyTrend_x_Absorption_10D_5D_20D",
+      "rank_ic": 0.0464902969909533,
+      "ic": 0.0270679904652308,
+      "desc": "Cross-sectional signal favoring stocks with a clean positive 10D log-close trend (high correlation-squared with time and positive slope), strong 20D liquidity absorption (high standardized log doll...",
+      "hyp": "Hypothesis: Stocks will have higher 5–20 trading-day forward returns when they simultaneously exhibit (i) an orderly, directionally consistent short-term trend (10D log-price trend regression R^2 is high and slope is positive) with low short-horizon noise (...",
+      "expr": "RANK(MAX(REGBETA(LOG($close),SEQUENCE(10),10),0)*POW(TS_CORR(LOG($close),SEQUENCE(10),10),2))*RANK(TS_ZSCORE(LOG($close*$volume+1e-8),20)..."
+    },
+    {
+      "name": "Liquidity_Rerating_DlvUp_IlliqDown_RangeVol_20_60",
+      "rank_ic": 0.0457744046087718,
+      "ic": 0.0297199587172701,
+      "desc": "Cross-sectional liquidity re-rating score: rewards rising dollar-volume trend (5d avg vs 20d ago) and improving liquidity (20d Amihud illiquidity decreasing vs 20d ago), while penalizing elevated 2...",
+      "hyp": "Hypothesis: Liquidity re-rating / stealth accumulation: A cross-sectional factor that increases with (i) sustained relative volume/dollar-volume expansion over a 60d baseline, (ii) improving liquidity via a 20d decrease in Amihud price impact (|ret1|/dollar...",
+      "expr": "RANK(TS_PCTCHANGE(TS_MEAN(LOG($close*$volume+1),5),20))+RANK(-TS_PCTCHANGE(TS_MEAN(ABS($return)/($close*$volume+1e-8),20),20))-RANK(TS_ME..."
+    },
+    {
+      "name": "Mom120_RangeStdRatio_SignedCLV_5",
+      "rank_ic": 0.0438249669374815,
+      "ic": 0.0305425261603224,
+      "desc": "Continuation score using 120D price momentum, a volatility contraction proxy via the 20D/60D ratio of range% volatility, and 5D signed close-location pressure (CLV mapped to [-1,1]).",
+      "hyp": "Hypothesis: Intermediate-term trend continuation is strongest after a volatility squeeze with persistent close-to-extreme pressure: stocks with positive 120D momentum that simultaneously show a 20D contraction in intraday range volatility (e.g., low TS_ZSCO...",
+      "expr": "RANK(TS_PCTCHANGE($close,120))+RANK(-TS_STD(($high-$low)/($close+1e-8),20)/(TS_STD(($high-$low)/($close+1e-8),60)+1e-8))+RANK(TS_MEAN((2*..."
+    },
+    {
+      "name": "DonchianWidthCompress20_HighBreak55_VolumeRatio20",
+      "rank_ic": 0.0423956821464393,
+      "ic": 0.0238736532520424,
+      "desc": "Range-compression breakout continuation factor using (1) 20-day Donchian channel width compression, (2) gated breakout strength only when close exceeds the 55-day high, scaled by recent channel wid...",
+      "hyp": "Hypothesis: A volatility-compression breakout continuation factor constructed from (i) a 20-day range/volatility contraction score, (ii) a 55-day Donchian-style breakout strength, and (iii) a 20-day volume-surprise confirmation will positively predict next-...",
+      "expr": "RANK(-((TS_MAX($high,20)-TS_MIN($low,20))/(TS_MEAN($close,20)+1e-8))) + RANK(($close>TS_MAX($high,55))?(($close-TS_MAX($high,55))/(TS_MAX..."
+    }
+  ],
+  "qa_bot": [
+    {
+      "name": "KineticLength_AbsRetSum_Z_10D",
+      "rank_ic": -0.0720091554236062,
+      "ic": -0.024622021795345,
+      "desc": "Proxy for KLEN: cross-sectionally standardized 10-day cumulative absolute return (path length). Higher values indicate choppier/noisier paths; lower values indicate smoother trends (better trend qu...",
+      "hyp": "Hypothesis: A cross-sectional long-short strategy that goes long instruments simultaneously ranked in the top decile of a trend-quality composite score TQ = z(RSQR10) − z(KLEN) − z(WVMA5) and in the top decile of a capitulation composite score CAP = z(ROC60...",
+      "expr": "ZSCORE(TS_SUM(ABS($return),10))"
+    },
+    {
+      "name": "Drawdown_Gated_NegCorr_60D_20D_thr20pct",
+      "rank_ic": -0.0282075461899185,
+      "ic": -0.0095466252506998,
+      "desc": "Implements a hard regime gate: when 60-day return is below -20% (large drawdown proxy), the factor becomes the cross-sectional rank of negative 20-day price–volume log-change correlation; otherwise...",
+      "hyp": "Hypothesis: Conditioned long-horizon reversal is stronger when the past 60-day price trend indicates a large drawdown (ROC_60 < -1) and the last 20-day price–volume correlation is negative (CORR_20(ΔlogClose, ΔlogVolume) < 0); specifically, the future 20–60...",
+      "expr": "(TS_PCTCHANGE($close,60) < -0.2)?RANK(-TS_CORR(DELTA(LOG($close),1),DELTA(LOG($volume),1),20)):0"
+    },
+    {
+      "name": "Gated_CapitulAbsorb_Reversal_50D15D",
+      "rank_ic": -0.0277672477906205,
+      "ic": -0.0165459259148588,
+      "desc": "A simpler window-variant of the gated reversal idea: uses 50D drawdown intensity and 15D return–volume-change correlation, gated by cross-sectionally strong smoothed absorption (high average dollar...",
+      "hyp": "Hypothesis: Post-drawdown mean reversion is most predictable when the selloff exhibits capitulation (60D return deeply negative and 20D price–volume change correlation negative) but microstructure indicates absorption (20D log-dollar-volume z-score high whi...",
+      "expr": "(ZSCORE(LOG(TS_MEAN($close*$volume,20)+1e-8)-LOG(TS_MEAN(ABS($return)/($close*$volume+1e-8),20)+1e-8))>0.5)?(RANK(MAX(-TS_PCTCHANGE($clos..."
+    },
+    {
+      "name": "HighClose_Shock_With_VolSync_60_20",
+      "rank_ic": -0.0273813978825889,
+      "ic": -0.0089892644288204,
+      "desc": "Shock-day quality score: combines close-near-high control (close location in range) with the magnitude of the range shock (60D z-score of range/close), plus 20D return–volume synchronization. High ...",
+      "hyp": "Hypothesis: Stocks exhibit the strongest 1–10D continuation returns when an established intermediate-term uptrend (positive 120D momentum with persistent close-to-high pressure) undergoes a 20D volatility compression (intraday range/close unusually low vs i...",
+      "expr": "RANK((($close-$low)/($high-$low+1e-8))*TS_ZSCORE(($high-$low)/($close+1e-8),60)+TS_CORR($return,$volume,20))"
+    },
+    {
+      "name": "Capitulation_RegimeScore_DD60_Corr20_Overnight20",
+      "rank_ic": -0.0215498523936588,
+      "ic": -0.0179191375308351,
+      "desc": "Slow-moving capitulation/forced-selling regime score: deep 60D drawdown from rolling peak, strongly negative 20D return–volume-change association, and low 20D overnight-dominance (overnight gap sma...",
+      "hyp": "Hypothesis: A short-horizon contrarian return premium exists when a stock is simultaneously (i) in a forced-selling/capitulation regime—proxied by a deep 60-day drawdown from its rolling peak and a strongly negative 20-day return–volume-change association w...",
+      "expr": "RANK((TS_MAX($close,60)-$close)/(TS_MAX($close,60)+1e-8))+RANK(-TS_CORR($return,DELTA(LOG($volume+1),1),20))+RANK(-TS_MEAN(ABS($open/DELA..."
+    }
+  ],
+  "aa_top": [
+    {
+      "name": "Exhaustion_Intensity_Index_10D",
+      "rank_ic": 0.03231159073645,
+      "ic": 0.0158508933939878,
+      "desc": "This factor captures price exhaustion by measuring the product of the 60-day price distance (normalized by cross-sectional rank) and the inverse of the short-term volume intensity. It targets stock...",
+      "hyp": "Hypothesis: The 'Liquidity-Adjusted Trend Deviation' factor identifies high-conviction reversals by scaling the 60-day price Z-score by the 10-day volume intensity relative to its 60-day average, specifically focusing on the interaction between extreme pric...",
+      "expr": "RANK(TS_PCTCHANGE($close, 60)) * (TS_MEAN($volume, 60) / (TS_MEAN($volume, 10) + 1e-8))"
+    },
+    {
+      "name": "Climax_Exhaustion_Intensity",
+      "rank_ic": 0.0241854153194284,
+      "ic": 0.0160369173211397,
+      "desc": "A variation of the liquidity climax hypothesis that uses the cross-sectional rank of price displacement scaled by the volume climax ratio. By ranking the price component, it reduces the impact of o...",
+      "hyp": "Hypothesis: The 'Asymmetric Liquidity Climax' factor identifies high-conviction reversals by scaling the 60-day price Z-score by the ratio of 5-day volume to its 60-day median, specifically when the short-term volume is higher than the long-term average, in...",
+      "expr": "RANK(TS_PCTCHANGE($close, 60)) * (TS_MEAN($volume, 5) / (TS_MEDIAN($volume, 60) + 1e-8))"
+    },
+    {
+      "name": "Relative_Climax_Reversal_Index",
+      "rank_ic": 0.0127375236038649,
+      "ic": 0.0091240905003778,
+      "desc": "This factor measures the distance of the current price from its 60-day Bollinger Middle Band, scaled by the volume climax ratio. It uses the BB_MIDDLE function to represent the trend baseline, avoi...",
+      "hyp": "Hypothesis: The 'Asymmetric Liquidity Climax' factor identifies high-conviction reversals by scaling the 60-day price Z-score by the ratio of 5-day volume to its 60-day median, specifically when the short-term volume is higher than the long-term average, in...",
+      "expr": "(($close - BB_MIDDLE($close, 60)) / $close) * (TS_MEAN($volume, 5) / (TS_MEDIAN($volume, 60) + 1e-8))"
+    },
+    {
+      "name": "Exhaustion_Volume_Instability_Index",
+      "rank_ic": 0.0120975204850499,
+      "ic": 0.0116604773193899,
+      "desc": "This factor combines price trend deviation (measured as the ratio of close to its 60-day mean) with volume instability. It uses the 20-day standard deviation of volume normalized by its 60-day mean...",
+      "hyp": "Hypothesis: The 'Volatility-Adjusted Exhaustion' factor identifies high-conviction reversals by scaling the 60-day price Z-score by the 20-day standard deviation of volume, normalized by the 60-day average volume, to isolate price extremes occurring during ...",
+      "expr": "(($close - TS_MEAN($close, 60)) / (TS_MEAN($close, 60) + 1e-8)) * (TS_STD($volume, 20) / (TS_MEAN($volume, 60) + 1e-8))"
+    },
+    {
+      "name": "Relative_Range_Efficiency_Climax",
+      "rank_ic": 0.0120791426991307,
+      "ic": -0.00096415526718,
+      "desc": "Identifies reversal points by measuring the 'Result-over-Effort' ratio. It uses the price's position relative to its 15-day Bollinger Middle band, normalized by the cross-sectional rank of the asse...",
+      "hyp": "Hypothesis: The 'Cross-Sectional Efficiency-Decay Factor' (CSEDF) identifies robust mean reversion by weighting the asset-level price-volume efficiency collapse with its relative volatility rank, filtering out market-wide liquidity surges. Concise Observati...",
+      "expr": "RANK(($close - BB_MIDDLE($close, 15)) / BB_MIDDLE($close, 15)) * (1.0 - RANK(TS_RANK($volume, 60)))"
+    }
+  ],
+  "aa_bot": [
+    {
+      "name": "Relative_Volume_Calm_Reversal",
+      "rank_ic": -0.0279497838318051,
+      "ic": -0.0188254324927483,
+      "desc": "This factor identifies mean reversion opportunities by looking for 'quiet' volume regimes (low volume range relative to average) during periods of high price momentum divergence. It uses the ratio ...",
+      "hyp": "Hypothesis: The 'Volume-Price Climax Factor' (VPCF) identifies trend exhaustion by measuring the product of normalized volume intensity decay and the acceleration of price momentum divergence. Concise Observation: Previous attempts using raw volume Coeffici...",
+      "expr": "TS_RANK((TS_MAX($volume, 10) - TS_MIN($volume, 10)) / (TS_MEAN($volume, 10) + 1e-8), 40) * (TS_PCTCHANGE($close, 10) - TS_PCTCHANGE($clos..."
+    },
+    {
+      "name": "Volume_Stability_Momentum_Divergence_40D",
+      "rank_ic": -0.0246742946453437,
+      "ic": -0.015477365539354,
+      "desc": "This factor identifies trend exhaustion by measuring the interaction between volume stability and price momentum divergence. It uses the time-series rank of the volume's median absolute deviation (...",
+      "hyp": "Hypothesis: The 'Volume-Price Climax Factor' (VPCF) identifies trend exhaustion by measuring the product of normalized volume intensity decay and the acceleration of price momentum divergence. Concise Observation: Previous attempts using raw volume Coeffici...",
+      "expr": "TS_RANK(TS_MAD($volume, 10) / (TS_MEDIAN($volume, 10) + 1e-8), 40) * (TS_PCTCHANGE($close, 10) - TS_PCTCHANGE($close, 60))"
+    },
+    {
+      "name": "LVR_Bottom_Fishing_20D",
+      "rank_ic": -0.0190066557377513,
+      "ic": -0.0143535694981038,
+      "desc": "Liquidity-Validated Reversal (LVR) factor focusing on bottom-fishing. It identifies oversold conditions using a volatility-normalized price extension (Z-score relative to 20-day SMA), validated by ...",
+      "hyp": "Hypothesis: The 'Liquidity-Validated Reversal' (LVR) factor identifies high-conviction pivots by interacting volatility-normalized price extension with intraday rejection, but only when validated by a relative volume surge that exceeds the stock's recent ba...",
+      "expr": "RANK(-($close - TS_MEAN($close, 20)) / (TS_STD($close, 20) + 1e-8)) * RANK((MIN($close, $open) - $low) / ($close + 1e-8)) * RANK($volume ..."
+    },
+    {
+      "name": "LVR_Conditional_Reversal_V3",
+      "rank_ic": -0.013335896754372,
+      "ic": -0.0136037753940212,
+      "desc": "This factor identifies reversals by interacting price extension and intraday rejection only when volume is significantly higher than its recent median, using an additive rank structure to improve I...",
+      "hyp": "Hypothesis: The 'Liquidity-Validated Reversal' (LVR) factor identifies high-conviction pivots by interacting volatility-normalized price extension with intraday rejection, but only when validated by a relative volume surge that exceeds the stock's recent ba...",
+      "expr": "RANK((TS_MEAN($close, 20) - $close) / (TS_STD($close, 20) + 1e-8)) * (($volume > TS_MEDIAN($volume, 20)) ? RANK((MIN($close, $open) - $lo..."
+    },
+    {
+      "name": "Ranked_Accumulation_Signal_V1",
+      "rank_ic": -0.0128035810274261,
+      "ic": -0.0086798060779643,
+      "desc": "A cross-sectionally ranked version of the reversal hypothesis. It identifies stocks where the long-term price decline is most pronounced, backed by consistent price-volume synchronization and low t...",
+      "hyp": "Hypothesis: A composite factor combining a 60-day price momentum indicator (ROC60), the 20-day correlation between price and volume (CORR20), and the 5-day volume volatility (VSTD5) can effectively capture long-term mean reversion and short-term liquidity-d...",
+      "expr": "RANK(INV(1 + TS_PCTCHANGE($close, 60))) + RANK(TS_CORR($close, $volume, 20)) - RANK(TS_STD($volume, 5))"
+    }
+  ]
+}

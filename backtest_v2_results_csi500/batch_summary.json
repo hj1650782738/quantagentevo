@@ -1,0 +1,67 @@
+[
+  {
+    "name": "top150_factors_csi500",
+    "num_factors": 150,
+    "IC": 0.15536732249274648,
+    "ICIR": 1.1865985771820962,
+    "Rank_IC": 0.15055868561688585,
+    "Rank_ICIR": 1.148594024057385,
+    "annualized_return": 0.2569188460602122,
+    "information_ratio": 2.636420479693002,
+    "max_drawdown": -0.12313884160044364,
+    "calmar_ratio": 2.0864159733924814,
+    "elapsed_seconds": 493.9021611213684
+  },
+  {
+    "name": "csi500_alpha158",
+    "num_factors": 158,
+    "IC": 0.009807028713013982,
+    "ICIR": 0.07394458524162371,
+    "Rank_IC": 0.04544319124725012,
+    "Rank_ICIR": 0.3605027843837975,
+    "annualized_return": 0.04920777767131589,
+    "information_ratio": 0.612133584241474,
+    "max_drawdown": -0.11030435351328419,
+    "calmar_ratio": 0.4461091163132532,
+    "elapsed_seconds": 142.34070873260498
+  },
+  {
+    "name": "csi500_alpha360",
+    "num_factors": 66,
+    "IC": 0.012343966319625197,
+    "ICIR": 0.08813409833400566,
+    "Rank_IC": 0.04734819990583373,
+    "Rank_ICIR": 0.3535443147532463,
+    "annualized_return": 0.07271353380765824,
+    "information_ratio": 0.8971571401673452,
+    "max_drawdown": -0.12936716373596568,
+    "calmar_ratio": 0.5620710210209469,
+    "elapsed_seconds": 79.88490128517151
+  },
+  {
+    "name": "AA_top80_RankIC_AA_claude_123_csi300",
+    "num_factors": 80,
+    "IC": 0.11777350088147763,
+    "ICIR": 0.944640252499348,
+    "Rank_IC": 0.11306169882531213,
+    "Rank_ICIR": 0.9160545896570131,
+    "annualized_return": 0.16978267416455745,
+    "information_ratio": 1.9186838811608609,
+    "max_drawdown": -0.11028811347234979,
+    "calmar_ratio": 1.539446716595832,
+    "elapsed_seconds": 3280.4294514656067
+  },
+  {
+    "name": "all_factors_library_AA_claude_123_csi300",
+    "num_factors": 158,
+    "IC": 0.16253637564517198,
+    "ICIR": 1.3668615805607058,
+    "Rank_IC": 0.157024907332793,
+    "Rank_ICIR": 1.3224550852217762,
+    "annualized_return": 0.24886214212621205,
+    "information_ratio": 2.73514714536414,
+    "max_drawdown": -0.12136243753140341,
+    "calmar_ratio": 2.0505697412497765,
+    "elapsed_seconds": 3719.489072561264
+  }
+]

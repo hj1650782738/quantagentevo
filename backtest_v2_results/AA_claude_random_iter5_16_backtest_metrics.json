@@ -1,0 +1,23 @@
+{
+  "experiment_name": "AA_claude_iter5",
+  "factor_source": "custom",
+  "num_factors": 16,
+  "metrics": {
+    "IC": 0.058029006467523465,
+    "ICIR": 0.3803271711802298,
+    "Rank IC": 0.05673353694708556,
+    "Rank ICIR": 0.38218738345709885,
+    "annualized_return": 0.10222349470035638,
+    "information_ratio": 1.3486498915319753,
+    "max_drawdown": -0.11160267080854369,
+    "calmar_ratio": 0.915959214593731
+  },
+  "config": {
+    "data_range": "2016-01-01 ~ 2025-12-26",
+    "test_range": "2022-01-01 ~ 2025-12-26",
+    "backtest_range": "2022-01-01 ~ 2025-12-26",
+    "market": "csi300",
+    "benchmark": "SH000300"
+  },
+  "elapsed_seconds": 57.792624950408936
+}

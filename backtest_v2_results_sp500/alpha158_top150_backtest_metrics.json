@@ -1,0 +1,23 @@
+{
+  "experiment_name": "exp_sp500_alpha158_top150",
+  "factor_source": "alpha158",
+  "num_factors": 158,
+  "metrics": {
+    "IC": 0.005888207399717012,
+    "ICIR": 0.05879471825365857,
+    "Rank IC": 0.003951896609164029,
+    "Rank ICIR": 0.03634378736252102,
+    "annualized_return": 0.038733483503444,
+    "information_ratio": 0.306946531594841,
+    "max_drawdown": -0.2106512222412079,
+    "calmar_ratio": 0.18387495259387532
+  },
+  "config": {
+    "data_range": "2016-01-01 ~ 2025-12-23",
+    "test_range": "2022-01-01 ~ 2025-12-23",
+    "backtest_range": "2022-01-01 ~ 2025-12-25",
+    "market": "sp500",
+    "benchmark": "SPX"
+  },
+  "elapsed_seconds": 168.47661900520325
+}

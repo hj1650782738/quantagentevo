@@ -61,9 +61,10 @@ class BacktestRunner:
         import qlib
         
         provider_uri = self.config['data']['provider_uri']
-        qlib.init(provider_uri=provider_uri, region='cn')
+        region = self.config['data'].get('region', 'cn')
+        qlib.init(provider_uri=provider_uri, region=region)
         self._qlib_initialized = True
-        logger.info(f"✓ Qlib 初始化完成: {provider_uri}")
+        logger.info(f"✓ Qlib 初始化完成: {provider_uri} (region={region})")
     
     def run(self, 
             factor_source: Optional[str] = None,
@@ -127,7 +128,7 @@ class BacktestRunner:
         
         # 4. 训练模型并回测
         print("\n🤖 第四步：训练模型并执行回测...")
-        metrics = self._train_and_backtest(dataset, exp_name, rec_name)
+        metrics = self._train_and_backtest(dataset, exp_name, rec_name, output_name=output_name)
         
         # 5. 输出结果
         total_time = time.time() - start_time_total
@@ -506,7 +507,7 @@ class BacktestRunner:
             logger.warning(f"加载 Qlib 因子失败: {e}")
             return None
     
-    def _train_and_backtest(self, dataset, exp_name: str, rec_name: str) -> Dict:
+    def _train_and_backtest(self, dataset, exp_name: str, rec_name: str, output_name: Optional[str] = None) -> Dict:
         """训练模型并执行回测"""
         from qlib.contrib.model.gbdt import LGBModel
         from qlib.data import D
@@ -665,6 +666,29 @@ class BacktestRunner:
                         excess_return_with_cost = excess_return_with_cost.dropna()
                         
                         if len(excess_return_with_cost) > 0:
+                            # 保存每日数据到 CSV
+                            try:
+                                daily_df = report_df.copy()
+                                daily_df['excess_return'] = excess_return_with_cost
+                                
+                                output_dir = Path(self.config['experiment'].get('output_dir', './backtest_v2_results'))
+                                output_dir.mkdir(parents=True, exist_ok=True)
+                                
+                                # 使用 output_name 或 experiment_name
+                                file_prefix = output_name if output_name else exp_name
+                                csv_path = output_dir / f"{file_prefix}_cumulative_excess.csv"
+                                
+                                # 只保留需要的列并重命名
+                                save_df = daily_df[['excess_return']].copy()
+                                save_df.columns = ['daily_excess_return']
+                                save_df['cumulative_excess_return'] = save_df['daily_excess_return'].cumsum()
+                                
+                                save_df.index.name = 'date'
+                                save_df.to_csv(csv_path)
+                                print(f"  ✓ 每日累计超额收益已保存: {csv_path}")
+                            except Exception as csv_err:
+                                logger.warning(f"保存每日CSV失败: {csv_err}")
+
                             analysis = risk_analysis(excess_return_with_cost)
                             
                             if isinstance(analysis, pd.DataFrame):

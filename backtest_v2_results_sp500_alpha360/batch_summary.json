@@ -1,0 +1,15 @@
+[
+  {
+    "name": "Alphaagent_sp500_alpha360",
+    "num_factors": 66,
+    "IC": 0.007154844651984159,
+    "ICIR": 0.07107249070861976,
+    "Rank_IC": 0.006394102759896482,
+    "Rank_ICIR": 0.06688742481443433,
+    "annualized_return": 0.09610022656483101,
+    "information_ratio": 0.5592313516888116,
+    "max_drawdown": -0.1742010895145684,
+    "calmar_ratio": 0.5516626034465426,
+    "elapsed_seconds": 92.43319463729858
+  }
+]

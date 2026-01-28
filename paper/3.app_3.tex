@@ -1,0 +1,45 @@
+\section{Appendix: Alpha Decay}
+\label{app:factor_analysis}
+
+This appendix provides a factor-level interpretation of why QuantaAlpha remains effective during the 2023 regime shift, while baseline methods fail.
+We analyze both market microstructure changes and the semantic categories of dominant factors.
+
+\subsection{The 2023 Regime Shift in the A-share Market}
+
+The divergence in performance originates from a mismatch between the training distribution (2016--2020) and the 2023 market environment.
+
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Training Regime (Large-Cap Dominance).}
+    The CSI~300 during 2016--2020 is characterized by large-cap leadership, high institutional participation, and relatively low intraday noise.
+    Trend-following and classical mean-reversion signals are stable under this regime.
+    
+    \item \textbf{Test Regime (Small-Cap Rotation in 2023).}
+    In 2023, market liquidity becomes fragmented and rotates toward small-cap and thematic stocks.
+    This regime exhibits:
+    (i) noisy intraday price movements,
+    (ii) frequent and information-rich overnight gaps driven by call auction activity,
+    and (iii) gradual liquidity accumulation preceding price breakouts.
+\end{itemize}
+
+Such conditions invalidate the core assumptions embedded in many baseline factor designs.
+
+\subsection{Structural Factor Semantics and Regime Robustness}
+
+The 2023 performance contrast highlights that robust alpha generation depends on identifying \emph{structural information channels} that remain stable across liquidity regimes:
+
+\label{subsec:qa_structural_channels}
+
+\begin{itemize}
+    \setlength{\itemsep}{2pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Overnight information channel (Gap Factors)}: Factors such as \texttt{GapZ10\_Overnight\_vs\_TR} capture the risk premium associated with non-trading hours. In 2023, as intraday predictability weakened, overnight price formation became a dominant information channel, rendering gap signals highly effective at quantifying off-hours information processing.
+    \item \textbf{Volatility structure channel (Range Deviation)}: Signals like \texttt{Mean-Reverting Range Deviation} focus on abnormal intraday range expansion relative to volatility clusters. Instead of predicting simple direction, these primitives identify transient dislocations in price variability, which remain reliable even under noisy trading conditions.
+    \item \textbf{Trend-quality channel (clean trend vs.\ pseudo-trend)}: QuantaAlpha evolves factors that explicitly penalize residual volatility and unstable volume rather than relying on raw momentum. This filtering separates orderly trends with strong participation from the noisy pseudo-trends driven by retail liquidity in small-cap stocks.
+    \item \textbf{Baseline reversal/exhaustion channel}: Traditional baseline methods rely on \emph{volume-price exhaustion} or \emph{climax-reversal} logic. While effective in institutionally dominated markets, this channel often breaks down in retail-driven regimes (like 2023), where overbought conditions persist due to thematic narratives rather than mean-reverting immediately.
+\end{itemize}
+
+The discovery of these primitives suggests two high-level design principles for temporal robustness:
+\textbf{Prioritize semantic stability over style.} Baseline failures highlight the fragility of factors tied to specific market styles (e.g., rapid reversal). In contrast, economically interpretable primitives—such as overnight risk and volatility structure—generalize better across OOD data.
+\textbf{Avoid homogeneity in signal logic.} Relying solely on price-volume exhaustion creates semantic homogeneity; incorporating orthogonal channels like trend quality and overnight gaps ensures sustained alpha generation when dominant market dynamics shift.

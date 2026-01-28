@@ -1,0 +1,23 @@
+{
+  "experiment_name": "Alphaagent_sp500",
+  "factor_source": "custom",
+  "num_factors": 158,
+  "metrics": {
+    "IC": 0.1575842133794177,
+    "ICIR": 1.3580102622422199,
+    "Rank IC": 0.15533548872404954,
+    "Rank ICIR": 1.3440826361962033,
+    "annualized_return": 0.2887624951270158,
+    "information_ratio": 2.8355360336030264,
+    "max_drawdown": -0.07155066064796975,
+    "calmar_ratio": 4.035776784056981
+  },
+  "config": {
+    "data_range": "2016-01-01 ~ 2025-12-23",
+    "test_range": "2022-01-01 ~ 2025-12-23",
+    "backtest_range": "2022-01-01 ~ 2025-12-25",
+    "market": "sp500",
+    "benchmark": "SPX"
+  },
+  "elapsed_seconds": 14279.803439617157
+}

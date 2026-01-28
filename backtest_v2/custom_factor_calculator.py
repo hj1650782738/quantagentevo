@@ -562,10 +562,11 @@ def get_qlib_stock_data(config: Dict) -> pd.DataFrame:
     data_config = config.get('data', {})
     
     provider_uri = data_config.get('provider_uri', '/home/tjxy/.qlib/qlib_data/cn_data')
+    region = data_config.get('region', 'cn')
     
     # 初始化 Qlib (如果尚未初始化)
     try:
-        qlib.init(provider_uri=provider_uri, region='cn')
+        qlib.init(provider_uri=provider_uri, region=region)
     except Exception:
         pass  # 已经初始化
     

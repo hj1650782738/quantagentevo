@@ -1,0 +1,80 @@
+[
+  {
+    "name": "RANKIC_top150_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300",
+    "num_factors": 150,
+    "IC": 0.12666578401375023,
+    "ICIR": 0.762317440966773,
+    "Rank_IC": 0.12302202336432787,
+    "Rank_ICIR": 0.7417781668847137,
+    "annualized_return": 0.26186724008516343,
+    "information_ratio": 3.179184208765831,
+    "max_drawdown": -0.09241471261368195,
+    "calmar_ratio": 2.833609851494513,
+    "elapsed_seconds": 429.29499673843384
+  },
+  {
+    "name": "RANKIC_top200_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300",
+    "num_factors": 200,
+    "IC": 0.14027128902712716,
+    "ICIR": 0.8466014587667755,
+    "Rank_IC": 0.136212125135414,
+    "Rank_ICIR": 0.8219981015798518,
+    "annualized_return": 0.28456320014270126,
+    "information_ratio": 3.436140924945047,
+    "max_drawdown": -0.09888074068219432,
+    "calmar_ratio": 2.8778425220063424,
+    "elapsed_seconds": 542.1149394512177
+  },
+  {
+    "name": "RANKIC_top250_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300",
+    "num_factors": 250,
+    "IC": 0.15083152030487165,
+    "ICIR": 0.9291035765836191,
+    "Rank_IC": 0.14632212797605448,
+    "Rank_ICIR": 0.9008599959954292,
+    "annualized_return": 0.302532629740836,
+    "information_ratio": 3.687767252849472,
+    "max_drawdown": -0.09747901019406169,
+    "calmar_ratio": 3.1035669026445034,
+    "elapsed_seconds": 662.7979552745819
+  },
+  {
+    "name": "RANKIC_top300_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300",
+    "num_factors": 300,
+    "IC": 0.15938739573960897,
+    "ICIR": 0.9958529224969442,
+    "Rank_IC": 0.15452697281501376,
+    "Rank_ICIR": 0.9653368289682295,
+    "annualized_return": 0.3000595220391983,
+    "information_ratio": 3.664805841439843,
+    "max_drawdown": -0.09852954338897568,
+    "calmar_ratio": 3.0453761553996146,
+    "elapsed_seconds": 796.6240890026093
+  },
+  {
+    "name": "RANKIC_top350_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300",
+    "num_factors": 350,
+    "IC": 0.174986927320387,
+    "ICIR": 1.0839997336902403,
+    "Rank_IC": 0.1700294638859871,
+    "Rank_ICIR": 1.0519756494749335,
+    "annualized_return": 0.32029096108834587,
+    "information_ratio": 3.817135852789366,
+    "max_drawdown": -0.09260001050233213,
+    "calmar_ratio": 3.4588652782094376,
+    "elapsed_seconds": 931.3453605175018
+  },
+  {
+    "name": "RANKIC_top400_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300",
+    "num_factors": 400,
+    "IC": 0.1806227338126957,
+    "ICIR": 1.1373414766929295,
+    "Rank_IC": 0.1756259109242911,
+    "Rank_ICIR": 1.1057326150581581,
+    "annualized_return": 0.3236540523504327,
+    "information_ratio": 3.940836773081584,
+    "max_drawdown": -0.07834263933925412,
+    "calmar_ratio": 4.1312630654283256,
+    "elapsed_seconds": 1076.4847793579102
+  }
+]

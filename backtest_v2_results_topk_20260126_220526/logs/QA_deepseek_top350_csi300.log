@@ -1,0 +1,862 @@
+✓ 已加载环境变量: /home/tjxy/quantagent/AlphaAgent/.env
+2026-01-26 22:46:02,187 - INFO - Note: detected 112 virtual cores but NumExpr set to maximum of 64, check "NUMEXPR_MAX_THREADS" environment variable.
+2026-01-26 22:46:02,187 - INFO - Note: NumExpr detected 112 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+2026-01-26 22:46:02,187 - INFO - NumExpr defaulting to 16 threads.
+2026-01-26 22:46:02,305 - INFO - ✓ 加载配置文件: backtest_v2_results_topk_20260126_220526/config_topk.yaml
+[3186082:MainThread](2026-01-26 22:46:02,953) INFO - qlib.Initialization - [config.py:452] - default_conf: client.
+[3186082:MainThread](2026-01-26 22:46:03,308) INFO - qlib.Initialization - [__init__.py:82] - qlib successfully initialized based on client settings.
+[3186082:MainThread](2026-01-26 22:46:03,308) INFO - qlib.Initialization - [__init__.py:84] - data_path={'__DEFAULT_FREQ': PosixPath('/home/tjxy/.qlib/qlib_data/cn_data')}
+2026-01-26 22:46:03,308 - INFO - ✓ Qlib 初始化完成: /home/tjxy/.qlib/qlib_data/cn_data (region=cn)
+
+======================================================================
+🚀 开始回测: QA_deepseek_top350_csi300
+📁 因子库: factor_library/hj/RANKIC_top350_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300.json
+======================================================================
+
+📊 第一步：加载因子...
+2026-01-26 22:46:03,308 - INFO - 📊 加载因子源: custom
+2026-01-26 22:46:03,323 - INFO -   ✓ 加载自定义因子: 350 个 (使用自定义计算器)
+[3186082:MainThread](2026-01-26 22:46:03,324) INFO - qlib.Initialization - [config.py:452] - default_conf: client.
+[3186082:MainThread](2026-01-26 22:46:03,325) INFO - qlib.Initialization - [__init__.py:82] - qlib successfully initialized based on client settings.
+[3186082:MainThread](2026-01-26 22:46:03,325) INFO - qlib.Initialization - [__init__.py:84] - data_path={'__DEFAULT_FREQ': PosixPath('/home/tjxy/.qlib/qlib_data/cn_data')}
+  ✓ Qlib 兼容因子: 0 个
+  ✓ 需要计算的自定义因子: 350 个
+
+🔧 第二步：计算自定义因子...
+  获取股票数据...
+2026-01-26 22:46:04,862 - INFO - ✓ 加载股票数据: 727818 行
+2026-01-26 22:46:04,862 - INFO -   ✓ 加载股票数据: 727818 条记录
+2026-01-26 22:46:05,076 - INFO - 数据准备完成: 727818 行, 列: ['$open', '$high', '$low', '$close', '$volume', '$vwap', '$return']
+2026-01-26 22:46:05,076 - INFO -   计算因子 [1/350]: Regulatory_Resistance_Breakthrough_Momentum_20D
+2026-01-26 22:46:07,189 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716787/727818)
+2026-01-26 22:46:07,189 - INFO -   计算因子 [2/350]: Anchored_Price_Adjustment_Acceleration_15D
+2026-01-26 22:46:07,228 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 717377/727818)
+2026-01-26 22:46:07,228 - INFO -   计算因子 [3/350]: Institutional_Volume_Confirmation_Momentum_10D
+2026-01-26 22:46:09,261 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718333/727818)
+2026-01-26 22:46:09,261 - INFO -   计算因子 [4/350]: Regime_Adaptive_Volatility_Composite_5D
+2026-01-26 22:46:11,323 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717526/727818)
+2026-01-26 22:46:11,323 - INFO -   计算因子 [5/350]: Regime_Scaled_Price_Volume_Divergence_10D
+2026-01-26 22:46:13,358 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718129/727818)
+2026-01-26 22:46:13,359 - INFO -   计算因子 [6/350]: Regime_Conditional_Intraday_Momentum_3D
+2026-01-26 22:46:13.583 | WARNING  | alphaagent.oai.llm_utils:<module>:142 - azure.identity is not installed.
+2026-01-26 22:46:14.031 | WARNING  | alphaagent.oai.llm_utils:<module>:152 - llama is not installed.
+2026-01-26 22:46:14,105 - WARNING - 因子计算失败 [Regime_Conditional_Intraday_Momentum_3D]: 无效的运算符: ";=//"
+2026-01-26 22:46:14,105 - WARNING -     ✗ 因子 Regime_Conditional_Intraday_Momentum_3D 计算失败或为空
+2026-01-26 22:46:14,105 - INFO -   计算因子 [7/350]: Stress_Resilience_Convergence_45D
+2026-01-26 22:46:16,118 - INFO -     ✓ 从 cache_location 加载 (有效数据: 714748/727818)
+2026-01-26 22:46:16,118 - INFO -   计算因子 [8/350]: Volatility_Efficiency_Ratio_30D
+2026-01-26 22:46:18,171 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720772/727818)
+2026-01-26 22:46:18,171 - INFO -   计算因子 [9/350]: Regime_Confirmation_Momentum_60D
+2026-01-26 22:46:20,214 - INFO -     ✓ 从 cache_location 加载 (有效数据: 724038/727818)
+2026-01-26 22:46:20,214 - INFO -   计算因子 [10/350]: Regulatory_Breakthrough_Convergence_252D
+2026-01-26 22:46:22,234 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717377/727818)
+2026-01-26 22:46:22,234 - INFO -   计算因子 [11/350]: Earnings_Quality_Microstructure_15D
+2026-01-26 22:46:24,255 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720263/727818)
+2026-01-26 22:46:24,255 - INFO -   计算因子 [12/350]: Volatility_Spillover_Timing_20D
+2026-01-26 22:46:26,296 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717197/727818)
+2026-01-26 22:46:26,296 - INFO -   计算因子 [13/350]: Institutional_Momentum_Score_20D
+2026-01-26 22:46:28,320 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718518/727818)
+2026-01-26 22:46:28,320 - INFO -   计算因子 [14/350]: Retail_Herding_Divergence_10D
+2026-01-26 22:46:30,359 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718559/727818)
+2026-01-26 22:46:30,359 - INFO -   计算因子 [15/350]: Volatility_Adaptive_Regime_Score_15D
+2026-01-26 22:46:30,372 - WARNING - 因子计算失败 [Volatility_Adaptive_Regime_Score_15D]: 无效的运算符: "="
+2026-01-26 22:46:30,372 - WARNING -     ✗ 因子 Volatility_Adaptive_Regime_Score_15D 计算失败或为空
+2026-01-26 22:46:30,372 - INFO -   计算因子 [16/350]: Governance_Convergence_Signal_20D
+2026-01-26 22:46:32,387 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718445/727818)
+2026-01-26 22:46:32,387 - INFO -   计算因子 [17/350]: Ownership_Concentration_Alpha_40D
+2026-01-26 22:46:34,413 - INFO -     ✓ 从 cache_location 加载 (有效数据: 722568/727818)
+2026-01-26 22:46:34,413 - INFO -   计算因子 [18/350]: Strategic_Transformation_Momentum_30D
+2026-01-26 22:46:36,461 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721924/727818)
+2026-01-26 22:46:36,461 - INFO -   计算因子 [19/350]: Regulatory_Complexity_Underreaction_5D
+2026-01-26 22:46:38,475 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718150/727818)
+2026-01-26 22:46:38,475 - INFO -   计算因子 [20/350]: Sentiment_Divergence_Volume_Confirmation_10D
+2026-01-26 22:46:40,503 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717811/727818)
+2026-01-26 22:46:40,503 - INFO -   计算因子 [21/350]: Institutional_Processing_Lag_15D
+2026-01-26 22:46:42,530 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718619/727818)
+2026-01-26 22:46:42,531 - INFO -   计算因子 [22/350]: Institutional_Accumulation_Momentum_20D
+2026-01-26 22:46:44,551 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:46:44,551 - INFO -   计算因子 [23/350]: Behavioral_Attention_Lag_5D
+2026-01-26 22:46:46,580 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718457/727818)
+2026-01-26 22:46:46,580 - INFO -   计算因子 [24/350]: Multi_Timeframe_Convergence_10D_25D
+2026-01-26 22:46:48,623 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719464/727818)
+2026-01-26 22:46:48,623 - INFO -   计算因子 [25/350]: Attention_Concentration_Asymmetry_10D
+2026-01-26 22:46:50,648 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:46:50,648 - INFO -   计算因子 [26/350]: Institutional_Flow_Momentum_25D
+2026-01-26 22:46:52,696 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721481/727818)
+2026-01-26 22:46:52,696 - INFO -   计算因子 [27/350]: Sentiment_Divergence_Filter_15D
+2026-01-26 22:46:54,721 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720055/727818)
+2026-01-26 22:46:54,721 - INFO -   计算因子 [28/350]: Coordinated_Ownership_Momentum_20D
+2026-01-26 22:46:56,746 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:46:56,746 - INFO -   计算因子 [29/350]: Low_Correlation_Regime_Amplifier_60D
+2026-01-26 22:46:58,762 - INFO -     ✓ 从 cache_location 加载 (有效数据: 724233/727818)
+2026-01-26 22:46:58,762 - INFO -   计算因子 [30/350]: Structural_Shift_Detector_40D
+2026-01-26 22:46:58,779 - WARNING - 因子计算失败 [Structural_Shift_Detector_40D]: name 'Given' is not defined
+2026-01-26 22:46:58,779 - WARNING -     ✗ 因子 Structural_Shift_Detector_40D 计算失败或为空
+2026-01-26 22:46:58,779 - INFO -   计算因子 [31/350]: SupplyChain_Volatility_Interaction_20D
+2026-01-26 22:47:00,797 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:47:00,797 - INFO -   计算因子 [32/350]: Geopolitical_Risk_Resilience_15D
+2026-01-26 22:47:02,814 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:47:02,814 - INFO -   计算因子 [33/350]: Operational_Recovery_Momentum_10D
+2026-01-26 22:47:04,848 - INFO -     ✓ 从 cache_location 加载 (有效数据: 715710/727818)
+2026-01-26 22:47:04,848 - INFO -   计算因子 [34/350]: Governance_SupplyChain_Persistence_20D
+2026-01-26 22:47:06,873 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720633/727818)
+2026-01-26 22:47:06,873 - INFO -   计算因子 [35/350]: Institutional_Retail_Momentum_Dual_15D
+2026-01-26 22:47:08,902 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716833/727818)
+2026-01-26 22:47:08,902 - INFO -   计算因子 [36/350]: Volatility_Microstructure_Adaptive_25D
+2026-01-26 22:47:10,934 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721201/727818)
+2026-01-26 22:47:10,934 - INFO -   计算因子 [37/350]: Behavioral_Reversal_Sentiment_5D
+2026-01-26 22:47:12,956 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717703/727818)
+2026-01-26 22:47:12,956 - INFO -   计算因子 [38/350]: Fundamental_Stability_Inverse_20D
+2026-01-26 22:47:14,992 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727818/727818)
+2026-01-26 22:47:14,992 - INFO -   计算因子 [39/350]: Event_Anticipation_Correlation_20D
+2026-01-26 22:47:17,011 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720761/727818)
+2026-01-26 22:47:17,011 - INFO -   计算因子 [40/350]: Operational_Resilience_Momentum_20D
+2026-01-26 22:47:19,040 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721154/727818)
+2026-01-26 22:47:19,040 - INFO -   计算因子 [41/350]: Efficiency_Gap_Momentum_15D
+2026-01-26 22:47:21,062 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718739/727818)
+2026-01-26 22:47:21,062 - INFO -   计算因子 [42/350]: Supply_Chain_Stability_Factor_30D
+2026-01-26 22:47:23,084 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721838/727818)
+2026-01-26 22:47:23,084 - INFO -   计算因子 [43/350]: Regime_Adaptive_OFI_Sentiment_Spread_5D
+2026-01-26 22:47:25,132 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717919/727818)
+2026-01-26 22:47:25,132 - INFO -   计算因子 [44/350]: Volatility_Regime_Composite_10D
+2026-01-26 22:47:27,166 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:47:27,166 - INFO -   计算因子 [45/350]: Delayed_Correction_Signal_5D
+2026-01-26 22:47:29,193 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718109/727818)
+2026-01-26 22:47:29,193 - INFO -   计算因子 [46/350]: Volume_Price_Confirmation_Factor_10D
+2026-01-26 22:47:31,230 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:47:31,231 - INFO -   计算因子 [47/350]: Governance_Persistence_Factor_20D
+2026-01-26 22:47:33,247 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720878/727818)
+2026-01-26 22:47:33,247 - INFO -   计算因子 [48/350]: Adaptive_Volatility_Weighting_Factor_25D
+2026-01-26 22:47:35,271 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721290/727818)
+2026-01-26 22:47:35,271 - INFO -   计算因子 [49/350]: Resilience_Efficiency_Composite_60D
+2026-01-26 22:47:37,294 - INFO -     ✓ 从 cache_location 加载 (有效数据: 724038/727818)
+2026-01-26 22:47:37,294 - INFO -   计算因子 [50/350]: Momentum_Valuation_Accelerator_20D
+2026-01-26 22:47:39,314 - INFO -     ✓ 从 cache_location 加载 (有效数据: 707475/727818)
+2026-01-26 22:47:39,314 - INFO -   计算因子 [51/350]: Volume_Price_Validation_Filter_10D
+2026-01-26 22:47:41,322 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719192/727818)
+2026-01-26 22:47:41,323 - INFO -   计算因子 [52/350]: Institutional_Concentration_Proxy_30D
+2026-01-26 22:47:43,345 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721838/727818)
+2026-01-26 22:47:43,345 - INFO -   计算因子 [53/350]: Supply_Centrality_Correlation_60D
+2026-01-26 22:47:45,366 - INFO -     ✓ 从 cache_location 加载 (有效数据: 723969/727818)
+2026-01-26 22:47:45,366 - INFO -   计算因子 [54/350]: Governance_Quality_Volatility_40D
+2026-01-26 22:47:47,384 - INFO -     ✓ 从 cache_location 加载 (有效数据: 722568/727818)
+2026-01-26 22:47:47,384 - INFO -   计算因子 [55/350]: Inventory_Velocity_Proxy_20D
+2026-01-26 22:47:49,397 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721091/727818)
+2026-01-26 22:47:49,397 - INFO -   计算因子 [56/350]: Supply_Chain_Resilience_Proxy_30D
+2026-01-26 22:47:51,400 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721746/727818)
+2026-01-26 22:47:51,400 - INFO -   计算因子 [57/350]: Velocity_Resilience_Mismatch_15D
+2026-01-26 22:47:53,410 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718315/727818)
+2026-01-26 22:47:53,411 - INFO -   计算因子 [58/350]: Supply_Chain_Disruption_Intensity_20D
+2026-01-26 22:47:55,415 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:47:55,415 - INFO -   计算因子 [59/350]: Technological_Substitution_Momentum_15D
+2026-01-26 22:47:57,425 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727806/727818)
+2026-01-26 22:47:57,425 - INFO -   计算因子 [60/350]: Ecosystem_Network_Stability_30D
+2026-01-26 22:47:59,439 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721746/727818)
+2026-01-26 22:47:59,439 - INFO -   计算因子 [61/350]: Fundamental_Deviation_Mean_Reversion_60D
+2026-01-26 22:48:01,462 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717271/727818)
+2026-01-26 22:48:01,462 - INFO -   计算因子 [62/350]: Liquidity_Normalization_Volume_Deviation_20D
+2026-01-26 22:48:01,483 - WARNING - 因子计算失败 [Liquidity_Normalization_Volume_Deviation_20D]: float() argument must be a string or a real number, not 'module'
+2026-01-26 22:48:01,484 - WARNING -     ✗ 因子 Liquidity_Normalization_Volume_Deviation_20D 计算失败或为空
+2026-01-26 22:48:01,484 - INFO -   计算因子 [63/350]: Volatility_Compressed_Price_Range_10D
+2026-01-26 22:48:03,491 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717002/727818)
+2026-01-26 22:48:03,492 - INFO -   计算因子 [64/350]: Liquidity_Shock_Volume_Price_Divergence_5D
+2026-01-26 22:48:05,502 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716643/727818)
+2026-01-26 22:48:05,502 - INFO -   计算因子 [65/350]: Sentiment_Momentum_Operational_Efficiency_20D_60D
+2026-01-26 22:48:07,508 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720985/727818)
+2026-01-26 22:48:07,508 - INFO -   计算因子 [66/350]: Microstructure_Stability_Anchored_Composite
+2026-01-26 22:48:07,546 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 727818/727818)
+2026-01-26 22:48:07,546 - INFO -   计算因子 [67/350]: Order_Flow_Asymmetry_5D
+2026-01-26 22:48:07,563 - WARNING - 因子计算失败 [Order_Flow_Asymmetry_5D]: 无效的运算符: "'"
+2026-01-26 22:48:07,563 - WARNING -     ✗ 因子 Order_Flow_Asymmetry_5D 计算失败或为空
+2026-01-26 22:48:07,563 - INFO -   计算因子 [68/350]: Liquidity_Shock_Divergence_10D
+2026-01-26 22:48:09,576 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:48:09,577 - INFO -   计算因子 [69/350]: Microstructure_Imbalance_8D
+2026-01-26 22:48:11,621 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718780/727818)
+2026-01-26 22:48:11,621 - INFO -   计算因子 [70/350]: Institutional_Flow_Momentum_20D
+2026-01-26 22:48:13,613 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:48:13,613 - INFO -   计算因子 [71/350]: Cash_Flow_Efficiency_30D
+2026-01-26 22:48:15,603 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721746/727818)
+2026-01-26 22:48:15,603 - INFO -   计算因子 [72/350]: Options_Sentiment_Asymmetry_15D
+2026-01-26 22:48:17,586 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720303/727818)
+2026-01-26 22:48:17,586 - INFO -   计算因子 [73/350]: Sentiment_Resilience_Arbitrage_5D_20D
+2026-01-26 22:48:17,623 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 717105/727818)
+2026-01-26 22:48:17,623 - INFO -   计算因子 [74/350]: Volume_Validated_Sentiment_Momentum_10D
+2026-01-26 22:48:19,617 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718254/727818)
+2026-01-26 22:48:19,618 - INFO -   计算因子 [75/350]: Operational_Efficiency_Sentiment_Filter_20D_60D
+2026-01-26 22:48:21,614 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720916/727818)
+2026-01-26 22:48:21,614 - INFO -   计算因子 [76/350]: Network_Centrality_Volatility_Decay_10D
+2026-01-26 22:48:23,619 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717854/727818)
+2026-01-26 22:48:23,619 - INFO -   计算因子 [77/350]: Volume_Centrality_Convergence_15D
+2026-01-26 22:48:25,616 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717811/727818)
+2026-01-26 22:48:25,616 - INFO -   计算因子 [78/350]: Price_Range_Information_Diffusion_20D
+2026-01-26 22:48:27,612 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716297/727818)
+2026-01-26 22:48:27,612 - INFO -   计算因子 [79/350]: Network_Resilience_Price_Stability_20D
+2026-01-26 22:48:29,622 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718150/727818)
+2026-01-26 22:48:29,622 - INFO -   计算因子 [80/350]: Regulatory_Complexity_Volume_Opacity_15D
+2026-01-26 22:48:31,620 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720027/727818)
+2026-01-26 22:48:31,621 - INFO -   计算因子 [81/350]: Network_Regulatory_Convergence_Stress_Indicator_10D
+2026-01-26 22:48:33,617 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717960/727818)
+2026-01-26 22:48:33,617 - INFO -   计算因子 [82/350]: Fundamental_Price_Adjustment_Gap_10D
+2026-01-26 22:48:35,633 - INFO -     ✓ 从 cache_location 加载 (有效数据: 715722/727818)
+2026-01-26 22:48:35,633 - INFO -   计算因子 [83/350]: Volume_Acceleration_Price_Reaction_15D
+2026-01-26 22:48:37,628 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:48:37,628 - INFO -   计算因子 [84/350]: Price_Range_Information_Efficiency_20D
+2026-01-26 22:48:39,629 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718633/727818)
+2026-01-26 22:48:39,629 - INFO -   计算因子 [85/350]: Regulatory_Breakthrough_Microstructure_Convergence_20D_5D
+2026-01-26 22:48:41,628 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:48:41,628 - INFO -   计算因子 [86/350]: Volume_Validated_Convergence_Momentum_10D
+2026-01-26 22:48:43,625 - INFO -     ✓ 从 cache_location 加载 (有效数据: 715648/727818)
+2026-01-26 22:48:43,625 - INFO -   计算因子 [87/350]: MultiTimeframe_Acceleration_Indicator_20D_5D
+2026-01-26 22:48:45,627 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:48:45,627 - INFO -   计算因子 [88/350]: Stress_Amplified_Volume_Reversal_10D
+2026-01-26 22:48:47,629 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718446/727818)
+2026-01-26 22:48:47,629 - INFO -   计算因子 [89/350]: Liquidity_Shock_Reversal_15D
+2026-01-26 22:48:47,668 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 717997/727818)
+2026-01-26 22:48:47,668 - INFO -   计算因子 [90/350]: Corporate_Action_Overreaction_20D
+2026-01-26 22:48:49,669 - WARNING - 因子计算失败 [Corporate_Action_Overreaction_20D]: float() argument must be a string or a real number, not 'module'
+2026-01-26 22:48:49,670 - WARNING -     ✗ 因子 Corporate_Action_Overreaction_20D 计算失败或为空
+2026-01-26 22:48:49,670 - INFO -   计算因子 [91/350]: CrossAsset_Transmission_Delay_5D
+2026-01-26 22:48:51,646 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717426/727818)
+2026-01-26 22:48:51,646 - INFO -   计算因子 [92/350]: Institutional_Accumulation_Momentum_10D
+2026-01-26 22:48:53,634 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718254/727818)
+2026-01-26 22:48:53,634 - INFO -   计算因子 [93/350]: Volatility_Spillover_Validation_25D
+2026-01-26 22:48:55,621 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719452/727818)
+2026-01-26 22:48:55,621 - INFO -   计算因子 [94/350]: Resource_Fluidity_Volatility_Response_20D
+2026-01-26 22:48:57,616 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720677/727818)
+2026-01-26 22:48:57,616 - INFO -   计算因子 [95/350]: Working_Capital_Efficiency_Proxy_15D
+2026-01-26 22:48:59,624 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717181/727818)
+2026-01-26 22:48:59,624 - INFO -   计算因子 [96/350]: Adaptive_Recovery_Momentum_10D
+2026-01-26 22:48:59,662 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 716473/727818)
+2026-01-26 22:48:59,662 - INFO -   计算因子 [97/350]: Microstructure_Spread_Compression_7D
+2026-01-26 22:49:01,654 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717140/727818)
+2026-01-26 22:49:01,654 - INFO -   计算因子 [98/350]: Cross_Asset_Delay_Momentum_5D
+2026-01-26 22:49:03,640 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717813/727818)
+2026-01-26 22:49:03,640 - INFO -   计算因子 [99/350]: Institutional_Accumulation_Momentum_10D
+2026-01-26 22:49:05,660 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719646/727818)
+2026-01-26 22:49:05,660 - INFO -   计算因子 [100/350]: Earnings_Quality_Proxy_15D
+2026-01-26 22:49:07,692 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:49:07,692 - INFO -   计算因子 [101/350]: Sentiment_Divergence_20D
+2026-01-26 22:49:09,736 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720873/727818)
+2026-01-26 22:49:09,736 - INFO -   计算因子 [102/350]: Quality_Momentum_Composite_10D
+2026-01-26 22:49:11,770 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718254/727818)
+2026-01-26 22:49:11,770 - INFO -   计算因子 [103/350]: Microstructure_Fragmentation_Intensity_15D
+2026-01-26 22:49:13,804 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720165/727818)
+2026-01-26 22:49:13,805 - INFO -   计算因子 [104/350]: Liquidity_Normalization_Premium_20D
+2026-01-26 22:49:15,841 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:49:15,842 - INFO -   计算因子 [105/350]: Ownership_Sentiment_Divergence_30D
+2026-01-26 22:49:17,896 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716873/727818)
+2026-01-26 22:49:17,896 - INFO -   计算因子 [106/350]: Institutional_Volume_Accumulation_Momentum_10D
+2026-01-26 22:49:19,932 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718254/727818)
+2026-01-26 22:49:19,932 - INFO -   计算因子 [107/350]: MultiTimeframe_Convergence_Consistency_20D
+2026-01-26 22:49:22,018 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718445/727818)
+2026-01-26 22:49:22,018 - INFO -   计算因子 [108/350]: Attention_Adjusted_Volume_Trend_15D
+2026-01-26 22:49:24,070 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719187/727818)
+2026-01-26 22:49:24,070 - INFO -   计算因子 [109/350]: Governance_Stability_Factor_15D
+2026-01-26 22:49:26,104 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720281/727818)
+2026-01-26 22:49:26,104 - INFO -   计算因子 [110/350]: Supply_Chain_Persistence_Factor_30D
+2026-01-26 22:49:28,155 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721746/727818)
+2026-01-26 22:49:28,155 - INFO -   计算因子 [111/350]: Structural_Advantage_Momentum_20D
+2026-01-26 22:49:28,178 - WARNING - 因子计算失败 [Structural_Advantage_Momentum_20D]: name 'Given' is not defined
+2026-01-26 22:49:28,178 - WARNING -     ✗ 因子 Structural_Advantage_Momentum_20D 计算失败或为空
+2026-01-26 22:49:28,178 - INFO -   计算因子 [112/350]: Event_Window_Reversion_Strength_5D
+2026-01-26 22:49:30,220 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716953/727818)
+2026-01-26 22:49:30,220 - INFO -   计算因子 [113/350]: Fundamental_Momentum_Convergence_30D
+2026-01-26 22:49:30,258 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 718023/727818)
+2026-01-26 22:49:30,258 - INFO -   计算因子 [114/350]: Volume_Price_Validation_Filter_20D
+2026-01-26 22:49:32,297 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:49:32,297 - INFO -   计算因子 [115/350]: CrossAsset_Momentum_Spillover_5D
+2026-01-26 22:49:34,323 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721200/727818)
+2026-01-26 22:49:34,323 - INFO -   计算因子 [116/350]: Fundamental_Deterioration_Filter_20D
+2026-01-26 22:49:36,350 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720886/727818)
+2026-01-26 22:49:36,350 - INFO -   计算因子 [117/350]: Volume_Price_Validation_10D
+2026-01-26 22:49:38,400 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:49:38,400 - INFO -   计算因子 [118/350]: Tech_Liquidity_Convergence_15D_5D
+2026-01-26 22:49:40,436 - INFO -     ✓ 从 cache_location 加载 (有效数据: 715165/727818)
+2026-01-26 22:49:40,436 - INFO -   计算因子 [119/350]: Ecosystem_Stability_Filtered_Momentum_30D
+2026-01-26 22:49:42,482 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727818/727818)
+2026-01-26 22:49:42,482 - INFO -   计算因子 [120/350]: Institutional_Accumulation_Volume_Correlation_20D
+2026-01-26 22:49:44,523 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:49:44,523 - INFO -   计算因子 [121/350]: Attention_Concentration_Volume_Spike_5D
+2026-01-26 22:49:46,549 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:49:46,550 - INFO -   计算因子 [122/350]: Event_Window_Price_Distortion_10D
+2026-01-26 22:49:48,586 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717197/727818)
+2026-01-26 22:49:48,586 - INFO -   计算因子 [123/350]: Multi_Channel_Sentiment_Divergence_15D
+2026-01-26 22:49:50,613 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:49:50,614 - INFO -   计算因子 [124/350]: Governance_SupplyChain_Momentum_20D
+2026-01-26 22:49:52,644 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:49:52,644 - INFO -   计算因子 [125/350]: Sentiment_Reversal_VolumeDivergence_10D
+2026-01-26 22:49:54,683 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:49:54,683 - INFO -   计算因子 [126/350]: Regime_Switching_Stability_Indicator_15D
+2026-01-26 22:49:56,719 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717818/727818)
+2026-01-26 22:49:56,719 - INFO -   计算因子 [127/350]: NoiseRegime_OrderFlow_Imbalance_5D
+2026-01-26 22:49:58,753 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717813/727818)
+2026-01-26 22:49:58,753 - INFO -   计算因子 [128/350]: VolWeighted_Noise_Regime_OrderFlow_10D
+2026-01-26 22:50:00,781 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716772/727818)
+2026-01-26 22:50:00,781 - INFO -   计算因子 [129/350]: RegimeFiltered_ReturnVolume_Divergence_8D
+2026-01-26 22:50:02,808 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718781/727818)
+2026-01-26 22:50:02,808 - INFO -   计算因子 [130/350]: Regulatory_Shock_Volume_Divergence_5D
+2026-01-26 22:50:02,847 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 715426/727818)
+2026-01-26 22:50:02,847 - INFO -   计算因子 [131/350]: Cross_Asset_Transmission_Delay_20D
+2026-01-26 22:50:02,884 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 719880/727818)
+2026-01-26 22:50:02,884 - INFO -   计算因子 [132/350]: Institutional_Validation_Composite_10D
+2026-01-26 22:50:04,934 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719258/727818)
+2026-01-26 22:50:04,934 - INFO -   计算因子 [133/350]: Institutional_Accumulation_Momentum_20D
+2026-01-26 22:50:06,980 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:50:06,980 - INFO -   计算因子 [134/350]: Microstructure_Liquidity_Signal_5D
+2026-01-26 22:50:09,015 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718043/727818)
+2026-01-26 22:50:09,015 - INFO -   计算因子 [135/350]: MultiTimeframe_OrderFlow_Imbalance_10D
+2026-01-26 22:50:11,052 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:50:11,052 - INFO -   计算因子 [136/350]: Governance_Stability_20D
+2026-01-26 22:50:13,102 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:50:13,102 - INFO -   计算因子 [137/350]: Institutional_Accumulation_10D
+2026-01-26 22:50:15,125 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719456/727818)
+2026-01-26 22:50:15,125 - INFO -   计算因子 [138/350]: Behavioral_Attention_Validation_15D
+2026-01-26 22:50:17,152 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:50:17,152 - INFO -   计算因子 [139/350]: Operational_Efficiency_Momentum_15D
+2026-01-26 22:50:19,182 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:50:19,182 - INFO -   计算因子 [140/350]: Regime_Validation_Convergence_20D
+2026-01-26 22:50:21,203 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720962/727818)
+2026-01-26 22:50:21,203 - INFO -   计算因子 [141/350]: Resilience_Adaptive_Composite_10D
+2026-01-26 22:50:23,217 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:50:23,217 - INFO -   计算因子 [142/350]: Fundamental_Momentum_Divergence_20D
+2026-01-26 22:50:25,242 - INFO -     ✓ 从 cache_location 加载 (有效数据: 709374/727818)
+2026-01-26 22:50:25,242 - INFO -   计算因子 [143/350]: Volume_Price_Confirmation_15D
+2026-01-26 22:50:27,263 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:50:27,263 - INFO -   计算因子 [144/350]: Volatility_Weighted_Trap_Indicator_30D
+2026-01-26 22:50:29,317 - INFO -     ✓ 从 cache_location 加载 (有效数据: 709374/727818)
+2026-01-26 22:50:29,317 - INFO -   计算因子 [145/350]: Regime_Adaptive_Momentum_15D
+2026-01-26 22:50:31,318 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:50:31,318 - INFO -   计算因子 [146/350]: Volume_Return_Divergence_10D
+2026-01-26 22:50:33,311 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:50:33,311 - INFO -   计算因子 [147/350]: Stability_Filtered_Range_20D
+2026-01-26 22:50:35,305 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720878/727818)
+2026-01-26 22:50:35,305 - INFO -   计算因子 [148/350]: Supply_Chain_Recovery_Momentum_10D
+2026-01-26 22:50:37,288 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717377/727818)
+2026-01-26 22:50:37,288 - INFO -   计算因子 [149/350]: Innovation_Momentum_Acceleration_90D
+2026-01-26 22:50:39,277 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727790/727818)
+2026-01-26 22:50:39,277 - INFO -   计算因子 [150/350]: Regulatory_Complexity_Supply_Chain_Volatility_Interaction
+2026-01-26 22:50:41,256 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720455/727818)
+2026-01-26 22:50:41,256 - INFO -   计算因子 [151/350]: Operational_Quality_Undervaluation_30D
+2026-01-26 22:50:43,241 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718445/727818)
+2026-01-26 22:50:43,241 - INFO -   计算因子 [152/350]: CrossAsset_Momentum_Spillover_5D
+2026-01-26 22:50:45,230 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717474/727818)
+2026-01-26 22:50:45,230 - INFO -   计算因子 [153/350]: Volume_Price_Validation_10D
+2026-01-26 22:50:47,217 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:50:47,217 - INFO -   计算因子 [154/350]: Institutional_Footprint_Liquidity_Ratio_5D
+2026-01-26 22:50:49,200 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718739/727818)
+2026-01-26 22:50:49,201 - INFO -   计算因子 [155/350]: Liquidity_Constrained_Momentum_Reversal_10D
+2026-01-26 22:50:51,182 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:50:51,182 - INFO -   计算因子 [156/350]: Volume_Acceleration_Reversal_Predictor_15D
+2026-01-26 22:50:53,168 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:50:53,168 - INFO -   计算因子 [157/350]: Attention_Concentration_Price_Impact_20D
+2026-01-26 22:50:55,150 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720887/727818)
+2026-01-26 22:50:55,150 - INFO -   计算因子 [158/350]: Sentiment_Flow_Acceleration_15D
+2026-01-26 22:50:57,133 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:50:57,133 - INFO -   计算因子 [159/350]: Information_Diffusion_Lag_10D
+2026-01-26 22:50:59,114 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719247/727818)
+2026-01-26 22:50:59,115 - INFO -   计算因子 [160/350]: Volume_Disproportion_Factor_5D
+2026-01-26 22:51:01,108 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716643/727818)
+2026-01-26 22:51:01,108 - INFO -   计算因子 [161/350]: Post_Decline_Stabilization_Factor_3D
+2026-01-26 22:51:01,155 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 716731/727818)
+2026-01-26 22:51:01,155 - INFO -   计算因子 [162/350]: Panic_Exhaustion_Composite_Factor
+2026-01-26 22:51:03,141 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716612/727818)
+2026-01-26 22:51:03,141 - INFO -   计算因子 [163/350]: Volatility_Resource_Reallocation_15D
+2026-01-26 22:51:05,112 - INFO -     ✓ 从 cache_location 加载 (有效数据: 703011/727818)
+2026-01-26 22:51:05,112 - INFO -   计算因子 [164/350]: Supply_Chain_Resilience_Momentum_20D
+2026-01-26 22:51:07,076 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720878/727818)
+2026-01-26 22:51:07,076 - INFO -   计算因子 [165/350]: Volume_Sentiment_Divergence_10D
+2026-01-26 22:51:09,038 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:51:09,039 - INFO -   计算因子 [166/350]: Regime_Adaptive_Volume_Stress_20D
+2026-01-26 22:51:11,012 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717818/727818)
+2026-01-26 22:51:11,012 - INFO -   计算因子 [167/350]: Sentiment_Weighted_Momentum_Switch_10D
+2026-01-26 22:51:12,982 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:51:12,982 - INFO -   计算因子 [168/350]: Cross_Asset_Confirmed_Inefficiency_20D
+2026-01-26 22:51:14,954 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716901/727818)
+2026-01-26 22:51:14,955 - INFO -   计算因子 [169/350]: Patent_Momentum_Acceleration_30D
+2026-01-26 22:51:15,001 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 717037/727818)
+2026-01-26 22:51:15,001 - INFO -   计算因子 [170/350]: R&D_Efficiency_Volume_60D
+2026-01-26 22:51:16,990 - INFO -     ✓ 从 cache_location 加载 (有效数据: 723968/727818)
+2026-01-26 22:51:16,990 - INFO -   计算因子 [171/350]: Innovation_Diversity_Momentum_90D
+2026-01-26 22:51:18,974 - INFO -     ✓ 从 cache_location 加载 (有效数据: 725571/727818)
+2026-01-26 22:51:18,974 - INFO -   计算因子 [172/350]: Institutional_Volume_Confirmation_20D
+2026-01-26 22:51:20,945 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718333/727818)
+2026-01-26 22:51:20,946 - INFO -   计算因子 [173/350]: Cross_Asset_Momentum_Spillover_10D
+2026-01-26 22:51:22,916 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716640/727818)
+2026-01-26 22:51:22,916 - INFO -   计算因子 [174/350]: Fundamental_Acceleration_Momentum_30D
+2026-01-26 22:51:24,888 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718367/727818)
+2026-01-26 22:51:24,888 - INFO -   计算因子 [175/350]: Institutional_Order_Imbalance_5D
+2026-01-26 22:51:26,868 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717849/727818)
+2026-01-26 22:51:26,868 - INFO -   计算因子 [176/350]: Algorithmic_Footprint_Divergence_10D
+2026-01-26 22:51:28,847 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718711/727818)
+2026-01-26 22:51:28,847 - INFO -   计算因子 [177/350]: Strategic_Positioning_Anomaly_15D
+2026-01-26 22:51:30,824 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720383/727818)
+2026-01-26 22:51:30,824 - INFO -   计算因子 [178/350]: Fundamental_Volatility_Compression_Score_20D
+2026-01-26 22:51:32,791 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718150/727818)
+2026-01-26 22:51:32,791 - INFO -   计算因子 [179/350]: Cross_Asset_Momentum_Validation_10D
+2026-01-26 22:51:34,759 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:51:34,759 - INFO -   计算因子 [180/350]: Operational_Efficiency_Price_Range_15D
+2026-01-26 22:51:36,728 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720268/727818)
+2026-01-26 22:51:36,728 - INFO -   计算因子 [181/350]: Institutional_Volume_Momentum_20D
+2026-01-26 22:51:38,699 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718333/727818)
+2026-01-26 22:51:38,699 - INFO -   计算因子 [182/350]: Informed_Price_Range_Alignment_15D
+2026-01-26 22:51:40,664 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719443/727818)
+2026-01-26 22:51:40,664 - INFO -   计算因子 [183/350]: Volume_Acceleration_Signal_10D
+2026-01-26 22:51:42,634 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717330/727818)
+2026-01-26 22:51:42,634 - INFO -   计算因子 [184/350]: Event_Cluster_Volatility_Spike_10D
+2026-01-26 22:51:42,681 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 715739/727818)
+2026-01-26 22:51:42,682 - INFO -   计算因子 [185/350]: Price_Reversal_After_Event_Density_15D
+2026-01-26 22:51:44,686 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716537/727818)
+2026-01-26 22:51:44,686 - INFO -   计算因子 [186/350]: Volume_Acceleration_During_Event_Windows_20D
+2026-01-26 22:51:46,657 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717377/727818)
+2026-01-26 22:51:46,658 - INFO -   计算因子 [187/350]: Fundamental_Behavioral_Deviation_20D_5D
+2026-01-26 22:51:48,633 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:51:48,633 - INFO -   计算因子 [188/350]: Volume_Stabilized_Reversion_10D
+2026-01-26 22:51:50,628 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717197/727818)
+2026-01-26 22:51:50,628 - INFO -   计算因子 [189/350]: Range_Volume_Divergence_15D
+2026-01-26 22:51:52,601 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717181/727818)
+2026-01-26 22:51:52,601 - INFO -   计算因子 [190/350]: Institutional_Accumulation_Intensity_30D
+2026-01-26 22:51:54,576 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716997/727818)
+2026-01-26 22:51:54,576 - INFO -   计算因子 [191/350]: Market_Transition_Momentum_Convergence_40D
+2026-01-26 22:51:56,543 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719560/727818)
+2026-01-26 22:51:56,543 - INFO -   计算因子 [192/350]: Valuation_Anomaly_Recovery_Signal_50D
+2026-01-26 22:51:58,512 - INFO -     ✓ 从 cache_location 加载 (有效数据: 715722/727818)
+2026-01-26 22:51:58,512 - INFO -   计算因子 [193/350]: Institutional_Order_Flow_Imbalance_15D
+2026-01-26 22:52:00,492 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720165/727818)
+2026-01-26 22:52:00,492 - INFO -   计算因子 [194/350]: Retail_Sentiment_Divergence_10D
+2026-01-26 22:52:02,475 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719185/727818)
+2026-01-26 22:52:02,475 - INFO -   计算因子 [195/350]: Fundamental_Instability_Volatility_20D
+2026-01-26 22:52:04,448 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720794/727818)
+2026-01-26 22:52:04,448 - INFO -   计算因子 [196/350]: Institutional_Rebalancing_Pressure_10D
+2026-01-26 22:52:06,423 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:52:06,423 - INFO -   计算因子 [197/350]: Quality_Validated_Momentum_30D
+2026-01-26 22:52:08,396 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721838/727818)
+2026-01-26 22:52:08,396 - INFO -   计算因子 [198/350]: Cross_Asset_Spillover_Confirmation_5D
+2026-01-26 22:52:10,375 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718424/727818)
+2026-01-26 22:52:10,375 - INFO -   计算因子 [199/350]: SupplyChain_GeoRisk_Interaction_10D
+2026-01-26 22:52:12,348 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719203/727818)
+2026-01-26 22:52:12,348 - INFO -   计算因子 [200/350]: Regime_Convergence_Validation_20D
+2026-01-26 22:52:14,335 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719532/727818)
+2026-01-26 22:52:14,335 - INFO -   计算因子 [201/350]: Adaptive_Efficiency_Momentum_15D
+2026-01-26 22:52:16,309 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:52:16,309 - INFO -   计算因子 [202/350]: Institutional_Momentum_Volume_Corr_30D
+2026-01-26 22:52:18,281 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721838/727818)
+2026-01-26 22:52:18,281 - INFO -   计算因子 [203/350]: Microstructure_Regime_Validation_5D
+2026-01-26 22:52:18,326 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 717430/727818)
+2026-01-26 22:52:18,326 - INFO -   计算因子 [204/350]: Volatility_Conditioned_Weight_20D
+2026-01-26 22:52:18,342 - WARNING - 因子计算失败 [Volatility_Conditioned_Weight_20D]: 表达式括号未闭合  (at char 0), (line:1, col:1)
+2026-01-26 22:52:18,343 - WARNING -     ✗ 因子 Volatility_Conditioned_Weight_20D 计算失败或为空
+2026-01-26 22:52:18,343 - INFO -   计算因子 [205/350]: Current_Ratio_Proxy_20D
+2026-01-26 22:52:20,335 - INFO -     ✓ 从 cache_location 加载 (有效数据: 715886/727818)
+2026-01-26 22:52:20,335 - INFO -   计算因子 [206/350]: Price_Volume_Divergence_10D
+2026-01-26 22:52:22,321 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:52:22,321 - INFO -   计算因子 [207/350]: Debt_Equity_Proxy_20D
+2026-01-26 22:52:24,351 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716189/727818)
+2026-01-26 22:52:24,352 - INFO -   计算因子 [208/350]: Microstructure_Dislocation_Indicator_5D
+2026-01-26 22:52:26,395 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717818/727818)
+2026-01-26 22:52:26,395 - INFO -   计算因子 [209/350]: CrossAsset_Validation_Momentum_10D
+2026-01-26 22:52:28,438 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718765/727818)
+2026-01-26 22:52:28,438 - INFO -   计算因子 [210/350]: Institutional_Accumulation_Confirmation_15D
+2026-01-26 22:52:30,461 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720390/727818)
+2026-01-26 22:52:30,461 - INFO -   计算因子 [211/350]: Resilience_Score_20D
+2026-01-26 22:52:32,477 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718518/727818)
+2026-01-26 22:52:32,477 - INFO -   计算因子 [212/350]: Tactical_Reversal_Signal_10D
+2026-01-26 22:52:34,496 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718739/727818)
+2026-01-26 22:52:34,496 - INFO -   计算因子 [213/350]: Volatility_Regime_Indicator_15D
+2026-01-26 22:52:36,523 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717818/727818)
+2026-01-26 22:52:36,523 - INFO -   计算因子 [214/350]: Geopolitical_Risk_Adjusted_Resilience_15D
+2026-01-26 22:52:38,539 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717166/727818)
+2026-01-26 22:52:38,540 - INFO -   计算因子 [215/350]: Institutional_Validation_Convergence_15D
+2026-01-26 22:52:40,555 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:52:40,555 - INFO -   计算因子 [216/350]: Operational_Stability_Filter_20D_25D
+2026-01-26 22:52:42,577 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720878/727818)
+2026-01-26 22:52:42,577 - INFO -   计算因子 [217/350]: ETF_Rebalance_Flow_Reversal_20D
+2026-01-26 22:52:44,606 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:52:44,606 - INFO -   计算因子 [218/350]: Passive_Ownership_Price_Pressure_15D
+2026-01-26 22:52:46,628 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719551/727818)
+2026-01-26 22:52:46,629 - INFO -   计算因子 [219/350]: Index_Reconstitution_Reversion_25D
+2026-01-26 22:52:48,651 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717285/727818)
+2026-01-26 22:52:48,652 - INFO -   计算因子 [220/350]: Operational_Quality_Undervaluation_30D
+2026-01-26 22:52:50,673 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718445/727818)
+2026-01-26 22:52:50,673 - INFO -   计算因子 [221/350]: Informed_Ownership_Convergence_45D
+2026-01-26 22:52:52,686 - INFO -     ✓ 从 cache_location 加载 (有效数据: 722960/727818)
+2026-01-26 22:52:52,686 - INFO -   计算因子 [222/350]: Low_Attention_Mean_Reversion_20D
+2026-01-26 22:52:54,708 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717794/727818)
+2026-01-26 22:52:54,708 - INFO -   计算因子 [223/350]: Regulatory_Shock_Volume_Breakout_20D
+2026-01-26 22:52:56,739 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717271/727818)
+2026-01-26 22:52:56,740 - INFO -   计算因子 [224/350]: Earnings_Quality_Persistence_15D
+2026-01-26 22:52:58,756 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:52:58,756 - INFO -   计算因子 [225/350]: Behavioral_Anchoring_Price_Deviation_10D
+2026-01-26 22:53:00,782 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717377/727818)
+2026-01-26 22:53:00,782 - INFO -   计算因子 [226/350]: Liquidity_Shock_Reversal_5D
+2026-01-26 22:53:02,799 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717813/727818)
+2026-01-26 22:53:02,799 - INFO -   计算因子 [227/350]: Forced_Selling_Intensity_10D
+2026-01-26 22:53:04,820 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717377/727818)
+2026-01-26 22:53:04,820 - INFO -   计算因子 [228/350]: Microstructure_Stability_Anchor_20D
+2026-01-26 22:53:06,845 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720772/727818)
+2026-01-26 22:53:06,845 - INFO -   计算因子 [229/350]: Fundamental_Momentum_Acceleration_20D
+2026-01-26 22:53:08,867 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720425/727818)
+2026-01-26 22:53:08,867 - INFO -   计算因子 [230/350]: Liquidity_Enhanced_Momentum_15D
+2026-01-26 22:53:10,903 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720268/727818)
+2026-01-26 22:53:10,903 - INFO -   计算因子 [231/350]: Institutional_Flow_Momentum_25D
+2026-01-26 22:53:12,930 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720559/727818)
+2026-01-26 22:53:12,930 - INFO -   计算因子 [232/350]: Microstructure_Fragmentation_Indicator_5D
+2026-01-26 22:53:14,954 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718150/727818)
+2026-01-26 22:53:14,954 - INFO -   计算因子 [233/350]: Tech_Liquidity_Convergence_20D
+2026-01-26 22:53:16,971 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716642/727818)
+2026-01-26 22:53:16,971 - INFO -   计算因子 [234/350]: Institutional_Flow_Validation_15D
+2026-01-26 22:53:18,987 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719542/727818)
+2026-01-26 22:53:18,987 - INFO -   计算因子 [235/350]: PreEvent_Volume_Surge_5D
+2026-01-26 22:53:21,000 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:53:21,000 - INFO -   计算因子 [236/350]: PostEvent_Price_Reversal_3D
+2026-01-26 22:53:23,034 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717605/727818)
+2026-01-26 22:53:23,034 - INFO -   计算因子 [237/350]: Event_Range_Expansion_5D
+2026-01-26 22:53:25,047 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718150/727818)
+2026-01-26 22:53:25,047 - INFO -   计算因子 [238/350]: Sentiment_Attention_Divergence_5D
+2026-01-26 22:53:27,066 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718445/727818)
+2026-01-26 22:53:27,066 - INFO -   计算因子 [239/350]: Cognitive_Overload_Reversal_10D
+2026-01-26 22:53:29,080 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717002/727818)
+2026-01-26 22:53:29,080 - INFO -   计算因子 [240/350]: Information_Diffusion_Lag_20D
+2026-01-26 22:53:31,103 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717698/727818)
+2026-01-26 22:53:31,103 - INFO -   计算因子 [241/350]: Retail_Attention_Volume_Spike_5D
+2026-01-26 22:53:33,122 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:53:33,122 - INFO -   计算因子 [242/350]: Microstructure_Liquidity_Resilience_3D
+2026-01-26 22:53:33,170 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 716597/727818)
+2026-01-26 22:53:33,170 - INFO -   计算因子 [243/350]: Overnight_Reversal_Momentum_2D
+2026-01-26 22:53:35,194 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:53:35,194 - INFO -   计算因子 [244/350]: Retail_Institutional_Divergence_5D
+2026-01-26 22:53:35,241 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 716377/727818)
+2026-01-26 22:53:35,241 - INFO -   计算因子 [245/350]: Attention_Reversion_10D
+2026-01-26 22:53:37,296 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:53:37,296 - INFO -   计算因子 [246/350]: Institutional_Footprint_20D
+2026-01-26 22:53:39,287 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716894/727818)
+2026-01-26 22:53:39,287 - INFO -   计算因子 [247/350]: Attention_Resilience_Filter_10D_30D
+2026-01-26 22:53:41,276 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718254/727818)
+2026-01-26 22:53:41,276 - INFO -   计算因子 [248/350]: Operational_Efficiency_Attention_20D_50D
+2026-01-26 22:53:43,266 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:53:43,266 - INFO -   计算因子 [249/350]: Resilience_Validated_Diffusion_5D_40D
+2026-01-26 22:53:45,268 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718043/727818)
+2026-01-26 22:53:45,269 - INFO -   计算因子 [250/350]: Attention_Resilience_Momentum_10D
+2026-01-26 22:53:47,258 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717781/727818)
+2026-01-26 22:53:47,258 - INFO -   计算因子 [251/350]: Resilience_Validation_Momentum_15D
+2026-01-26 22:53:49,251 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718869/727818)
+2026-01-26 22:53:49,252 - INFO -   计算因子 [252/350]: MultiChannel_Validation_Factor_20D
+2026-01-26 22:53:51,253 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717960/727818)
+2026-01-26 22:53:51,253 - INFO -   计算因子 [253/350]: Inventory_Volatility_Proxy_30D
+2026-01-26 22:53:53,244 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716873/727818)
+2026-01-26 22:53:53,244 - INFO -   计算因子 [254/350]: Logistics_Inefficiency_Correlation_45D
+2026-01-26 22:53:55,225 - INFO -     ✓ 从 cache_location 加载 (有效数据: 722960/727818)
+2026-01-26 22:53:55,225 - INFO -   计算因子 [255/350]: Production_Cycle_Momentum_60D
+2026-01-26 22:53:57,215 - INFO -     ✓ 从 cache_location 加载 (有效数据: 724038/727818)
+2026-01-26 22:53:57,215 - INFO -   计算因子 [256/350]: Crowding_Volume_Concentration_10D
+2026-01-26 22:53:59,201 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719465/727818)
+2026-01-26 22:53:59,201 - INFO -   计算因子 [257/350]: Retail_Attention_Spike_5D
+2026-01-26 22:54:01,188 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717083/727818)
+2026-01-26 22:54:01,188 - INFO -   计算因子 [258/350]: Options_Skew_Proxy_20D
+2026-01-26 22:54:03,199 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720878/727818)
+2026-01-26 22:54:03,199 - INFO -   计算因子 [259/350]: Supply_Chain_Resilience_Volatility_Factor_60D
+2026-01-26 22:54:05,202 - INFO -     ✓ 从 cache_location 加载 (有效数据: 724038/727818)
+2026-01-26 22:54:05,202 - INFO -   计算因子 [260/350]: Operational_Efficiency_Stability_Factor_120D
+2026-01-26 22:54:07,197 - INFO -     ✓ 从 cache_location 加载 (有效数据: 726483/727818)
+2026-01-26 22:54:07,197 - INFO -   计算因子 [261/350]: Structural_Advantage_Momentum_Factor_90D
+2026-01-26 22:54:09,203 - INFO -     ✓ 从 cache_location 加载 (有效数据: 725529/727818)
+2026-01-26 22:54:09,203 - INFO -   计算因子 [262/350]: CrossAsset_Sentiment_Spillover_10D
+2026-01-26 22:54:11,193 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718188/727818)
+2026-01-26 22:54:11,193 - INFO -   计算因子 [263/350]: Structural_Break_Arbitrage_20D
+2026-01-26 22:54:13,180 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718075/727818)
+2026-01-26 22:54:13,181 - INFO -   计算因子 [264/350]: Sentiment_Regime_Divergence_15D
+2026-01-26 22:54:15,215 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718045/727818)
+2026-01-26 22:54:15,215 - INFO -   计算因子 [265/350]: Operational_Efficiency_Momentum_20D
+2026-01-26 22:54:17,238 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720677/727818)
+2026-01-26 22:54:17,238 - INFO -   计算因子 [266/350]: Working_Capital_Cycle_Proxy_15D
+2026-01-26 22:54:19,247 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719765/727818)
+2026-01-26 22:54:19,247 - INFO -   计算因子 [267/350]: Tech_Adoption_Acceleration_30D
+2026-01-26 22:54:21,268 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721413/727818)
+2026-01-26 22:54:21,268 - INFO -   计算因子 [268/350]: Fundamental_Deviation_Reversion_60D
+2026-01-26 22:54:23,282 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717314/727818)
+2026-01-26 22:54:23,282 - INFO -   计算因子 [269/350]: Volatility_Compressed_Range_20D
+2026-01-26 22:54:25,294 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717271/727818)
+2026-01-26 22:54:25,294 - INFO -   计算因子 [270/350]: Volume_Stabilization_Reversion_10D
+2026-01-26 22:54:27,305 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717197/727818)
+2026-01-26 22:54:27,305 - INFO -   计算因子 [271/350]: Regime_Adaptive_Reversal_20D
+2026-01-26 22:54:29,340 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717813/727818)
+2026-01-26 22:54:29,340 - INFO -   计算因子 [272/350]: Volume_Confirmed_Reversal_20D
+2026-01-26 22:54:31,365 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718565/727818)
+2026-01-26 22:54:31,365 - INFO -   计算因子 [273/350]: Volatility_Weighted_Dislocation_20D
+2026-01-26 22:54:33,389 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716723/727818)
+2026-01-26 22:54:33,389 - INFO -   计算因子 [274/350]: Stress_Resilience_Volume_Spread_10D
+2026-01-26 22:54:35,402 - INFO -     ✓ 从 cache_location 加载 (有效数据: 697011/727818)
+2026-01-26 22:54:35,402 - INFO -   计算因子 [275/350]: Normalized_Spread_Volatility_Ratio_20D
+2026-01-26 22:54:37,420 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720878/727818)
+2026-01-26 22:54:37,420 - INFO -   计算因子 [276/350]: Volume_Spike_Spread_Stability_15D
+2026-01-26 22:54:39,440 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:54:39,441 - INFO -   计算因子 [277/350]: Sentiment_Momentum_Volume_Correlation_5D
+2026-01-26 22:54:41,455 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717705/727818)
+2026-01-26 22:54:41,455 - INFO -   计算因子 [278/350]: Fundamental_Quality_Profitability_Stability_20D
+2026-01-26 22:54:43,526 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:54:43,526 - INFO -   计算因子 [279/350]: Behavioral_Divergence_Reversal_10D
+2026-01-26 22:54:45,537 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718333/727818)
+2026-01-26 22:54:45,537 - INFO -   计算因子 [280/350]: Stealth_Accumulation_Volume_Stability_20D
+2026-01-26 22:54:47,547 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718633/727818)
+2026-01-26 22:54:47,547 - INFO -   计算因子 [281/350]: Low_Volatility_Price_Range_Compression_15D
+2026-01-26 22:54:49,558 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720059/727818)
+2026-01-26 22:54:49,558 - INFO -   计算因子 [282/350]: Institutional_Flow_Imbalance_Proxy_30D
+2026-01-26 22:54:51,572 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716959/727818)
+2026-01-26 22:54:51,572 - INFO -   计算因子 [283/350]: Retail_Attention_Momentum_Divergence_5D
+2026-01-26 22:54:53,583 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727818/727818)
+2026-01-26 22:54:53,583 - INFO -   计算因子 [284/350]: Volume_Surge_Price_Dislocation_10D
+2026-01-26 22:54:55,625 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717197/727818)
+2026-01-26 22:54:55,625 - INFO -   计算因子 [285/350]: Sentiment_Decay_Momentum_Reversal_15D
+2026-01-26 22:54:57,635 - INFO -     ✓ 从 cache_location 加载 (有效数据: 711056/727818)
+2026-01-26 22:54:57,636 - INFO -   计算因子 [286/350]: SupplyChain_Resilience_Proxy_20D
+2026-01-26 22:54:59,651 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718150/727818)
+2026-01-26 22:54:59,651 - INFO -   计算因子 [287/350]: Geopolitical_Risk_Exposure_Proxy_10D
+2026-01-26 22:55:01,673 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:55:01,673 - INFO -   计算因子 [288/350]: ESG_Adaptation_Momentum_15D
+2026-01-26 22:55:03,692 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:55:03,692 - INFO -   计算因子 [289/350]: SupplyChain_Resilience_Momentum_20D
+2026-01-26 22:55:05,716 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721091/727818)
+2026-01-26 22:55:05,716 - INFO -   计算因子 [290/350]: Regulatory_Price_Dispersion_20D
+2026-01-26 22:55:07,768 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718633/727818)
+2026-01-26 22:55:07,768 - INFO -   计算因子 [291/350]: Volume_Sentiment_Divergence_10D
+2026-01-26 22:55:07,816 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 717026/727818)
+2026-01-26 22:55:07,816 - INFO -   计算因子 [292/350]: Institutional_Rebalancing_Divergence_10D
+2026-01-26 22:55:07,830 - WARNING - 因子计算失败 [Institutional_Rebalancing_Divergence_10D]: 无效的运算符: "'"
+2026-01-26 22:55:07,832 - WARNING -     ✗ 因子 Institutional_Rebalancing_Divergence_10D 计算失败或为空
+2026-01-26 22:55:07,832 - INFO -   计算因子 [293/350]: Liquidity_Momentum_Mismatch_15D
+2026-01-26 22:55:07,878 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 718274/727818)
+2026-01-26 22:55:07,878 - INFO -   计算因子 [294/350]: Volume_Pressure_Reversal_Indicator_20D
+2026-01-26 22:55:09,904 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717088/727818)
+2026-01-26 22:55:09,904 - INFO -   计算因子 [295/350]: Regulatory_Complexity_Momentum_5D
+2026-01-26 22:55:11,932 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717854/727818)
+2026-01-26 22:55:11,932 - INFO -   计算因子 [296/350]: Sentiment_Volume_Divergence_10D
+2026-01-26 22:55:13,989 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716772/727818)
+2026-01-26 22:55:13,989 - INFO -   计算因子 [297/350]: Institutional_Processing_Lag_15D
+2026-01-26 22:55:16,016 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717377/727818)
+2026-01-26 22:55:16,016 - INFO -   计算因子 [298/350]: SentFundDivergence_5D_20D
+2026-01-26 22:55:18,056 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718633/727818)
+2026-01-26 22:55:18,056 - INFO -   计算因子 [299/350]: StressAccumulation_10D
+2026-01-26 22:55:20,093 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719191/727818)
+2026-01-26 22:55:20,093 - INFO -   计算因子 [300/350]: LiquidityFilteredReversal_10D
+2026-01-26 22:55:22,120 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719826/727818)
+2026-01-26 22:55:22,120 - INFO -   计算因子 [301/350]: Sentiment_Divergence_Intensity_20D
+2026-01-26 22:55:24,146 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720762/727818)
+2026-01-26 22:55:24,146 - INFO -   计算因子 [302/350]: Regulatory_Dislocation_Anchor_15D
+2026-01-26 22:55:26,168 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717253/727818)
+2026-01-26 22:55:26,168 - INFO -   计算因子 [303/350]: Volatility_Spillover_Timing_10D
+2026-01-26 22:55:28,193 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719190/727818)
+2026-01-26 22:55:28,193 - INFO -   计算因子 [304/350]: RegimeAdaptive_Momentum_VolumeConfirmation_30D
+2026-01-26 22:55:28,216 - WARNING - 因子计算失败 [RegimeAdaptive_Momentum_VolumeConfirmation_30D]: 无效的运算符: "'"
+2026-01-26 22:55:28,217 - WARNING -     ✗ 因子 RegimeAdaptive_Momentum_VolumeConfirmation_30D 计算失败或为空
+2026-01-26 22:55:28,217 - INFO -   计算因子 [305/350]: CrossSectional_Governance_Momentum_20D
+2026-01-26 22:55:30,250 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727818/727818)
+2026-01-26 22:55:30,251 - INFO -   计算因子 [306/350]: SentimentDriven_Reversal_Detection_15D
+2026-01-26 22:55:32,280 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718188/727818)
+2026-01-26 22:55:32,280 - INFO -   计算因子 [307/350]: Innovation_Momentum_Confirmation_20D
+2026-01-26 22:55:34,308 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720873/727818)
+2026-01-26 22:55:34,308 - INFO -   计算因子 [308/350]: Sentiment_Innovation_Alignment_15D
+2026-01-26 22:55:36,347 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720134/727818)
+2026-01-26 22:55:36,347 - INFO -   计算因子 [309/350]: Institutional_Innovation_Flow_10D
+2026-01-26 22:55:38,380 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719265/727818)
+2026-01-26 22:55:38,380 - INFO -   计算因子 [310/350]: CrossAsset_Momentum_Spillover_5D
+2026-01-26 22:55:40,409 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720102/727818)
+2026-01-26 22:55:40,409 - INFO -   计算因子 [311/350]: Institutional_Lag_Volatility_Adjustment
+2026-01-26 22:55:42,434 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716834/727818)
+2026-01-26 22:55:42,434 - INFO -   计算因子 [312/350]: Segmented_Market_Momentum_Diffusion
+2026-01-26 22:55:44,482 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717724/727818)
+2026-01-26 22:55:44,482 - INFO -   计算因子 [313/350]: Microstructure_Reversal_Intensity_3D
+2026-01-26 22:55:46,508 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716952/727818)
+2026-01-26 22:55:46,508 - INFO -   计算因子 [314/350]: Volume_Accelerated_Reversal_5D
+2026-01-26 22:55:48,542 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717733/727818)
+2026-01-26 22:55:48,542 - INFO -   计算因子 [315/350]: Liquidity_Adjusted_Reversal_2D
+2026-01-26 22:55:50,568 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717376/727818)
+2026-01-26 22:55:50,568 - INFO -   计算因子 [316/350]: Commodity_Spillover_Momentum_20D
+2026-01-26 22:55:52,596 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720980/727818)
+2026-01-26 22:55:52,596 - INFO -   计算因子 [317/350]: Cross_Asset_Volatility_Adjustment_10D
+2026-01-26 22:55:54,617 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717631/727818)
+2026-01-26 22:55:54,617 - INFO -   计算因子 [318/350]: Institutional_Rebalancing_Signal_15D
+2026-01-26 22:55:56,640 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719514/727818)
+2026-01-26 22:55:56,640 - INFO -   计算因子 [319/350]: Regulatory_Resistance_Breakout_20D
+2026-01-26 22:55:58,668 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717271/727818)
+2026-01-26 22:55:58,668 - INFO -   计算因子 [320/350]: Supply_Chain_Volatility_Validation_15D
+2026-01-26 22:56:00,694 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720165/727818)
+2026-01-26 22:56:00,694 - INFO -   计算因子 [321/350]: Institutional_Microstructure_Convergence_10D
+2026-01-26 22:56:02,726 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717197/727818)
+2026-01-26 22:56:02,727 - INFO -   计算因子 [322/350]: Flow_Imbalance_Mean_Reversion_5D
+2026-01-26 22:56:04,754 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717811/727818)
+2026-01-26 22:56:04,754 - INFO -   计算因子 [323/350]: Liquidity_Stress_Indicator_3D
+2026-01-26 22:56:06,784 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717037/727818)
+2026-01-26 22:56:06,784 - INFO -   计算因子 [324/350]: Institutional_Footprint_ZScore_10D
+2026-01-26 22:56:08,808 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717197/727818)
+2026-01-26 22:56:08,809 - INFO -   计算因子 [325/350]: Liquidity_Imbalance_Mean_Reversion_5D
+2026-01-26 22:56:10,839 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718035/727818)
+2026-01-26 22:56:10,839 - INFO -   计算因子 [326/350]: Algorithmic_Pressure_Reversal_3D
+2026-01-26 22:56:12,877 - INFO -     ✓ 从 cache_location 加载 (有效数据: 716129/727818)
+2026-01-26 22:56:12,877 - INFO -   计算因子 [327/350]: Microstructure_Distortion_Index_7D
+2026-01-26 22:56:14,908 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718129/727818)
+2026-01-26 22:56:14,908 - INFO -   计算因子 [328/350]: SupplyChain_GeoRisk_Resilience_20D
+2026-01-26 22:56:16,941 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717196/727818)
+2026-01-26 22:56:16,941 - INFO -   计算因子 [329/350]: Regulatory_Dispersion_Amplifier_5D
+2026-01-26 22:56:18,975 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718150/727818)
+2026-01-26 22:56:18,975 - INFO -   计算因子 [330/350]: Volume_Sentiment_Timing_5D
+2026-01-26 22:56:20,998 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727818/727818)
+2026-01-26 22:56:20,998 - INFO -   计算因子 [331/350]: Governance_Volatility_Stability_60D
+2026-01-26 22:56:23,027 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720878/727818)
+2026-01-26 22:56:23,027 - INFO -   计算因子 [332/350]: Return_Consistency_Governance_60D
+2026-01-26 22:56:23,075 - INFO -     ✓ 从 MD5 缓存加载 (有效数据: 722462/727818)
+2026-01-26 22:56:23,075 - INFO -   计算因子 [333/350]: Volume_Confidence_Alignment_60D
+2026-01-26 22:56:25,084 - INFO -     ✓ 从 cache_location 加载 (有效数据: 723648/727818)
+2026-01-26 22:56:25,084 - INFO -   计算因子 [334/350]: Institutional_Accumulation_Volatility_Adjusted_30D
+2026-01-26 22:56:27,106 - INFO -     ✓ 从 cache_location 加载 (有效数据: 721746/727818)
+2026-01-26 22:56:27,106 - INFO -   计算因子 [335/350]: Order_Flow_Sentiment_Convergence_5D
+2026-01-26 22:56:29,125 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717811/727818)
+2026-01-26 22:56:29,125 - INFO -   计算因子 [336/350]: Bid_Ask_Spread_Filter_10D
+2026-01-26 22:56:31,143 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717377/727818)
+2026-01-26 22:56:31,143 - INFO -   计算因子 [337/350]: Institutional_Flow_Momentum_20D
+2026-01-26 22:56:33,183 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720755/727818)
+2026-01-26 22:56:33,183 - INFO -   计算因子 [338/350]: Options_Flow_Volatility_Skew_15D
+2026-01-26 22:56:35,195 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720055/727818)
+2026-01-26 22:56:35,195 - INFO -   计算因子 [339/350]: Large_Ticket_Accumulation_Indicator_10D
+2026-01-26 22:56:37,207 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727818/727818)
+2026-01-26 22:56:37,207 - INFO -   计算因子 [340/350]: Institutional_Accumulation_Intensity_20D
+2026-01-26 22:56:39,258 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718333/727818)
+2026-01-26 22:56:39,258 - INFO -   计算因子 [341/350]: MultiTimeframe_Accumulation_Consistency_60D
+2026-01-26 22:56:41,274 - INFO -     ✓ 从 cache_location 加载 (有效数据: 724291/727818)
+2026-01-26 22:56:41,274 - INFO -   计算因子 [342/350]: Volume_Adjusted_Trend_Strength_40D
+2026-01-26 22:56:43,305 - INFO -     ✓ 从 cache_location 加载 (有效数据: 719646/727818)
+2026-01-26 22:56:43,305 - INFO -   计算因子 [343/350]: Accumulation_Flow_Momentum_20D
+2026-01-26 22:56:45,316 - INFO -     ✓ 从 cache_location 加载 (有效数据: 707407/727818)
+2026-01-26 22:56:45,316 - INFO -   计算因子 [344/350]: Options_Position_Asymmetry_15D
+2026-01-26 22:56:47,333 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720052/727818)
+2026-01-26 22:56:47,333 - INFO -   计算因子 [345/350]: Insider_Confirmation_Filter_10D
+2026-01-26 22:56:49,349 - INFO -     ✓ 从 cache_location 加载 (有效数据: 727818/727818)
+2026-01-26 22:56:49,349 - INFO -   计算因子 [346/350]: Network_Centrality_Decay_10D
+2026-01-26 22:56:51,365 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718056/727818)
+2026-01-26 22:56:51,365 - INFO -   计算因子 [347/350]: Regulatory_Microstructure_Convergence_20D
+2026-01-26 22:56:53,373 - INFO -     ✓ 从 cache_location 加载 (有效数据: 718633/727818)
+2026-01-26 22:56:53,373 - INFO -   计算因子 [348/350]: Information_Diffusion_Risk_Control
+2026-01-26 22:56:55,383 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720165/727818)
+2026-01-26 22:56:55,383 - INFO -   计算因子 [349/350]: Operational_Efficiency_Momentum_20D
+2026-01-26 22:56:57,391 - INFO -     ✓ 从 cache_location 加载 (有效数据: 720616/727818)
+2026-01-26 22:56:57,391 - INFO -   计算因子 [350/350]: Tech_Liquidity_Convergence_15D_5D
+2026-01-26 22:56:59,401 - INFO -     ✓ 从 cache_location 加载 (有效数据: 717813/727818)
+2026-01-26 22:56:59,402 - INFO -   因子计算完成: 成功 340, 失败 10
+2026-01-26 22:56:59,402 - INFO -     - cache_location 命中: 324
+2026-01-26 22:56:59,402 - INFO -     - MD5 缓存命中: 17
+2026-01-26 22:56:59,402 - INFO -     - 重新计算: -1
+2026-01-26 22:57:00,607 - INFO -   结果 DataFrame: (727818, 328), 索引类型: MultiIndex
+2026-01-26 22:57:00,607 - INFO -   ✓ 因子计算完成: 328 个因子, 727818 行数据
+  ✓ 成功计算 328 个因子
+
+📈 第三步：创建数据集...
+2026-01-26 22:57:00,610 - INFO -   检测到预计算因子: 328 个因子, 727818 行数据
+  使用自定义因子模式 (预计算因子值)...
+  计算因子数量: 328
+  计算标签...
+  标签表达式: Ref($close, -2) / Ref($close, -1) - 1
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/home/tjxy/quantagent/venv/lib/python3.12/site-packages/mlflow/tracking/_tracking_service/utils.py:178: FutureWarning: The filesystem tracking backend (e.g., './mlruns') will be deprecated in February 2026. Consider transitioning to a database backend (e.g., 'sqlite:///mlflow.db') to take advantage of the latest MLflow features. See https://github.com/mlflow/mlflow/issues/18534 for more details and migration guidance. For migrating existing data, https://github.com/mlflow/mlflow-export-import can be used.
+  return FileStore(store_uri, store_uri)
+[3186082:MainThread](2026-01-26 23:00:50,765) WARNING - qlib.workflow - [expm.py:231] - No valid experiment found. Create a new experiment with name QA_deepseek_top350_csi300.
+[3186082:MainThread](2026-01-26 23:00:50,826) INFO - qlib.workflow - [exp.py:258] - Experiment 858559080103971621 starts running ...
+[3186082:MainThread](2026-01-26 23:00:50,901) INFO - qlib.workflow - [recorder.py:345] - Recorder 3c6c017b74c942a4a81182275065c5bc starts running under Experiment 858559080103971621 ...
+[3186082:MainThread](2026-01-26 23:01:12,905) INFO - qlib.workflow - [record_temp.py:198] - Signal record 'pred.pkl' has been saved as the artifact of the Experiment 858559080103971621
+  标签数据行数: 727818
+  总因子数量: 328
+  数据行数: 727818
+  应用数据预处理...
+  预处理后数据行数: 716950
+  训练集: ['2016-01-01', '2020-12-31']
+  验证集: ['2021-01-01', '2021-12-31']
+  测试集: ['2022-01-01', '2025-12-26']
+
+🤖 第四步：训练模型并执行回测...
+ModuleNotFoundError.  PyTorch models are skipped (optional: maybe installing pytorch can fix it).
+  训练 LightGBM 模型...
+Training until validation scores don't improve for 50 rounds
+[20]	train's l2: 0.0829425	valid's l2: 0.0829425
+[40]	train's l2: 0.0827708	valid's l2: 0.0827708
+[60]	train's l2: 0.0826383	valid's l2: 0.0826383
+[80]	train's l2: 0.0825206	valid's l2: 0.0825206
+[100]	train's l2: 0.0824166	valid's l2: 0.0824166
+[120]	train's l2: 0.0823152	valid's l2: 0.0823152
+[140]	train's l2: 0.0822245	valid's l2: 0.0822245
+[160]	train's l2: 0.0821399	valid's l2: 0.0821399
+[180]	train's l2: 0.0820642	valid's l2: 0.0820642
+[200]	train's l2: 0.0819837	valid's l2: 0.0819837
+[220]	train's l2: 0.0819154	valid's l2: 0.0819154
+[240]	train's l2: 0.081853	valid's l2: 0.081853
+[260]	train's l2: 0.0817877	valid's l2: 0.0817877
+[280]	train's l2: 0.0817289	valid's l2: 0.0817289
+[300]	train's l2: 0.0816559	valid's l2: 0.0816559
+[320]	train's l2: 0.0816096	valid's l2: 0.0816096
+[340]	train's l2: 0.081562	valid's l2: 0.081562
+[360]	train's l2: 0.0815246	valid's l2: 0.0815246
+[380]	train's l2: 0.0814918	valid's l2: 0.0814918
+[400]	train's l2: 0.0814897	valid's l2: 0.0814897
+[420]	train's l2: 0.0814897	valid's l2: 0.0814897
+[440]	train's l2: 0.0814897	valid's l2: 0.0814897
+Early stopping, best iteration is:
+[401]	train's l2: 0.0814897	valid's l2: 0.0814897
+  ✓ 模型训练完成 (耗时: 20.07秒)
+  生成预测...
+  ✓ 预测数据形状: (716950,)
+'The following are prediction results of the LGBModel model.'
+                          score
+instrument datetime            
+SH600000   2016-01-04  0.005003
+           2016-01-05 -0.008570
+           2016-01-06 -0.026860
+           2016-01-07 -0.007887
+           2016-01-08 -0.003082
+  计算 IC 指标...
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 68.27it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 67.82it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 68.90it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 68.28it/s]
+{'IC': np.float64(0.174986927320387),
+ 'ICIR': np.float64(1.0839997336902403),
+ 'Rank IC': np.float64(0.1700294638859871),
+ 'Rank ICIR': np.float64(1.0519756494749335)}
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 815.06it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 767.91it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 826.30it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 780.77it/s]
+  ✓ IC=0.174987, ICIR=1.084000
+  ✓ Rank IC=0.170029, Rank ICIR=1.051976
+  执行组合回测...
+  ✓ 股票数量: 394
+  检查并过滤价格异常数据...
+[3186082:MainThread](2026-01-26 23:01:17,954) INFO - qlib.backtest caller - [__init__.py:93] - Create new exchange
+  ⚠️ 发现 350 条价格为0/NaN的记录
+[3186082:MainThread](2026-01-26 23:01:21,069) WARNING - qlib.online operator - [exchange.py:219] - $open field data contains nan.
+[3186082:MainThread](2026-01-26 23:01:21,070) WARNING - qlib.online operator - [exchange.py:219] - $open field data contains nan.
+[3186082:MainThread](2026-01-26 23:01:23,050) WARNING - qlib.BaseExecutor - [executor.py:121] - `common_infra` is not set for <qlib.backtest.executor.SimulatorExecutor object at 0x7f769d7ef770>
+backtest loop:   0%|          | 0/966 [00:00<?, ?it/s]backtest loop:   1%|          | 9/966 [00:00<00:10, 89.63it/s]backtest loop:   2%|▏         | 19/966 [00:00<00:09, 95.27it/s]backtest loop:   3%|▎         | 29/966 [00:00<00:12, 75.87it/s]backtest loop:   4%|▍         | 39/966 [00:00<00:11, 83.45it/s]backtest loop:   5%|▌         | 49/966 [00:00<00:10, 86.45it/s]backtest loop:   6%|▌         | 59/966 [00:00<00:10, 90.15it/s]backtest loop:   7%|▋         | 69/966 [00:00<00:09, 90.85it/s]backtest loop:   8%|▊         | 79/966 [00:00<00:10, 86.86it/s]backtest loop:   9%|▉         | 89/966 [00:01<00:09, 89.41it/s]backtest loop:  10%|█         | 99/966 [00:01<00:09, 92.16it/s]backtest loop:  11%|█▏        | 109/966 [00:01<00:09, 93.89it/s]backtest loop:  12%|█▏        | 119/966 [00:01<00:08, 95.19it/s]backtest loop:  13%|█▎        | 129/966 [00:01<00:08, 95.95it/s]backtest loop:  14%|█▍        | 139/966 [00:01<00:08, 96.68it/s]backtest loop:  15%|█▌        | 149/966 [00:01<00:08, 96.34it/s]backtest loop:  16%|█▋        | 159/966 [00:01<00:08, 94.84it/s]backtest loop:  17%|█▋        | 169/966 [00:01<00:08, 96.05it/s]backtest loop:  19%|█▊        | 179/966 [00:01<00:08, 96.77it/s]backtest loop:  20%|█▉        | 189/966 [00:02<00:07, 97.24it/s]backtest loop:  21%|██        | 199/966 [00:02<00:07, 97.93it/s]backtest loop:  22%|██▏       | 209/966 [00:02<00:07, 98.42it/s]backtest loop:  23%|██▎       | 219/966 [00:02<00:07, 98.54it/s]backtest loop:  24%|██▎       | 229/966 [00:02<00:07, 98.75it/s]backtest loop:  25%|██▍       | 239/966 [00:02<00:07, 98.73it/s]backtest loop:  26%|██▌       | 249/966 [00:02<00:07, 98.88it/s]backtest loop:  27%|██▋       | 259/966 [00:02<00:07, 98.73it/s]backtest loop:  28%|██▊       | 269/966 [00:02<00:07, 98.32it/s]backtest loop:  29%|██▉       | 279/966 [00:02<00:06, 98.30it/s]backtest loop:  30%|██▉       | 289/966 [00:03<00:06, 98.21it/s]backtest loop:  31%|███       | 299/966 [00:03<00:06, 98.34it/s]backtest loop:  32%|███▏      | 309/966 [00:03<00:06, 93.89it/s]backtest loop:  33%|███▎      | 319/966 [00:03<00:06, 95.29it/s]backtest loop:  34%|███▍      | 329/966 [00:03<00:06, 92.07it/s]backtest loop:  35%|███▌      | 339/966 [00:03<00:06, 93.43it/s]backtest loop:  36%|███▌      | 349/966 [00:03<00:06, 94.61it/s]backtest loop:  37%|███▋      | 359/966 [00:03<00:06, 95.36it/s]backtest loop:  38%|███▊      | 369/966 [00:03<00:06, 96.24it/s]backtest loop:  39%|███▉      | 379/966 [00:04<00:06, 97.01it/s]backtest loop:  40%|████      | 389/966 [00:04<00:05, 97.50it/s]backtest loop:  41%|████▏     | 399/966 [00:04<00:05, 97.87it/s]backtest loop:  42%|████▏     | 409/966 [00:04<00:05, 98.01it/s]backtest loop:  43%|████▎     | 419/966 [00:04<00:05, 98.23it/s]backtest loop:  44%|████▍     | 429/966 [00:04<00:05, 93.75it/s]backtest loop:  45%|████▌     | 439/966 [00:04<00:05, 95.22it/s]backtest loop:  46%|████▋     | 449/966 [00:04<00:05, 96.04it/s]backtest loop:  48%|████▊     | 459/966 [00:04<00:05, 96.93it/s]backtest loop:  49%|████▊     | 469/966 [00:04<00:05, 97.62it/s]backtest loop:  50%|████▉     | 479/966 [00:05<00:05, 95.38it/s]backtest loop:  51%|█████     | 490/966 [00:05<00:04, 97.80it/s]backtest loop:  52%|█████▏    | 500/966 [00:05<00:04, 98.21it/s]backtest loop:  53%|█████▎    | 510/966 [00:05<00:04, 98.46it/s]backtest loop:  54%|█████▍    | 521/966 [00:05<00:04, 99.86it/s]backtest loop:  55%|█████▍    | 531/966 [00:05<00:04, 99.50it/s]backtest loop:  56%|█████▌    | 541/966 [00:05<00:04, 99.56it/s]backtest loop:  57%|█████▋    | 551/966 [00:05<00:04, 92.52it/s]backtest loop:  58%|█████▊    | 561/966 [00:05<00:04, 94.17it/s]backtest loop:  59%|█████▉    | 571/966 [00:05<00:04, 95.50it/s]backtest loop:  60%|██████    | 581/966 [00:06<00:04, 96.13it/s]backtest loop:  61%|██████    | 591/966 [00:06<00:04, 92.64it/s]backtest loop:  62%|██████▏   | 601/966 [00:06<00:03, 94.33it/s]backtest loop:  63%|██████▎   | 611/966 [00:06<00:03, 95.31it/s]backtest loop:  64%|██████▍   | 621/966 [00:06<00:03, 96.20it/s]backtest loop:  65%|██████▌   | 631/966 [00:06<00:03, 96.53it/s]backtest loop:  66%|██████▋   | 641/966 [00:06<00:03, 97.22it/s]backtest loop:  67%|██████▋   | 651/966 [00:06<00:03, 97.78it/s]backtest loop:  68%|██████▊   | 661/966 [00:06<00:03, 97.56it/s]backtest loop:  69%|██████▉   | 671/966 [00:07<00:03, 95.25it/s]backtest loop:  70%|███████   | 681/966 [00:07<00:02, 96.00it/s]backtest loop:  72%|███████▏  | 691/966 [00:07<00:02, 96.90it/s]backtest loop:  73%|███████▎  | 701/966 [00:07<00:02, 97.60it/s]backtest loop:  74%|███████▎  | 711/966 [00:07<00:02, 98.06it/s]backtest loop:  75%|███████▍  | 721/966 [00:07<00:02, 98.28it/s]backtest loop:  76%|███████▌  | 731/966 [00:07<00:02, 94.30it/s]backtest loop:  77%|███████▋  | 741/966 [00:07<00:02, 95.33it/s]backtest loop:  78%|███████▊  | 751/966 [00:07<00:02, 92.13it/s]backtest loop:  79%|███████▉  | 761/966 [00:07<00:02, 94.14it/s]backtest loop:  80%|███████▉  | 771/966 [00:08<00:02, 95.57it/s]backtest loop:  81%|████████  | 781/966 [00:08<00:01, 96.60it/s]backtest loop:  82%|████████▏ | 791/966 [00:08<00:01, 93.08it/s]backtest loop:  83%|████████▎ | 801/966 [00:08<00:01, 94.92it/s]backtest loop:  84%|████████▍ | 811/966 [00:08<00:01, 96.05it/s]backtest loop:  85%|████████▍ | 821/966 [00:08<00:01, 96.87it/s]backtest loop:  86%|████████▌ | 831/966 [00:08<00:01, 97.51it/s]backtest loop:  87%|████████▋ | 841/966 [00:08<00:01, 97.79it/s]backtest loop:  88%|████████▊ | 851/966 [00:08<00:01, 97.97it/s]backtest loop:  89%|████████▉ | 861/966 [00:09<00:01, 98.47it/s]backtest loop:  90%|█████████ | 872/966 [00:09<00:00, 95.48it/s]backtest loop:  91%|█████████▏| 882/966 [00:09<00:00, 89.88it/s]backtest loop:  92%|█████████▏| 892/966 [00:09<00:00, 92.14it/s]backtest loop:  93%|█████████▎| 902/966 [00:09<00:00, 93.66it/s]backtest loop:  94%|█████████▍| 912/966 [00:09<00:00, 91.37it/s]backtest loop:  95%|█████████▌| 922/966 [00:09<00:00, 93.51it/s]backtest loop:  96%|█████████▋| 932/966 [00:09<00:00, 95.11it/s]backtest loop:  98%|█████████▊| 942/966 [00:09<00:00, 96.22it/s]backtest loop:  99%|█████████▊| 952/966 [00:09<00:00, 95.95it/s]backtest loop: 100%|█████████▉| 962/966 [00:10<00:00, 94.76it/s]backtest loop: 100%|██████████| 966/966 [00:10<00:00, 95.34it/s]
+[3186082:MainThread](2026-01-26 23:01:33,570) INFO - qlib.timer - [log.py:127] - Time cost: 0.330s | waiting `async_log` Done
+  ✓ 组合回测完成 (耗时: 18.25秒)
+  ✓ 每日累计超额收益已保存: backtest_v2_results_topk_20260126_220526/RANKIC_top350_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300_cumulative_excess.csv
+  ✓ 提取了组合策略指标
+
+======================================================================
+📈 回测结果:
+======================================================================
+
+【IC 指标】
+  IC:               0.174987
+  ICIR:             1.084000
+  Rank IC:          0.170029
+  Rank ICIR:        1.051976
+
+【策略指标】
+  年化收益:         0.3203
+  信息比率:         3.8171
+  最大回撤:         -0.0926
+  卡尔玛比率:       3.4589
+
+⏱️  总耗时: 931.35 秒
+======================================================================
+
+✓ 结果已保存到: backtest_v2_results_topk_20260126_220526/RANKIC_top350_all_factors_library_QA_round41_best_deepseek_aliyun_all_csi300_backtest_metrics.json
+
+✓ 已追加到汇总: backtest_v2_results_topk_20260126_220526/batch_summary.json

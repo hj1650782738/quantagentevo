@@ -1,0 +1,132 @@
+% Appendix (Factor-level diagnosis): QA vs AA in 2023
+% This file is intended to be included via \input{}; do NOT add documentclass/preamble here.
+
+\section{Factor-Level Diagnosis in 2023 (CSI300): QuantaAlpha vs.\ AlphaAgent}
+\label{sec:appendix_factor_diagnosis_quantaalpha_vs_alphaagent_2023}
+
+This appendix provides a factor-level diagnosis for the year 2023 on the CSI300 universe. The goal is to connect the observed strategy-level gap to \emph{which information channels were predictive} under the 2022--2023 regime transition, rather than to exhaustively list factor implementations.
+
+\label{subsec:appendix_market_context_2023}
+
+Market microstructure and style exposures in A-shares changed materially during 2022--2023. In particular, dispersion and rotation across styles increased, and short-horizon reversal effects became more pronounced in several sub-periods. Meanwhile, the growth of programmatic trading (e.g., DMA-style execution and increased private-fund participation) amplified the importance of \emph{auction/overnight information}, \emph{liquidity re-rating}, and \emph{trend quality filtering} (distinguishing ``clean'' trends from noise-driven moves). Under such non-stationarity, factors that rely on a single, narrow hypothesis are more likely to become unstable.
+
+\label{subsec:appendix_summary_stats_2023}
+
+Table~\ref{tab:qa_aa_2023_summary} reports the absolute summary statistics of annual Rank IC and IC in 2023. We use the \textbf{coverage ratio} to describe the fraction of factors with valid annual metrics (instead of enumerating factor counts).
+
+\makeatletter
+\setlength{\@fptop}{10pt}
+\makeatother
+
+\begin{table}[!htbp]
+\centering
+\caption{Summary statistics of annual factor predictability on the CSI 300 index in 2023.}
+\label{tab:qa_aa_2023_summary}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metric} & \textbf{QA} & \textbf{AA} \\
+\midrule
+Coverage ratio (valid metrics) & 0.98 & 0.80 \\
+Share with Rank IC $>0$ & 0.626 & 0.594 \\
+Mean Rank IC & 0.0057 & 0.0012 \\
+Max Rank IC & 0.0793 & 0.0323 \\
+Min Rank IC & -0.0720 & -0.0279 \\
+Share with Rank IC $>0.03$ & 0.102 & 0.0156 \\
+Share with Rank IC $>0.05$ & 0.0272 & 0.0000 \\
+\midrule
+Mean IC & 0.0044 & 0.0015 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+To keep the appendix concise, we highlight representative factors at the extremes of 2023 Rank IC for each method (Table~\ref{tab:qa_aa_2023_representative}). We do not repeat full formulas; each entry is summarized by its economic meaning.
+
+\label{subsec:appendix_dominant_signals_2023}
+
+\begin{table}[!htbp]
+\centering
+\caption{Representative factors and their performance metrics on the CSI 300 index in 2023.}
+\label{tab:qa_aa_2023_representative}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{7cm}ccp{6.3cm}}
+\toprule
+\textbf{Factor (representative)} & \textbf{Rank IC} & \textbf{IC} & \textbf{Interpretation (short)} \\
+\midrule
+\multicolumn{4}{c}{\textit{QA --- strong performers (overnight/auction, trend-quality, and liquidity re-rating)}} \\
+\midrule
+\texttt{GapZ10\_Overnight\_vs\_TR} & 0.0793 & 0.0335 & Normalized overnight gap magnitude relative to recent true range; captures auction-driven shocks and subsequent adjustment. \\
+\texttt{Gap\_IntradayAcceptanceScore\_20D} & 0.0744 & 0.0330 & ``Acceptance vs.\ rejection'' of an overnight gap using intraday direction, scaled by recent volatility. \\
+\texttt{Gap\_IntradayAcceptance\_VolWeighted\_20D} & 0.0606 & 0.0314 & Gap acceptance score weighted by abnormal volume; emphasizes information-rich openings with high participation. \\
+\texttt{CleanTrend\_Continuation\_Score\_RS10\_KLEN10\_WVMA5} & 0.0590 & 0.0267 & Trend continuation conditioned on high trend quality (low residual noise) and muted intraday/volume pressure. \\
+\texttt{OrderlyTrend\_x\_Absorption\_10D\_5D\_20D} & 0.0465 & 0.0271 & ``Orderly'' short-horizon trend cross-validated by liquidity absorption (high dollar volume with low price impact). \\
+\midrule
+\multicolumn{4}{c}{\textit{QA --- weak performers (overly rigid gates or noisy-path proxies under rotation)}} \\
+\midrule
+\texttt{KineticLength\_AbsRetSum\_Z\_10D} & -0.0720 & -0.0246 & Path-length proxy (choppiness): can behave like a noise detector, but may invert under fast style rotation. \\
+\texttt{Drawdown\_Gated\_NegCorr\_60D\_20D\_thr20pct} & -0.0282 & -0.0095 & Hard regime gate based on deep drawdown; brittle when drawdowns cluster and cross-sectional regimes shift quickly. \\
+\texttt{HighClose\_Shock\_With\_VolSync\_60\_20} & -0.0274 & -0.0090 & ``Shock-day'' breakout quality (close-in-range, range shock, return--volume sync); sensitive to regime-dependent follow-through. \\
+\midrule
+\multicolumn{4}{c}{\textit{AA --- strong performers (exhaustion/climax-style reversals)}} \\
+\midrule
+\texttt{Exhaustion\_Intensity\_Index\_10D} & 0.0323 & 0.0159 & Price displacement over 60D interacted with volume intensity ratio; targets potential exhaustion and reversal. \\
+\texttt{Climax\_Exhaustion\_Intensity} & 0.0242 & 0.0160 & Variant using short-horizon volume climax vs.\ long-horizon baseline; aims to identify capitulation-like turns. \\
+\texttt{Exhaustion\_Volume\_Instability\_Index} & 0.0121 & 0.0117 & Trend deviation combined with volume instability; highlights fragile price levels supported by unstable liquidity. \\
+\midrule
+\multicolumn{4}{c}{\textit{AA --- weak performers (bottom-fishing under non-stationary liquidity)}} \\
+\midrule
+\texttt{Relative\_Volume\_Calm\_Reversal} & -0.0279 & -0.0188 & ``Quiet-volume'' regimes multiplied by momentum divergence; may fail when liquidity conditions change abruptly. \\
+\texttt{Volume\_Stability\_Momentum\_Divergence\_40D} & -0.0247 & -0.0155 & Robust volume-stability proxy (MAD) times momentum spread; sensitive to turnover regime changes. \\
+\texttt{LVR\_Bottom\_Fishing\_20D} & -0.0190 & -0.0144 & ``Bottom-fishing'' reversal with intraday rejection and volume surge; vulnerable when reversals are short-lived and crowded. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 2022--2023 regime transition emphasizes that predictive signals should be interpreted as \emph{information channels} with different stability across regimes:
+
+\label{subsec:appendix_interpretation_channels}
+
+\begin{itemize}
+    \setlength{\itemsep}{2pt}
+    \setlength{\parskip}{0pt}
+    \item \textbf{Overnight/auction channel (Gap)}: Overnight gaps aggregate information released off-hours and the supply--demand balance during the opening auction. In 2023, representative gap-based signals (Table~\ref{tab:qa_aa_2023_representative}) indicate that this channel can be informative even when intraday price action is noisy.
+    \item \textbf{Trend-quality channel (clean trend vs.\ noise)}: Under higher dispersion and rapid rotation, ``plain momentum'' is often unstable; conditioning on trend quality (e.g., low residual volatility, muted intraday pressure) helps separate persistent flows from noise-driven moves.
+    \item \textbf{Liquidity re-rating channel (dollar-volume up, price-impact down)}: When capital reallocates quickly across themes, changes in liquidity and price impact can lead price moves. Signals combining volume expansion with improving liquidity can therefore be predictive in trend-following and rotation regimes.
+    \item \textbf{Pure reversal/exhaustion channel}: Reversal-style constructs can work episodically, but their stability depends on how quickly liquidity replenishes after shocks and whether the trades become crowded. Under non-stationary liquidity, rigid ``bottom-fishing'' patterns may be less reliable.
+\end{itemize}
+
+The 2023 diagnosis suggests two high-level design principles (without duplicating the main-text methodology):
+\textbf{Prefer multi-channel confirmation.} Combining orthogonal channels (overnight/auction, trend quality, liquidity) can reduce regime sensitivity relative to single-hypothesis factors.
+\textbf{Avoid brittle hard gates.} Hard thresholds (e.g., deep drawdown triggers) can be fragile when cross-sectional regimes shift quickly; smoother conditioning is often more robust.
+
+
+\section{Iteration Study: Convergence of Factor-Pool Performance (CSI300)}
+\label{sec:appendix_iteration_convergence}
+
+This appendix studies how the strategy-level performance of the \textbf{maintained high-quality factor pool} evolves as QuantaAlpha runs for more iterations on CSI300. The first five iterations are reported in Section~5.5 of the main text; here we focus on \textbf{Iter 5--15} to examine whether performance converges or starts to deteriorate.
+
+\label{subsec:appendix_iteration_setup}
+
+We run QuantaAlpha for a total of 15 iterations on CSI300, using \textbf{Deepseek-V3.2} as the backbone LLM for all agents. To improve mining throughput, we set the factor-complexity constraints to \textbf{symbol length $\leq 200$} and \textbf{base features $\leq 4$}. Each iteration consists of two phases: a \textit{Mutation} phase followed by a \textit{Crossover} phase.
+
+At the end of each iteration, we maintain a global \textbf{high-quality factor pool} using all factors generated up to that iteration. The maintenance rule is greedy and RankIC-driven: we sort all candidate factors by RankIC (descending) and add them into the pool in order, subject to a redundancy constraint. A factor is admitted only if its \textbf{absolute correlation} with every factor already in the pool is \textbf{below 0.7}. The pool size is capped at \textbf{50\% of the total number of mined factors} up to the current iteration. 
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=1\columnwidth]{images/iteration.png}
+\caption{Factor Pool Performance by Iteration.}
+\label{fig:annual_ic_rankic}
+\end{figure}
+
+
+\label{subsec:appendix_iteration_arr_mdd}
+
+In the two-column paper draft, we keep this appendix lightweight and report the key iteration-wise conclusions using absolute values. (The corresponding figure and compact tables can be added later; they are intentionally omitted here to avoid path and float issues when this file is included from different build roots.)
+
+\label{subsec:appendix_iteration_observations}
+
+Across Iter 5--15, ARR increases from \textbf{29.63\%} (Iter 5) to \textbf{35.97\%} (Iter 15), with a clear step-up at Iter 10 (\textbf{34.37\%}) and a peak at \textbf{36.02\%} (Iter 11). Meanwhile, the drawdown magnitude improves until Iter 12, where $|\mathrm{MDD}|$ reaches its minimum (\textbf{7.58\%}), and then increases afterwards (e.g., \textbf{9.36\%} at Iter 15). Overall, the curve suggests that performance \textbf{approaches a plateau around Iter 11--13}: further iterations yield limited incremental ARR while the drawdown profile can become less favorable. In practice, selecting \textbf{Iter 11--12} offers a balanced trade-off between return and drawdown under this setup.
+
+

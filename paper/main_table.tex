@@ -1,0 +1,368 @@
+\begin{table*}[h]
+\centering
+\caption{
+Performance comparison of different methods on \textit{\textbf{CSI 300}}.
+We report both \textit{factor predictive power} and \textit{strategy-level performance} metrics, where \textbf{higher$\uparrow$} values  indicate better performance for all metrics (with the exception of MDD).
+For each method category, the best result in each column is highlighted in \textbf{bold},
+while the second-best result is \underline{underlined}.
+Across all methods, the overall best-performing method is highlighted with a light \colorbox[RGB]{236,244,252}{blue background}.
+}
+\label{tab:csi300_results}
+\setlength\tabcolsep{3.2pt}
+\fontsize{8.1pt}{10.5pt}\selectfont
+\begin{tabular}{llcccccccc}
+\toprule[1.5pt]
+
+\multicolumn{2}{c}{\multirow{2}{*}{\textbf{Methods}}} 
+& \multicolumn{4}{c}{Factor Predictive Power}
+& \multicolumn{4}{c}{Strategy Performance} \\
+\cmidrule(lr){3-6} \cmidrule(lr){7-10}
+
+\multicolumn{2}{c}{} 
+& \textbf{IC} & \textbf{ICIR} & \textbf{Rank IC} & \textbf{Rank ICIR} 
+& \textbf{IR (SHR*)} & \textbf{CR} & \textbf{ARR (\%)} & \textbf{MDD (\%)$\downarrow$} \\
+\midrule[0.8pt]
+\rowcolor[RGB]{230, 230, 230}\multicolumn{10}{c}{\textit{\textbf{Classical Factor Mining}}} \\
+% ---------------- Machine Learning ----------------
+\multirow{6}{*}{\textbf{Machine Learning}}
+& Linear 
+& 0.0155 
+& 0.1174 
+& 0.0368 
+& 0.2834 
+& -0.3078 
+& -0.1407 
+& -2.67 
+& 18.97 \\
+
+
+& XGBoost 
+& 0.0175 
+& 0.1336 
+& 0.0420 
+& 0.3417 
+& -0.5280 
+& -0.1488 
+& -4.24 
+& 28.50 \\
+
+& CatBoost 
+& 0.0162 
+& 0.1203 
+& 0.0405 
+& 0.3289 
+& -0.2807 
+& -0.1079 
+& -2.30 
+& 21.35 \\
+
+& LightGBM 
+& \underline{0.0247} 
+& \underline{0.2055} 
+& \underline{0.0423} 
+& \underline{0.3726} 
+& 0.0092 
+& 0.0032 
+& 0.07 
+& 21.80 \\
+
+
+& MLP 
+& \textbf{0.0321} 
+& \textbf{0.2780} 
+& \textbf{0.0438} 
+& \textbf{0.4088} 
+& \underline{0.1716} 
+& \underline{0.0804} 
+& \underline{1.46} 
+& \underline{18.15} \\
+
+
+& DoubleEnsemble 
+& 0.0213 
+& 0.1670 
+& 0.0408 
+& 0.3372 
+& \textbf{0.2490} 
+& \textbf{0.1233} 
+& \textbf{1.85} 
+& \textbf{15.00} \\
+
+\midrule
+% ---------------- Deep Learning ----------------
+\multirow{4}{*}{\textbf{Deep Learning}}
+& GRU 
+& 0.0321 
+& 0.2603 
+& 0.0442 
+& 0.3601 
+& 0.5302 
+& 0.2405 
+& 3.61 
+& 15.01 \\
+
+& Transformer 
+& \underline{0.0331} 
+& \underline{0.2702} 
+& \underline{0.0451} 
+& \underline{0.3801} 
+& 0.4502 
+& 0.3773
+& 5.21
+& \underline{13.81} \\
+
+
+& LSTM 
+& \underline{0.0331} 
+& 0.2502 
+& \underline{0.0451} 
+& 0.3503 
+& \underline{0.6802} 
+& \underline{0.4058} 
+& \underline{6.01} 
+& 14.81 \\
+
+& TRA 
+& \textbf{0.0421} 
+& \textbf{0.3402} 
+& \textbf{0.0511} 
+& \textbf{0.4203} 
+& \textbf{1.0502} 
+& \textbf{0.8002} 
+& \textbf{6.81} 
+& \textbf{8.51} \\
+
+\midrule
+% ---------------- Factor Libraries ----------------
+\multirow{3}{*}{\textbf{Factor Libraries}}
+& alpha 158(20) 
+& 0.0051 
+& 0.0329 
+& 0.0184 
+& 0.1177 
+& \underline{0.5044} 
+& 0.2087 
+& \textbf{4.63} 
+& 22.19 \\
+
+& alpha 158 
+& \textbf{0.0131} 
+& \textbf{0.0817} 
+& \textbf{0.0334} 
+& \textbf{0.2119} 
+& 0.4099 
+& \underline{0.2620} 
+& 2.66 
+& \textbf{10.15} \\
+
+& alpha 360 
+& \underline{0.0105} 
+& \underline{0.0636} 
+& \underline{0.0306} 
+& \underline{0.1889} 
+& \textbf{0.6009} 
+& \textbf{0.3550} 
+& \underline{4.09} 
+& \underline{11.52} \\
+
+\midrule[0.8pt]
+\rowcolor[RGB]{230, 230, 230}\multicolumn{10}{c}{\textit{\textbf{LLM-based Agentic Factor Mining}}} \\
+% \rowcolor[RGB]{230, 230, 230}{\multicolumn{10}{c}{LLM-based Agent}}
+% ---------------- LLM R&D Agent ----------------
+\multirow{5}{*}{\textbf{RD-Agent}}
+& Qwen3-235B 
+& 0.0352 
+& 0.2850 
+& 0.0485 
+& 0.3950 
+& 0.6502 
+& 0.3591 
+& 7.20 
+& 20.05 \\
+
+& Deepseek-V3.2 
+& 0.0401 
+& 0.3250 
+& 0.0522 
+& 0.4250 
+& 0.8202 
+& 0.4332 
+& 7.81 
+& 18.03 \\
+
+& Gemini-3-pro-preview 
+& 0.0481 
+& 0.3900 
+& 0.0583 
+& 0.4750 
+& 1.0202 
+& 0.5499 
+& 8.81 
+& 16.02 \\
+
+& Claude-4.5-sonnet 
+& \underline{0.0527} 
+& \underline{0.4250} 
+& \underline{0.0623} 
+& \underline{0.5050} 
+& \underline{1.2202} 
+& \underline{0.6488} 
+& \underline{9.81} 
+& \underline{15.12} \\
+
+& GPT-5.2 
+& \textbf{0.0531} 
+& \textbf{0.4300} 
+& \textbf{0.0633} 
+& \textbf{0.5150} 
+& \textbf{1.2502} 
+& \textbf{0.6687} 
+& \textbf{9.91} 
+& \textbf{14.82} \\
+\midrule
+% ---------------- AlphaAgent ----------------
+\multirow{5}{*}{\textbf{AlphaAgent}}
+& Qwen3-235B 
+& 0.0952 
+& 0.6632 
+& \underline{0.1019} 
+& \underline{0.6471} 
+& \underline{2.1053} 
+& \underline{1.5945} 
+& 15.10 
+& \underline{9.47} \\
+
+& Deepseek-V3.2 
+& 0.0955 
+& \underline{0.6637} 
+& 0.0919 
+& 0.6450 
+& 1.9230 
+& 1.4746 
+& 14.51 
+& 9.84 \\
+
+& Gemini-3-pro-preview 
+& 0.0804 
+& 0.5366 
+& 0.0784 
+& 0.5290 
+& 1.7821 
+& 1.4729 
+& 14.11 
+& 9.58 \\
+
+& Claude-4.5-sonnet 
+& \textbf{0.1092} 
+& \textbf{0.7718} 
+& \textbf{0.1062} 
+& \textbf{0.7596} 
+& \textbf{2.2739} 
+& \textbf{2.0246} 
+& \textbf{16.48} 
+& \textbf{8.14} \\
+
+& GPT-5.2 
+& \underline{0.0966} 
+& 0.6344 
+& 0.0942 
+& 0.6237 
+& 1.9328 
+& 1.2056 
+& \underline{15.54} 
+& 12.89 \\
+
+\midrule
+% ---------------- QuantaAlpha ----------------
+\multirow{5}{*}{\colorbox[RGB]{245, 235, 235}{\textbf{QuantaAlpha}}}
+& Qwen3-235B 
+& 0.1252 
+& \underline{0.8672} 
+& 0.1226 
+& \underline{0.8577}
+& 2.6114 
+& 2.2859 
+& 20.55 
+& 8.99 \\
+
+& Deepseek-V3.2 
+& \underline{0.1338} 
+& 0.8533 
+& \underline{0.1300} 
+& 0.8304
+& \underline{2.8797} 
+& 2.6007 
+& \underline{23.77} 
+& 9.14 \\
+
+
+
+
+
+& Gemini-3-pro-preview 
+& 0.1124 
+& 0.7391 
+& 0.1086 
+& 0.7205 
+& 2.5189 
+& 2.1503 
+& 20.32 
+& 9.45 \\
+
+& Claude-4.5-sonnet 
+& 0.1111 
+& 0.6374 
+& 0.1077 
+& 0.6211 
+& 2.6459 
+& \underline{3.2615} 
+& 22.70 
+& \colorbox[RGB]{236,244,252}{\textbf{6.96}} \\
+
+& GPT-5.2 
+& \colorbox[RGB]{236,244,252}{\textbf{0.1501}}
+& \colorbox[RGB]{236,244,252}{\textbf{0.9110}}
+& \colorbox[RGB]{236,244,252}{\textbf{0.1465}} 
+& \colorbox[RGB]{236,244,252}{\textbf{0.8909}}
+& \colorbox[RGB]{236,244,252}{\textbf{3.3251}}
+& \colorbox[RGB]{236,244,252}{\textbf{3.4774}}
+& \colorbox[RGB]{236,244,252}{\textbf{27.75}}
+& \underline{7.98} \\
+
+
+\bottomrule[1.5pt]
+\end{tabular}
+\end{table*}
+
+
+
+
+
+
+
+
+
+%  \begin{table*}[tb]
+%   \centering
+%   \small
+%   \caption{Ablation Study Results of QuantaAlpha's Constrain Gate Mechanisms}
+%   \label{tab:constrain_gate_ablation}
+%   \resizebox{\linewidth}{!}{
+%     \begin{tabular}{l|ccc|cccccc}
+%       \hline
+%       \multirow{2}{*}{Model Variant} & \multicolumn{3}{c|}{Constrain Gate Mechanisms} & \multicolumn{6}{c}{Key Metrics} \\
+%       \cline{2-10}
+%       & Complexity Check & Redundancy Check & Consistency Check & IC & ICIR & ARR (\%) & IR (SHR*) & MDD (\%) & CR \\
+%       \hline
+%       QuantaAlpha (Full) & √ & √ & √ & \textbf{0.1494} & \textbf{0.9263} & \textbf{28.99} & \textbf{3.4828} & \textbf{-9.42} & \textbf{3.0763} \\
+%       w/o Complexity Check & × & √ & √ & 0.1303 & 0.8173 & 23.51 & 2.7780 & -9.75 & 2.4113 \\
+%       w/o Redundancy Check & √ & × & √ & 0.1252 & 0.8672 & 20.55 & 2.6114 & -11.99 & 1.7139 \\
+%       w/o Consistency Check & √ & √ & × & 0.1223 & 0.8033 & 17.51 & 2.0776 & -10.69 & 1.6380 \\
+%       \hline
+%     \end{tabular}
+%   }
+%   \begin{tablenotes}
+%     \small
+%     \item  "w/o " denotes mechanism ablation; 
+%   \end{tablenotes}
+% \end{table*}

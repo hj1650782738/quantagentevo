@@ -1,0 +1,15 @@
+[
+  {
+    "name": "Alphaagent_sp500_alpha158",
+    "num_factors": 158,
+    "IC": 0.005888207399717012,
+    "ICIR": 0.05879471825365857,
+    "Rank_IC": 0.003951896609164029,
+    "Rank_ICIR": 0.03634378736252102,
+    "annualized_return": 0.03873348350344398,
+    "information_ratio": 0.3069465315948407,
+    "max_drawdown": -0.2106512222412081,
+    "calmar_ratio": 0.18387495259387507,
+    "elapsed_seconds": 175.07099628448486
+  }
+]

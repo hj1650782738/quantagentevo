@@ -1,0 +1,23 @@
+{
+  "experiment_name": "Alphaagent_csi500_round11",
+  "factor_source": "custom",
+  "num_factors": 150,
+  "metrics": {
+    "IC": 0.12565113534933078,
+    "ICIR": 0.9272034343011744,
+    "Rank IC": 0.12058788226928127,
+    "Rank ICIR": 0.8930093534388993,
+    "annualized_return": 0.24035192536367564,
+    "information_ratio": 2.442221934627441,
+    "max_drawdown": -0.08870405439797358,
+    "calmar_ratio": 2.7095934565214916
+  },
+  "config": {
+    "data_range": "2016-01-01 ~ 2025-12-26",
+    "test_range": "2022-01-01 ~ 2025-12-26",
+    "backtest_range": "2022-01-01 ~ 2025-12-26",
+    "market": "csi500",
+    "benchmark": "SH000905"
+  },
+  "elapsed_seconds": 858.7699358463287
+}

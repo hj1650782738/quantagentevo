@@ -1,0 +1,23 @@
+{
+  "experiment_name": "random_150_QA_no_consistency_csi300",
+  "factor_source": "custom",
+  "num_factors": 150,
+  "metrics": {
+    "IC": 0.1303977009250069,
+    "ICIR": 0.8173707533089855,
+    "Rank IC": 0.1261357459221851,
+    "Rank ICIR": 0.7913528668341184,
+    "annualized_return": 0.23515192286729697,
+    "information_ratio": 2.778855698320664,
+    "max_drawdown": -0.09752715789782762,
+    "calmar_ratio": 2.4111429876142725
+  },
+  "config": {
+    "data_range": "2016-01-01 ~ 2025-12-26",
+    "test_range": "2022-01-01 ~ 2025-12-26",
+    "backtest_range": "2022-01-01 ~ 2025-12-26",
+    "market": "csi300",
+    "benchmark": "SH000300"
+  },
+  "elapsed_seconds": 801.7889003753662
+}

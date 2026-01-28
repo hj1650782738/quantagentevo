@@ -3,14 +3,14 @@
   "factor_source": "custom",
   "num_factors": 150,
   "metrics": {
-    "IC": 0.11107819200811474,
-    "ICIR": 0.6374387921349768,
-    "Rank IC": 0.10771248460250757,
-    "Rank ICIR": 0.6211221112654549,
-    "annualized_return": 0.22699822470425365,
-    "information_ratio": 2.6459230952544157,
-    "max_drawdown": -0.0695941899705258,
-    "calmar_ratio": 3.2617410275252987
+    "IC": 0.1086429430887389,
+    "ICIR": 0.6247976264372098,
+    "Rank IC": 0.10504464226278044,
+    "Rank ICIR": 0.6074329321080757,
+    "annualized_return": 0.21141007744992701,
+    "information_ratio": 2.522371766962309,
+    "max_drawdown": -0.072650389989801,
+    "calmar_ratio": 2.909964798256496
   },
   "config": {
     "data_range": "2016-01-01 ~ 2025-12-26",
@@ -19,5 +19,5 @@
     "market": "csi300",
     "benchmark": "SH000300"
   },
-  "elapsed_seconds": 427.85600233078003
+  "elapsed_seconds": 308.9878053665161
 }

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "RANKIC_desc_150_QA_round11_best_claude_123_csi300",
+    "num_factors": 150,
+    "IC": 0.10040766020028154,
+    "ICIR": 0.6699125443568136,
+    "Rank_IC": 0.09785045430087931,
+    "Rank_ICIR": 0.6637748506371518,
+    "annualized_return": 0.3254044027361147,
+    "information_ratio": 2.6699826019739765,
+    "max_drawdown": -0.12041054522356312,
+    "calmar_ratio": 2.702457680363002,
+    "elapsed_seconds": 1037.2222142219543
+  }
+]

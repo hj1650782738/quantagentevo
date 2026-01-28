@@ -1,0 +1,23 @@
+{
+  "experiment_name": "exp_sp500_custom_123",
+  "factor_source": "custom",
+  "num_factors": 333,
+  "metrics": {
+    "IC": 0.2015591128621947,
+    "ICIR": 1.7805319982159287,
+    "Rank IC": 0.1972894882253119,
+    "Rank ICIR": 1.7520258580186392,
+    "annualized_return": 0.4570150934059952,
+    "information_ratio": 3.9464822886397624,
+    "max_drawdown": -0.07788374788708163,
+    "calmar_ratio": 5.867913471095284
+  },
+  "config": {
+    "data_range": "2016-01-01 ~ 2025-12-23",
+    "test_range": "2022-01-01 ~ 2025-12-23",
+    "backtest_range": "2022-01-01 ~ 2025-12-25",
+    "market": "sp500",
+    "benchmark": "SPX"
+  },
+  "elapsed_seconds": 8174.679668426514
+}
