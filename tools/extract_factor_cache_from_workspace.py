@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-从 QuantaAlpha 工作空间提取因子计算缓存到 backtest_v2 格式
+从 QuantaAlpha 工作空间提取因子计算缓存到 backtest 格式
 
 使用方法:
     # 提取指定工作空间的所有因子
@@ -29,7 +29,7 @@ from typing import Optional, Set
 
 
 def get_cache_key(expression: str) -> str:
-    """计算 backtest_v2 使用的缓存 key"""
+    """计算 backtest 使用的缓存 key"""
     return hashlib.md5(expression.encode()).hexdigest()
 
 
@@ -147,7 +147,7 @@ def extract_cache(
         try:
             factor_data = pd.read_hdf(str(result_h5))
             
-            # 保存为 backtest_v2 格式
+            # 保存为 backtest 格式
             cache_path = os.path.join(cache_dir, f"{cache_key}.pkl")
             with open(cache_path, 'wb') as f:
                 pickle.dump(factor_data, f)

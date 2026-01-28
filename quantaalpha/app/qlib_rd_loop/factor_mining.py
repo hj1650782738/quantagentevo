@@ -609,8 +609,16 @@ def main(path=None, step_n=100, direction=None, stop_event=None, config_path=Non
         logger.info(f"  启用缓存: {RD_AGENT_SETTINGS.cache_with_pickle}")
         logger.info("="*60)
         
-        config_default = Path(__file__).parent / "run_config.yaml"
-        config_file = Path(config_path) if config_path else config_default
+        # 配置文件查找顺序: 参数指定 > 环境变量 > configs目录 > 旧位置
+        if config_path:
+            config_file = Path(config_path)
+        else:
+            project_root = Path(__file__).parent.parent.parent.parent
+            config_candidates = [
+                project_root / "configs" / "run_config.yaml",
+                Path(__file__).parent / "run_config.yaml",
+            ]
+            config_file = next((c for c in config_candidates if c.exists()), config_candidates[0])
         run_cfg = load_run_config(config_file)
         planning_cfg = (run_cfg.get("planning") or {}) if isinstance(run_cfg, dict) else {}
         exec_cfg = (run_cfg.get("execution") or {}) if isinstance(run_cfg, dict) else {}

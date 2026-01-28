@@ -36,8 +36,8 @@ requires-python = ">=3.10"
 quantaalpha = "quantaalpha.app.cli:app"
 
 [project.urls]
-homepage = "https://github.com/hj1650782738/quantagentevo"
-issue = "https://github.com/hj1650782738/quantagentevo/issues"
+homepage = "https://github.com/your-org/quantaalpha"
+issue = "https://github.com/your-org/quantaalpha/issues"
 
 [tool.setuptools]
 packages = ["quantaalpha"]

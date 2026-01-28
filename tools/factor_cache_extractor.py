@@ -3,7 +3,7 @@
 因子缓存提取器
 
 从主程序的日志和工作空间中提取已计算的因子数据，
-转换为 backtest_v2 可直接使用的缓存格式。
+转换为 backtest 可直接使用的缓存格式。
 
 功能:
 1. 从日志中解析因子 ID 和工作空间 UUID 的对应关系
@@ -80,7 +80,7 @@ DEFAULT_WORKSPACE_DIRS = get_all_workspace_dirs() or [
 
 def get_cache_key(expr: str) -> str:
     """
-    生成缓存键（与 backtest_v2/factor_calculator.py 中的方法一致）
+    生成缓存键（与 backtest/factor_calculator.py 中的方法一致）
     """
     return hashlib.md5(expr.encode()).hexdigest()
 
@@ -191,7 +191,7 @@ def copy_result_to_cache(
         # 读取 result.h5
         result = pd.read_hdf(result_h5_path, key='data')
         
-        # 保存为 pkl（与 backtest_v2 的缓存格式一致）
+        # 保存为 pkl（与 backtest 的缓存格式一致）
         result.to_pickle(cache_file)
         
         return f"{cache_key}.pkl"

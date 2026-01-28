@@ -163,8 +163,13 @@ class QuantaAlphaLoop(LoopBase, metaclass=LoopMeta):
         if config_path_str:
             config_path = Path(config_path_str)
         else:
-            # 使用默认配置文件
-            config_path = Path(__file__).parent.parent.parent / "app" / "qlib_rd_loop" / "run_config.yaml"
+            # 配置文件查找顺序: configs目录 > 旧位置
+            project_root = Path(__file__).parent.parent.parent.parent
+            config_candidates = [
+                project_root / "configs" / "run_config.yaml",
+                Path(__file__).parent.parent.parent / "app" / "qlib_rd_loop" / "run_config.yaml",
+            ]
+            config_path = next((c for c in config_candidates if c.exists()), config_candidates[0])
         
         # 加载配置文件
         if config_path.exists():
