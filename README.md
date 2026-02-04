@@ -1,4 +1,4 @@
-# QuantAgentEvo
+# QuantaAlpha
 
 面向因子挖掘与回测的 LLM 驱动实验框架，支持一致性/冗余度/复杂度质量门控与可复现实验流程。
 
@@ -29,8 +29,8 @@ alphaagent/app/qlib_rd_loop/     # 主流程与配置
 ### 1. 环境准备
 
 ```bash
-conda create -n quantagentevo python=3.10
-conda activate quantagentevo
+conda create -n quantaalpha python=3.10
+conda activate quantaalpha
 pip install -e .
 pip install -r requirements.txt
 ```

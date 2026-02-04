@@ -605,7 +605,7 @@ def main(path=None, step_n=100, direction=None, stop_event=None, config_path=Non
 
     .. code-block:: python
 
-        dotenv run -- python rdagent/app/qlib_rd_loop/factor_alphaagent.py $LOG_PATH/__session__/1/0_propose  --step_n 1  --potential_direction "[Initial Direction (Optional)]"
+        dotenv run -- python alphaagent/app/qlib_rd_loop/factor_mining.py $LOG_PATH/__session__/1/0_propose  --step_n 1  --potential_direction "[Initial Direction (Optional)]"
 
     """
     try:

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuantaAlpha Studio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">QAE</div>
+        <div class="title">
+          <h1>QuantaAlpha Studio</h1>
+          <p>LLM 驱动的量化因子挖掘与回测平台</p>
+        </div>
+      </div>
+      <div id="statusBadge" class="badge badge-idle">空闲</div>
+    </header>
+
+    <main class="grid">
+      <!-- 左侧：配置面板 -->
+      <section class="card">
+        <div class="tabs">
+          <button class="tab active" data-tab="mining">因子挖掘</button>
+          <button class="tab" data-tab="backtest">回测</button>
+        </div>
+
+        <!-- 因子挖掘配置 -->
+        <div id="miningPanel" class="tab-panel active">
+          <label>研究方向 <span class="required">*</span></label>
+          <textarea id="direction" placeholder="例如：价量因子挖掘、动量因子研究"></textarea>
+
+          <label>Qlib 数据路径 <span class="required">*</span></label>
+          <input id="qlibDataPath" type="text" placeholder="/path/to/qlib_data" />
+          <p class="hint">请提供完整的 Qlib 兼容格式数据目录</p>
+
+          <details class="advanced" open>
+            <summary>API 配置 <span class="required">*</span></summary>
+            <label>API Key</label>
+            <input id="apiKey" type="password" placeholder="sk-xxx" />
+            <label>API URL</label>
+            <input id="apiUrl" type="text" placeholder="https://openrouter.ai/api/v1" />
+            <label>模型名称</label>
+            <input id="model" type="text" placeholder="deepseek/deepseek-v3.2" />
+          </details>
+
+          <details class="advanced">
+            <summary>实验参数</summary>
+            <label>并行方向数 (num_directions)</label>
+            <input id="numDirections" type="number" min="1" max="50" value="10" />
+            <p class="hint">planning 阶段生成的并行探索方向数量</p>
+            
+            <label>进化轮次 (max_rounds)</label>
+            <input id="maxRounds" type="number" min="1" max="100" value="11" />
+            <p class="hint">总进化轮次（包括原始轮、变异轮、交叉轮）</p>
+            
+            <label>因子库后缀（可选）</label>
+            <input id="librarySuffix" type="text" placeholder="exp1" />
+            <p class="hint">输出文件名：all_factors_library_{后缀}.json</p>
+          </details>
+
+          <div class="actions">
+            <button id="miningBtn" class="btn primary">▶ 启动挖掘</button>
+            <button id="downloadMiningBtn" class="btn" disabled>📥 下载日志</button>
+          </div>
+        </div>
+
+        <!-- 回测配置 -->
+        <div id="backtestPanel" class="tab-panel">
+          <label>回测配置文件 <span class="required">*</span></label>
+          <input id="backtestConfig" type="text" placeholder="/path/to/config.yaml" />
+          <p class="hint">YAML 格式的回测配置文件</p>
+
+          <label>Qlib 数据路径</label>
+          <input id="backtestQlibPath" type="text" placeholder="/path/to/qlib_data" />
+
+          <label>因子源类型</label>
+          <select id="factorSource">
+            <option value="custom">custom - 自定义因子库</option>
+            <option value="combined">combined - 官方 + 自定义</option>
+            <option value="alpha158_20">alpha158_20 - 基础 20 因子</option>
+            <option value="alpha158">alpha158 - 完整 158 因子</option>
+            <option value="alpha360">alpha360 - 360 因子</option>
+          </select>
+
+          <label>因子库 JSON 文件路径</label>
+          <textarea id="factorJsonPaths" placeholder="每行一个路径，例如：&#10;/path/to/factors1.json&#10;/path/to/factors2.json"></textarea>
+          <p class="hint">使用 custom 或 combined 时必填</p>
+
+          <details class="advanced">
+            <summary>API 配置（可选）</summary>
+            <label>API Key</label>
+            <input id="backtestApiKey" type="password" placeholder="如需 LLM 计算因子则填写" />
+            <label>API URL</label>
+            <input id="backtestApiUrl" type="text" placeholder="https://openrouter.ai/api/v1" />
+            <label>模型名称</label>
+            <input id="backtestModel" type="text" placeholder="deepseek/deepseek-v3.2" />
+          </details>
+
+          <details class="advanced">
+            <summary>其他选项</summary>
+            <label class="toggle">
+              <input id="dryRun" type="checkbox" />
+              <span>Dry Run（仅加载因子，不执行回测）</span>
+            </label>
+            <label class="toggle">
+              <input id="verbose" type="checkbox" />
+              <span>详细模式</span>
+            </label>
+            <label>实验名称（可选）</label>
+            <input id="experimentName" type="text" placeholder="backtest_exp1" />
+          </details>
+
+          <div class="actions">
+            <button id="backtestBtn" class="btn primary">▶ 启动回测</button>
+            <button id="downloadBacktestBtn" class="btn" disabled>📥 下载日志</button>
+          </div>
+        </div>
+
+        <p class="hint security-note">🔒 API Key 仅在当前运行的子进程中使用，不会被保存</p>
+      </section>
+
+      <!-- 右侧：状态面板 -->
+      <section class="card">
+        <h2>运行状态</h2>
+        <div class="status">
+          <div class="stage">
+            <div class="stage-name" id="stageName">空闲</div>
+            <div class="stage-detail" id="stageDetail">等待启动...</div>
+          </div>
+          <div class="progress">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <div class="status-meta">
+            <span>任务 ID: <code id="runId">-</code></span>
+            <span>状态: <span id="runStatus">-</span></span>
+          </div>
+        </div>
+
+        <h3>实时输出</h3>
+        <div id="outputBox" class="output-box">
+          <pre id="outputContent">等待输出...</pre>
+        </div>
+
+        <h3>任务配置</h3>
+        <div id="configSummary" class="config-summary">-</div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>QuantaAlpha - LLM 驱动的量化因子挖掘框架</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

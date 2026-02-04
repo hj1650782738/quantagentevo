@@ -515,10 +515,10 @@ def show_feedbacks(exp_dir):
 def get_all_workspace_dirs():
     """
     动态发现所有工作空间目录
-    支持 RD-Agent_workspace 和 RD-Agent_workspace_{EXPERIMENT_ID} 格式
+    支持 QuantaAlpha_workspace 和 QuantaAlpha_workspace_{EXPERIMENT_ID} 格式
     """
     workspace_base_dirs = [
-        Path("/mnt/DATA/quantagent/AlphaAgent"),  # 新路径基础目录
+        Path("/mnt/DATA/quantagent/QuantaAlpha"),  # 新路径基础目录
         Path("/home/tjxy/quantagent/AlphaAgent/git_ignore_folder"),  # 旧路径基础目录
     ]
     
@@ -526,9 +526,9 @@ def get_all_workspace_dirs():
     for base_dir in workspace_base_dirs:
         if not base_dir.exists():
             continue
-        # 查找所有匹配 RD-Agent_workspace* 的目录
+        # 查找所有匹配 QuantaAlpha_workspace* 的目录
         for ws_dir in base_dir.iterdir():
-            if ws_dir.is_dir() and ws_dir.name.startswith("RD-Agent_workspace"):
+            if ws_dir.is_dir() and ws_dir.name.startswith("QuantaAlpha_workspace"):
                 workspace_dirs.append(ws_dir)
     
     return workspace_dirs

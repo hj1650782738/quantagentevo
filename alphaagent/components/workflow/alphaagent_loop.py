@@ -1,6 +1,5 @@
 """
-Model workflow with session control
-It is from `rdagent/app/qlib_rd_loop/model.py` and try to replace `rdagent/app/qlib_rd_loop/RDAgent.py`
+Model workflow with session control.
 """
 
 import time

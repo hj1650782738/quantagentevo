@@ -1,7 +1,7 @@
 from jinja2 import Template
 
 # Step 1: 读取模板内容
-with open('/home/tangziyi/RD-Agent/alphaagent/components/coder/factor_coder/template_debug.jinjia2', 'r') as f:
+with open('/home/tangziyi/QuantaAlpha/alphaagent/components/coder/factor_coder/template_debug.jinjia2', 'r') as f:
     template_content = f.read()
 
 # Step 2: 渲染模板

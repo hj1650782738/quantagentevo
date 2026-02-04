@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Temporary files
+.tmp/
+*.log
+*.zip
+
+# IDE
+.idea/
+.vscode/

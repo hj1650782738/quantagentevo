@@ -274,7 +274,7 @@ label = "Ref($close, -2) / Ref($close, -1) - 1"  # T+2 日收益率
 
 ```bash
 # 自动生成 (默认)
-WORKSPACE_PATH=/mnt/DATA/quantagent/AlphaAgent/RD-Agent_workspace_exp_YYYYMMDD_HHMMSS
+WORKSPACE_PATH=/mnt/DATA/quantagent/QuantaAlpha/QuantaAlpha_workspace_exp_YYYYMMDD_HHMMSS
 PICKLE_CACHE_FOLDER_PATH=/mnt/DATA/quantagent/AlphaAgent/pickle_cache_exp_YYYYMMDD_HHMMSS
 
 # 手动指定

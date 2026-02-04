@@ -35,8 +35,8 @@ requires-python = ">=3.10"
 alphaagent = "alphaagent.app.cli:app"
 
 [project.urls]
-homepage = "https://github.com/microsoft/RD-Agent/"
-issue = "https://github.com/microsoft/RD-Agent/issues"
+homepage = "https://github.com/hj1650782738/quantaalpha"
+issue = "https://github.com/hj1650782738/quantaalpha/issues"
 
 [tool.setuptools]
 packages = ["alphaagent"]

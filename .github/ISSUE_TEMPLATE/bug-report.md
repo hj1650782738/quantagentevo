@@ -1,6 +1,6 @@
 ---
 name: "\U0001F41B Bug Report"
-about: Submit a bug report to help us improve RD-Agent
+about: Submit a bug report to help us improve QuantaAlpha
 labels: bug
 
 ---
@@ -28,7 +28,7 @@ Steps to reproduce the behavior:
 
 ## Environment
 
-**Note**: Users can run `rdagent collect_info` to get system information and paste it directly here.
+**Note**: Users can run `alphaagent collect_info` to get system information and paste it directly here.
 
  - Name of current operating system:
  - Processor architecture:
@@ -43,7 +43,7 @@ Steps to reproduce the behavior:
  - Container port mapping:
  - Container Label:
  - Startup Commands:
- - RD-Agent version:
+ - QuantaAlpha version:
  - Package version:
 
 ## Additional Notes

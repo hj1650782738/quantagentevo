@@ -1,5 +1,5 @@
-   Welcome to RD-Agent's documentation!
-   ==================================
+   Welcome to QuantaAlpha's documentation!
+   =========================================
 
    .. toctree::
       :maxdepth: 2

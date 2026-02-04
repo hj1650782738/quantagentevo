@@ -179,13 +179,13 @@ class QlibFactorHypothesisExperiment2Feedback(HypothesisExperiment2Feedback):
                 break
             except json.JSONDecodeError as e:
                 last_error = e
-                logger.warning(f"[RDAgent] JSON 解析失败 (尝试 {attempt + 1}/{MAX_JSON_PARSE_RETRIES}): {e}")
+                logger.warning(f"[QuantaAlpha] JSON 解析失败 (尝试 {attempt + 1}/{MAX_JSON_PARSE_RETRIES}): {e}")
                 if attempt < MAX_JSON_PARSE_RETRIES - 1:
-                    logger.info("[RDAgent] 重新请求 LLM...")
+                    logger.info("[QuantaAlpha] 重新请求 LLM...")
                 continue
         
         if response_json is None:
-            logger.error(f"[RDAgent] JSON 解析在 {MAX_JSON_PARSE_RETRIES} 次尝试后仍然失败")
+            logger.error(f"[QuantaAlpha] JSON 解析在 {MAX_JSON_PARSE_RETRIES} 次尝试后仍然失败")
             # 返回默认反馈而不是崩溃
             return HypothesisFeedback(
                 observations="JSON 解析失败，无法提取反馈",

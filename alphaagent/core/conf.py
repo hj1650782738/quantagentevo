@@ -67,14 +67,14 @@ class RDAgentSettings(ExtendedBaseSettings):
     max_kmeans_group_number: int = 40
 
     # workspace conf - 存储到 /mnt/DATA 以节省根目录空间
-    workspace_path: Path = Path("/mnt/DATA/quantagent/AlphaAgent/RD-Agent_workspace")
+    workspace_path: Path = Path("/mnt/DATA/quantagent/QuantaAlpha/QuantaAlpha_workspace")
 
     # multi processing conf
     multi_proc_n: int = 1
 
     # pickle cache conf - 存储到 /mnt/DATA 以节省根目录空间
     cache_with_pickle: bool = True  # whether to use pickle cache
-    pickle_cache_folder_path_str: str = "/mnt/DATA/quantagent/AlphaAgent/pickle_cache"
+    pickle_cache_folder_path_str: str = "/mnt/DATA/quantagent/QuantaAlpha/pickle_cache"
     use_file_lock: bool = (
         True  # when calling the function with same parameters, whether to use file lock to avoid
         # executing the function multiple times

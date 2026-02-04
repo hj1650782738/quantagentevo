@@ -63,8 +63,8 @@ dev-%:
 init-qlib-env:
 	# note: You may need to install torch manually
 	# todo: downgrade ruamel.yaml in pyqlib
-	conda create -n qlibRDAgent python=3.8 -y
-	@source $$(conda info --base)/etc/profile.d/conda.sh && conda activate qlibRDAgent && which pip && pip install pyqlib && pip install ruamel-yaml==0.17.21 && pip install torch==2.1.1 && pip install catboost==0.24.3 && conda deactivate
+	conda create -n qlibQuantaAlpha python=3.8 -y
+	@source $$(conda info --base)/etc/profile.d/conda.sh && conda activate qlibQuantaAlpha && which pip && pip install pyqlib && pip install ruamel-yaml==0.17.21 && pip install torch==2.1.1 && pip install catboost==0.24.3 && conda deactivate
 
 dev:
 	$(PIPRUN) pip install -e .[docs,lint,package,test] -c $(CONSTRAINTS_FILE)

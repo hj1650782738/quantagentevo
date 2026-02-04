@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: readthedocs/actions/preview@v1
         with:
-          project-slug: RDAgent
+          project-slug: quantaalpha
 name: Read the Docs Pull Request Preview
 on:
   pull_request_target:

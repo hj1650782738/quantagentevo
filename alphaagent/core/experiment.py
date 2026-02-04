@@ -13,7 +13,7 @@ from typing import Any, Generic, TypeVar
 from alphaagent.core.conf import RD_AGENT_SETTINGS
 
 """
-This file contains the all the class about organizing the task in RD-Agent.
+This file contains the classes about organizing tasks in QuantaAlpha.
 """
 
 

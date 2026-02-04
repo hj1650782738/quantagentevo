@@ -128,7 +128,7 @@ fi
 export EXPERIMENT_ID
 
 if [ "${EXPERIMENT_ID}" != "shared" ]; then
-    export WORKSPACE_PATH="/mnt/DATA/quantagent/AlphaAgent/RD-Agent_workspace_${EXPERIMENT_ID}"
+    export WORKSPACE_PATH="/mnt/DATA/quantagent/QuantaAlpha/QuantaAlpha_workspace_${EXPERIMENT_ID}"
     export PICKLE_CACHE_FOLDER_PATH_STR="/mnt/DATA/quantagent/AlphaAgent/pickle_cache_${EXPERIMENT_ID}"
     echo "🔀 实验隔离模式: EXPERIMENT_ID=${EXPERIMENT_ID}"
     echo "   工作空间: ${WORKSPACE_PATH}"

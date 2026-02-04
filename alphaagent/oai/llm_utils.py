@@ -787,7 +787,7 @@ class APIBackend:
         seed : Optional[int]
             When retrying with cache enabled, it will keep returning the same results.
             To make retries useful, we need to enable a seed.
-            This seed is different from `self.chat_seed` for GPT. It is for the local cache mechanism enabled by RD-Agent locally.
+            This seed is different from `self.chat_seed` for GPT. It is for the local cache mechanism enabled by QuantaAlpha locally.
         """
         if seed is None and LLM_SETTINGS.use_auto_chat_cache_seed_gen:
             seed = LLM_CACHE_SEED_GEN.get_next_seed()
