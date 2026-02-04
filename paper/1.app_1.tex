@@ -1,0 +1,213 @@
+% Appendix A: Experiment Settings
+
+\section{Experiment Settings}
+\label{sec:appendix_experiment_details}
+
+This section provides details of our experimental setup, including computational infrastructure, evaluation metrics, backtesting setup, and baselines.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Computational Infrastructure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+All experiments are conducted on a high-performance computing server with the configuration shown in Table~\ref{tab:hardware_config}.
+
+\begin{table}[!htbp]
+\centering
+\caption{Hardware Configuration for Experimental Infrastructure}
+\label{tab:hardware_config}
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Specification} \\
+\midrule
+CPU & 2 $\times$ Intel Xeon Gold 6348 (56 cores / 112 threads) \\
+Memory & 755 GB DDR4 RAM \\
+GPU & 4 $\times$ NVIDIA RTX 6000 Ada (48 GB VRAM each) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Evaluation Metrics}
+\label{appendix:A.2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We evaluate predictive performance using two categories of metrics: factor predictive power and strategy-level performance.
+
+Without loss of generality, the bar notation $\bar{\cdot}$ denotes the mean, and $\sigma(\cdot)$ denotes the standard deviation.
+
+\begin{itemize}
+    \setlength{\itemsep}{-2pt}
+    \setlength{\parsep}{0pt}
+    \setlength{\topsep}{0pt}
+    \setlength{\partopsep}{0pt} 
+    \item \textbf{Information Coefficient (IC)}: Pearson correlation between factor values $\mathbf{f}_t$ and future returns $\mathbf{r}_{t+1}$:
+    \begin{equation*}
+        \operatorname{IC}_t = \frac{(\mathbf{f}_t - \bar{f}_t \mathbf{1})^\top (\mathbf{r}_{t+1} - \bar{r}_{t+1} \mathbf{1})}{\|\mathbf{f}_t - \bar{f}_t \mathbf{1}\|_2 \cdot \|\mathbf{r}_{t+1} - \bar{r}_{t+1} \mathbf{1}\|_2},
+    \end{equation*}
+    where $\mathbf{1}$ denotes a column vector of ones.
+    
+    \item \textbf{ICIR}: Information ratio of IC, measuring consistency: $\operatorname{ICIR} = \overline{\operatorname{IC}} / \sigma(\operatorname{IC})$.
+    
+    \item \textbf{Rank IC}: Spearman correlation using rank vectors $\tilde{\mathbf{f}}_t = \operatorname{rank}(\mathbf{f}_t)$ and $\tilde{\mathbf{r}}_{t+1} = \operatorname{rank}(\mathbf{r}_{t+1})$:
+    \begin{equation*}
+        \operatorname{RankIC}_t = \frac{(\tilde{\mathbf{f}}_t - \bar{\tilde{f}}_t \mathbf{1})^\top (\tilde{\mathbf{r}}_{t+1} - \bar{\tilde{r}}_{t+1} \mathbf{1})}{\|\tilde{\mathbf{f}}_t - \bar{\tilde{f}}_t \mathbf{1}\|_2 \cdot \|\tilde{\mathbf{r}}_{t+1} - \bar{\tilde{r}}_{t+1} \mathbf{1}\|_2},
+    \end{equation*}
+    where $\operatorname{rank}(\cdot)$ is the rank function applied element-wise to its input vector in ascending order.
+    
+    \item \textbf{Rank ICIR}: Information ratio of Rank IC: $\operatorname{RankICIR} = \overline{\operatorname{RankIC}} / \sigma(\operatorname{RankIC})$.
+\end{itemize}
+
+All strategy metrics are computed on \textit{excess returns after transaction costs}, where $r_{\text{excess},t} = r_{\text{portfolio},t} - r_{\text{benchmark},t} - c_{\text{transaction},t}$. Here, $r_{\text{portfolio},t}$ represents the return of the strategy portfolio, $r_{\text{benchmark},t}$ denotes the return of the market benchmark, and $c_{\text{transaction},t}$ accounts for the transaction costs incurred at time $t$.
+
+\begin{itemize}
+    \setlength{\itemsep}{-2pt}
+    \setlength{\parsep}{0pt}
+    \setlength{\topsep}{0pt}
+    \setlength{\partopsep}{0pt}
+    \item \textbf{Information Ratio ($\operatorname{IR}$)}: $\operatorname{IR} = (\overline{r_{\text{excess}}} / \sigma(r_{\text{excess}})) \times \sqrt{252}$.
+    \item \textbf{Annualized Return ($\operatorname{ARR}$)}: Annualized excess return over benchmark.
+    \item \textbf{Maximum Drawdown ($\operatorname{MDD}$)}: Largest peak-to-trough decline in cumulative excess returns.
+    \item \textbf{Calmar Ratio ($\operatorname{CR}$)}: $\operatorname{CR} = \operatorname{ARR} / |\operatorname{MDD}|$.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Backtesting Setup}
+\label{subsec:backtest_setup}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Backtesting is conducted using the Qlib framework across the CSI 300, CSI 500, and S\&P 500 indices, with the data split detailed in Table~\ref{tab:data_split}. Factor construction utilizes six basic features—\texttt{open}, \texttt{high}, \texttt{low}, \texttt{close}, \texttt{volume}, and \texttt{vwap}—to predict the next-day return, defined as $y_t = P_{t+2}^{\text{close}} / P_{t+1}^{\text{close}} - 1$, where $P_{t}^{\text{close}}$ denotes the closing price at time $t$. To ensure robustness against outliers, the preprocessing pipeline includes forward-filling missing values, replacing infinite values, dropping samples with missing labels, and applying cross-sectional rank normalization (CSRankNorm) to both features and labels.
+
+\begin{table}[!htbp]
+\centering
+\caption{Data Split Periods for Train, Validation, and Test Sets across All Markets}
+\label{tab:data_split}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Market} & \textbf{Train} & \textbf{Valid} & \textbf{Test} \\
+\midrule
+CSI 300 & 2016-01-01--2020-12-31 & 2021-01-01--2021-12-31 & 2022-01-01--2025-12-26 \\
+CSI 500 & 2016-01-01--2020-12-31 & 2021-01-01--2021-12-31 & 2022-01-01--2025-12-26 \\
+S\&P 500 & 2016-01-01--2020-12-31 & 2021-01-01--2021-12-31 & 2022-01-01--2025-12-26 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Baselines}
+\label{appendix:A.5}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We benchmark against four categories: (1) \textbf{ML models}: Linear Regression (Linear), Multi-Layer Perceptron (MLP), and gradient boosting decision trees including LightGBM, XGBoost, and CatBoost, along with DoubleEnsemble, an ensemble method for financial time series; (2) \textbf{Deep learning}: Recurrent networks such as Gated Recurrent Unit (GRU) and Long Short-Term Memory (LSTM), the attention-based Transformer, and Temporal Routing Adaptor (TRA); (3) \textbf{Classical factors}: Alpha158 and Alpha360, which are widely used sets of technical factors derived from price and volume; (4) \textbf{LLM agents}: RD-Agent and AlphaAgent, which utilize large language models for automated factor mining.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Algorithm Configuration}
+\label{sec:appendix_algorithm}
+
+This section details the evolution algorithm parameters, factor constraints, and trading strategy configuration.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Evolution Algorithm}
+\label{subsec:evolution_config}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+QuantaAlpha employs an evolutionary algorithm with mutation and crossover operations. Key hyperparameters are shown in Table~\ref{tab:evolution_params}. The process alternates between mutation (exploring orthogonal strategies) and crossover (combining successful trajectories) phases across multiple rounds. LightGBM is used as the downstream model for factor-based prediction.
+
+\begin{table}[!htbp]
+\centering
+\caption{Hyperparameters for the QuantaAlpha Evolution Algorithm}
+\label{tab:evolution_params}
+\begin{tabular}{llp{8.5cm}}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+\midrule
+\multicolumn{2}{c}{\textit{Planning Phase}} \\
+\midrule
+num\_directions & 10 & Parallel exploration directions \\
+max\_planning\_attempts & 5 & Max LLM retry attempts \\
+\midrule
+\multicolumn{2}{c}{\textit{Evolution Phase}} \\
+\midrule
+max\_rounds & 11 & Max evolution rounds \\
+crossover\_size & 2 & Parents per crossover \\
+crossover\_n & 10 & Offspring per round \\
+parent\_selection & best & Selection strategy \\
+\midrule
+\multicolumn{2}{c}{\textit{Execution Phase}} \\
+\midrule
+max\_loops & 11 & Max iterations per trajectory \\
+steps\_per\_loop & 5 & Steps: propose$\to$construct$\to$calculate$\to$backtest$\to$feedback \\
+factors\_per\_hypothesis & 3 & Factor expressions per hypothesis \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{subsec:factor_complexity}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To prevent overfitting and ensure interpretability, factor expressions—built using the operators listed in Table~\ref{tab:factor_operators}—are restricted by the following constraints: symbol length $\leq$ 250 characters, base features $\leq$ 6, free arguments ratio $<$ 50\%, and duplicate subtree size $\leq$ 5. Details of the associated complexity penalty formulation are discussed in the main text.
+
+\begin{table}[!htbp]
+\centering
+\caption{List of Supported Operators for Factor Construction}
+\label{tab:factor_operators}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{2.3cm} p{8cm} @{\hspace{0.6cm}} p{5.5cm}}
+\toprule
+\textbf{Category} & \textbf{Operators} & \textbf{Description} \\
+\midrule
+Time-Series & \texttt{DELTA}, \texttt{DELAY}, \texttt{TS\_MEAN}, \texttt{TS\_STD}, \texttt{TS\_VAR}, \texttt{TS\_MAX}, \texttt{TS\_MIN}, \texttt{TS\_SUM}, \texttt{TS\_RANK}, \texttt{TS\_CORR}, \texttt{TS\_COVARIANCE}, \texttt{TS\_ARGMAX}, \texttt{TS\_ARGMIN}, \texttt{TS\_SKEW}, \texttt{TS\_KURT}, \texttt{TS\_PCTCHANGE}, \texttt{TS\_ZSCORE}, \texttt{TS\_QUANTILE} & Rolling statistics computed along time axis per instrument \\
+\midrule
+Cross-Sectional & \texttt{RANK}, \texttt{ZSCORE}, \texttt{SCALE}, \texttt{MEAN}, \texttt{STD}, \texttt{MEDIAN}, \texttt{MAX}, \texttt{MIN}, \texttt{SKEW}, \texttt{KURT} & Statistics computed across stocks per datetime \\
+\midrule
+Mathematical & \texttt{ABS}, \texttt{SIGN}, \texttt{LOG}, \texttt{EXP}, \texttt{SQRT}, \texttt{POW}, \texttt{INV} & Element-wise mathematical functions \\
+\midrule
+Technical & \texttt{SMA}, \texttt{EMA}, \texttt{WMA}, \texttt{MACD}, \texttt{RSI}, \texttt{BB\_UPPER}, \texttt{BB\_LOWER}, \texttt{DECAYLINEAR}, \texttt{REGBETA}, \texttt{REGRESI} & Common technical indicators \\
+\midrule
+Logical & \texttt{GT}, \texttt{LT}, \texttt{GE}, \texttt{LE}, \texttt{AND}, \texttt{OR}, \texttt{WHERE} & Comparison and conditional operators \\
+\midrule
+Auxiliary & \texttt{COUNT}, \texttt{SUMIF}, \texttt{FILTER}, \texttt{PROD}, \texttt{HIGHDAY}, \texttt{LOWDAY} & Helper functions for complex expressions \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Trading Strategy Configuration}
+\label{subsec:trading_strategy}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We employ a TopkDropout strategy for portfolio construction, as detailed in Table~\ref{tab:trading_params}. On each trading day, stocks are ranked according to their predicted scores; the $n_{\text{drop}}$ lowest-scoring holdings are liquidated and replaced with the highest-ranked candidates to maintain a constant portfolio size with equal weighting.
+
+\begin{table}[!htbp]
+\centering
+\caption{Parameters for the TopkDropout Trading Strategy}
+\label{tab:trading_params}
+\begin{tabular}{llp{5cm}}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+\midrule
+\multicolumn{3}{c}{\textit{Portfolio}} \\
+\midrule
+topk & 50 & Number of stocks held \\
+n\_drop & 5 & Stocks dropped per rebalance \\
+\midrule
+\multicolumn{3}{c}{\textit{Transaction Costs}} \\
+\midrule
+Buying Fee & 0.05\% & Commission \\
+Selling Fee & 0.15\% & Commission + stamp duty \\
+\midrule
+\multicolumn{3}{c}{\textit{Execution}} \\
+\midrule
+Deal Price & Open & Next-day opening price \\
+Limit Threshold & 9.5\% & Price limit for halt \\
+\midrule
+\multicolumn{3}{c}{\textit{Benchmark}} \\
+\midrule
+China & SH000300/SH000905 & CSI 300/CSI500 \\
+U.S. & SPX & S\&P 500 \\
+\bottomrule
+\end{tabular}
+\end{table}

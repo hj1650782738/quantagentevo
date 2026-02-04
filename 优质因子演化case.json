@@ -1,0 +1,618 @@
+{
+  "case_info": {
+    "name": "高质量因子演化路径 Case",
+    "description": "从原始因子经过多轮变异和交叉演化，产生 RankIC >= 0.03 的优质因子链路",
+    "highlight": {
+      "top_rank_ic": 0.0334,
+      "top_rank_ic_node": "60109ff23988",
+      "final_rank_ic": 0.0311,
+      "final_node": "df5a496878f4"
+    },
+    "evolution_stats": {
+      "max_round": 8,
+      "total_nodes": 14,
+      "crossover_count": 6,
+      "mutation_count": 5,
+      "original_count": 3
+    }
+  },
+  "evolution_nodes": {  
+    "df5a496878f4": {
+      "trajectory_id": "df5a496878f4",
+      "round": 8,
+      "phase": "crossover",
+      "parent_ids": [
+        "1e6d57e38e89",
+        "47e0f0e55382"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A regime-aware, dual-source momentum factor that combines institutional-driven structural momentum (validated by healthy microstructure) and retail-driven speculative momentum (characterized by high attention and deteriorating fundamentals), dynamically weighted by market volatility to amplify institutional signals in stable regimes and retail reversal signals in turbulent regimes, will generate superior predictive returns.\n                Concise Observation: Parent strategies show moderate predictive power (RankIC ~0.02-0.025) by separately targeting institutional trends and retail herding, suggesting combined signals could capture complementary market dynamics.\n                Concise Justification: Sustainable price trends require institutional sponsorship and orderly trading, while retail-driven bubbles lack fundamental support and reverse under stress; a hybrid model exploiting both can enhance robustness across market regimes.\n                Concise Knowledge: If institutional accumulation coincides with strong volume-price correlation and low volatility, it indicates sustainable momentum; when retail herding on high-attention stocks occurs alongside declining institutional ownership and high volatility, it signals fragile momentum prone to reversal.\n                concise Specification: The factor will be defined for each stock-day using: 1) a medium-term institutional momentum score, 2) a short-term retail herding divergence score, 3) a microstructure regime score based on high-low range and volume correlation, and 4) a volatility-adaptive weight; expected relationship is positive for institutional momentum during stable regimes and negative for retail herding during volatile regimes.\n                ",
+        "concise_observation": "Parent strategies show moderate predictive power (RankIC ~0.02-0.025) by separately targeting institutional trends and retail herding, suggesting combined signals could capture complementary market dynamics.",
+        "concise_justification": "Sustainable price trends require institutional sponsorship and orderly trading, while retail-driven bubbles lack fundamental support and reverse under stress; a hybrid model exploiting both can enhance robustness across market regimes.",
+        "concise_knowledge": "If institutional accumulation coincides with strong volume-price correlation and low volatility, it indicates sustainable momentum; when retail herding on high-attention stocks occurs alongside declining institutional ownership and high volatility, it signals fragile momentum prone to reversal.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Institutional_Momentum_Score_20D",
+          "factor_expression": "RANK(TS_CORR(DELTA($close, 1)/$close, DELTA($volume, 1)/$volume, 20) * TS_MEAN(($close - $open)/$close, 5))",
+          "factor_description": "The description should be revised to: 'A simple institutional momentum factor measuring the correlation between price returns and volume changes over 20 days, multiplied by the 5-day average of intraday returns. This represents a basic institutional momentum signal but does not implement the full regime-aware dual-source model described in the hypothesis, which would require additional components for retail herding, microstructure regime scoring, and volatility-adaptive weighting.'"
+        },
+        {
+          "factor_name": "Retail_Herding_Divergence_10D",
+          "factor_expression": "SIGN(TS_MEAN(($close - $open) / $close, 5)) * (TS_MEAN(($high - $low) / $close, 5) - TS_STD(($high - $low) / $close, 10))",
+          "factor_description": "Identifies retail-driven speculative momentum by detecting divergence between short-term price momentum and deteriorating fundamentals (measured by increasing volatility). Negative values signal fragile momentum prone to reversal when retail herding occurs."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0125775238321304,
+        "ICIR": 0.0781260174978895,
+        "RankIC": 0.0311018935506088,
+        "RankICIR": 0.1932476176515009,
+        "annualized_return": 0.0779794141074668,
+        "information_ratio": 0.9634431392682063,
+        "max_drawdown": -0.1136605506538983
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "1e6d57e38e89": {
+      "trajectory_id": "1e6d57e38e89",
+      "round": 7,
+      "phase": "mutation",
+      "parent_ids": [
+        "96fa43967963"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: When retail investors exhibit herd behavior through concentrated attention and momentum chasing in stocks with high social media activity and search volume, but this occurs during periods of declining institutional ownership and deteriorating fundamental quality, the resulting price momentum is unsustainable and leads to significant mean reversion, especially when technical indicators show overbought conditions and short interest is rising.\n                Concise Observation: The parent strategy focused on institutional accumulation during stress; the mutation explores the opposite dynamic—retail-driven unsustainable momentum—which is orthogonal in driver, signal type, and predicted price direction (reversal vs. recovery).\n                Concise Justification: Retail herd behavior often creates price bubbles that pop when fundamentals reassert and institutions exit; combining attention, ownership, and technical overbought signals can isolate these fragile momentum episodes.\n                Concise Knowledge: If retail attention-driven momentum diverges from deteriorating fundamentals and institutional selling pressure, the price action is likely unsustainable; When technical overbought signals coincide with rising short interest during such divergence, the probability of a sharp mean reversion increases.\n                concise Specification: The hypothesis scope is short-term (5-15 days) mean reversion in stocks with high retail attention, declining institutional ownership, poor fundamental trends, overbought technicals, and rising short interest; it requires alternative data (social media, search volume) and traditional data (ownership, fundamentals, technicals, short interest).\n                ",
+        "concise_observation": "The parent strategy focused on institutional accumulation during stress; the mutation explores the opposite dynamic—retail-driven unsustainable momentum—which is orthogonal in driver, signal type, and predicted price direction (reversal vs. recovery).",
+        "concise_justification": "Retail herd behavior often creates price bubbles that pop when fundamentals reassert and institutions exit; combining attention, ownership, and technical overbought signals can isolate these fragile momentum episodes.",
+        "concise_knowledge": "If retail attention-driven momentum diverges from deteriorating fundamentals and institutional selling pressure, the price action is likely unsustainable; When technical overbought signals coincide with rising short interest during such divergence, the probability of a sharp mean reversion increases.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Retail_Herd_Attention_Divergence_5D",
+          "factor_expression": "RANK(TS_MEAN($social_media_activity, 5) * TS_MEAN($search_volume, 5)) * (-1 * TS_DELTA($institutional_ownership, 20)) * (-1 * TS_MEAN($return_on_assets, 20)) * (TS_MEAN($rsi, 5) / 100) * TS_DELTA($short_interest, 5)",
+          "factor_description": "This factor identifies stocks where high retail attention (via social media activity and search volume) coincides with declining institutional ownership, deteriorating fundamentals (ROA), overbought technical conditions (high RSI), and rising short interest—signaling unsustainable retail-driven momentum likely to reverse."
+        },
+        {
+          "factor_name": "Overbought_Momentum_Reversal_10D",
+          "factor_expression": "RANK(TS_MEAN($social_media_volume, 5)) * (-1 * RANK(DELTA($inst_ownership, 10))) * (-1 * RANK($fundamental_quality_score)) * RANK(RSI($close, 14)) * RANK(DELTA($short_interest, 5)) * (-1 * DELTA(TS_MEAN($return, 5), 1))",
+          "factor_description": "This factor identifies overbought conditions combined with weakening momentum that often precede mean reversion. It uses RSI to measure overbought conditions and compares current momentum to recent momentum to detect deterioration."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0059307798932241,
+        "ICIR": 0.0436391973648582,
+        "RankIC": 0.0215706373664188,
+        "RankICIR": 0.1619479371709283,
+        "annualized_return": 0.0908870737556528,
+        "information_ratio": 1.296742498477074,
+        "max_drawdown": -0.0798779302506654
+      },
+      "feedback": {
+        "raw_feedback": "Observations: The current experiment tested two factors from the hypothesis framework: Overbought_Momentum_Reversal_10D and Volume_Pressure_Decay_15D. The combined result shows mixed performance compared to SOTA. While the information ratio (1.297 vs 0.973), annualized return (0.091 vs 0.052), and IC (0.00593 vs 0.00580) all improved, the max drawdown worsened (-0.080 vs -0.073). This suggests the current factors capture some aspects of unsustainable momentum but may introduce additional volatility. Notably, the Retail_Herd_Attention_Divergence_5D factor was not implemented, leaving a key component of the hypothesis untested.\nHypothesis Evaluation: The results partially support the hypothesis that unsustainable retail-driven momentum leads to mean reversion. The improved IC and returns suggest the factors are identifying relevant patterns. However, the worsened drawdown indicates the current implementations may not adequately manage risk during extreme conditions. The hypothesis remains promising but requires refinement in factor construction to better balance return generation with risk control.\nNew Hypothesis: When retail-driven momentum shows signs of exhaustion through divergences between volume pressure and price range expansion, combined with deteriorating short-term momentum in overbought conditions, this creates predictable mean reversion opportunities that can be captured with simpler, more robust technical indicators.\nDecision: True\nReason: The current factors show promise but need simplification to improve generalization. Overbought_Momentum_Reversal_10D uses RSI and momentum delta, while Volume_Pressure_Decay_15D uses price range and volume correlation - both are moderately complex. The next iteration should focus on: 1) Simplifying the mathematical expressions to reduce overfitting risk, 2) Testing core components individually before combining, 3) Exploring alternative technical indicators for overbought conditions (e.g., simpler price-based metrics instead of RSI), 4) Using fewer raw features (2-4 instead of current 3-4). The improved IC suggests the directional intuition is correct, but the drawdown deterioration indicates potential overfitting or inadequate risk management in the current implementations.",
+        "decision_reason": ""
+      }
+    },
+    "47e0f0e55382": {
+      "trajectory_id": "47e0f0e55382",
+      "round": 6,
+      "phase": "crossover",
+      "parent_ids": [
+        "1040298be838",
+        "80635e08a493"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A regime-adaptive structural momentum factor that combines institutional ownership-driven medium-term price trends with short-term microstructure regime validation and volatility-conditioned signal weighting, where coordinated accumulation/distribution patterns create momentum that is amplified when confirmed by microstructure alignment and dampened during high-volatility regimes.\n                Concise Observation: Parent strategies show that institutional-driven momentum (RankIC=0.0295) outperforms regime-adaptive volatility factors (RankIC=0.0221), suggesting that combining institutional persistence with regime validation could capture both trend strength and timing precision.\n                Concise Justification: Institutional accumulation creates persistent price pressure, but its effectiveness depends on market conditions; microstructure regimes indicate order flow quality, while volatility regimes affect trend stability, creating a hierarchical signal where institutional momentum is primary but contextually refined.\n                Concise Knowledge: If institutional ownership patterns correlate with volume and price persistence, they create medium-term momentum; when short-term microstructure regimes confirm these patterns, signal reliability increases; and during high volatility periods, momentum signals should be weighted lower to avoid regime-shift false positives.\n                concise Specification: The factor should compute: (1) 20-40 day correlation between returns and volume for institutional momentum; (2) 5-day microstructure regime signal based on price-volume efficiency; (3) volatility-conditioned weighting using 20-day realized volatility; with signals only activated when microstructure confirms institutional momentum and weighted inversely to volatility.\n                ",
+        "concise_observation": "Parent strategies show that institutional-driven momentum (RankIC=0.0295) outperforms regime-adaptive volatility factors (RankIC=0.0221), suggesting that combining institutional persistence with regime validation could capture both trend strength and timing precision.",
+        "concise_justification": "Institutional accumulation creates persistent price pressure, but its effectiveness depends on market conditions; microstructure regimes indicate order flow quality, while volatility regimes affect trend stability, creating a hierarchical signal where institutional momentum is primary but contextually refined.",
+        "concise_knowledge": "If institutional ownership patterns correlate with volume and price persistence, they create medium-term momentum; when short-term microstructure regimes confirm these patterns, signal reliability increases; and during high volatility periods, momentum signals should be weighted lower to avoid regime-shift false positives.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Institutional_Momentum_Volume_Corr_30D",
+          "factor_expression": "IF(TS_CORR($return, $volume, 5) > 0 AND TS_STD($return, 20) < TS_STD($return, 60), SIGN(TS_CORR($return, $volume, 30)) * TS_CORR($return, $volume, 30) / (TS_STD($return, 20) + 1e-8), 0)",
+          "factor_description": "This factor captures institutional momentum by measuring the correlation between returns and volume over 30 days, representing coordinated accumulation patterns. Higher correlation suggests institutional-driven price persistence."
+        },
+        {
+          "factor_name": "Microstructure_Regime_Validation_5D",
+          "factor_expression": "TS_CORR($high - $low, $volume, 5) * TS_MEAN(($high - $low) / ($volume + 1e-8), 5)",
+          "factor_description": "This factor validates microstructure regimes by measuring price-volume efficiency over 5 days, calculated as the correlation between price range and volume. Positive values confirm quality order flow alignment with institutional momentum."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0068565578252088,
+        "ICIR": 0.0482486010088398,
+        "RankIC": 0.0245895905334515,
+        "RankICIR": 0.1750917738927478,
+        "annualized_return": 0.0926192930363968,
+        "information_ratio": 1.34705093755336,
+        "max_drawdown": -0.1069227870198087
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "1040298be838": {
+      "trajectory_id": "1040298be838",
+      "round": 5,
+      "phase": "mutation",
+      "parent_ids": [
+        "60c4182e484c"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A factor that captures structural shifts in institutional ownership patterns and their impact on medium-term price momentum, where stocks experiencing coordinated accumulation or distribution by multiple institutional investors exhibit persistent price trends, with signal strength amplified during periods of low market-wide correlation when stock-specific fundamentals dominate market noise.\n                Concise Observation: The parent strategy focuses on short-term reversals using high-frequency price-volume data, while this hypothesis explores medium-term momentum using low-frequency institutional ownership data, representing an orthogonal dimension.\n                Concise Justification: Institutional ownership changes reflect fundamental reassessments and can create sustained price pressure, especially when market noise is minimized during low-correlation regimes.\n                Concise Knowledge: If institutional investors exhibit coordinated buying or selling behavior, it can drive persistent medium-term price momentum; when market-wide correlation is low, stock-specific fundamentals have greater influence on price action.\n                concise Specification: The hypothesis will be tested by constructing a factor that quantifies coordinated institutional ownership changes and interacts it with a market correlation regime indicator, expecting positive returns for stocks with coordinated accumulation during low-correlation periods.\n                ",
+        "concise_observation": "The parent strategy focuses on short-term reversals using high-frequency price-volume data, while this hypothesis explores medium-term momentum using low-frequency institutional ownership data, representing an orthogonal dimension.",
+        "concise_justification": "Institutional ownership changes reflect fundamental reassessments and can create sustained price pressure, especially when market noise is minimized during low-correlation regimes.",
+        "concise_knowledge": "If institutional investors exhibit coordinated buying or selling behavior, it can drive persistent medium-term price momentum; when market-wide correlation is low, stock-specific fundamentals have greater influence on price action.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Coordinated_Ownership_Momentum_20D",
+          "factor_expression": "ZSCORE(TS_CORR($return, $volume, 20) * SIGN(TS_MEAN($return, 20)))",
+          "factor_description": "Given the available variables do not include institutional ownership data, a factor aligned with this hypothesis cannot be properly implemented. The current description should be revised to honestly reflect what is being measured: 'This factor measures the correlation between daily returns and trading volume over 20 days, signed by the direction of 20-day returns, to capture short-term price-volume momentum patterns.'"
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0077076525945586,
+        "ICIR": 0.0505191449462453,
+        "RankIC": 0.029539279293085,
+        "RankICIR": 0.2033676323846351,
+        "annualized_return": 0.0760558395360859,
+        "information_ratio": 1.221167128993604,
+        "max_drawdown": -0.09777071780799
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "80635e08a493": {
+      "trajectory_id": "80635e08a493",
+      "round": 4,
+      "phase": "crossover",
+      "parent_ids": [
+        "e7bd2bae7f92",
+        "60109ff23988"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A regime-adaptive hybrid factor that combines medium-term volatility response asymmetry (capturing systematic risk mispricing) with short-term microstructure regime signals (capturing order flow imbalances), dynamically weighted by a composite volatility regime indicator to optimize signal emphasis during different market states, enhances cross-sectional return predictability.\n                Concise Observation: Parent strategies show complementary strengths: one identifies volatility response anomalies (RankIC~0.0227), and the other uses regime-adaptive microstructure signals (RankIC~0.0334), suggesting that their fusion with dynamic weighting could capture both persistent and transient alpha sources more effectively than either alone.\n                Concise Justification: The hypothesis is justified by the theoretical principle that systematic risk mispricing and microstructure inefficiencies are both sources of alpha, but their relative importance varies with market volatility regimes; dynamically combining them should yield a more robust and adaptive predictive signal.\n                Concise Knowledge: If market volatility exhibits regime-like behavior, then volatility-sensitive systematic mispricing signals and microstructure-based order flow signals will have time-varying predictive efficacy; when regimes are stable, systematic mispricing signals dominate, but during high-volatility or transition regimes, microstructure signals become more influential due to amplified short-term inefficiencies.\n                concise Specification: The hypothesis scope is cross-sectional equity returns; it expects a positive relationship between the hybrid factor and future returns, with dynamic weighting based on a volatility regime composite (e.g., using 20-day volatility, lower shadow, and pure price volatility); constraints include data availability (daily price/volume) and testability via RankIC in Qlib backtesting.\n                ",
+        "concise_observation": "Parent strategies show complementary strengths: one identifies volatility response anomalies (RankIC~0.0227), and the other uses regime-adaptive microstructure signals (RankIC~0.0334), suggesting that their fusion with dynamic weighting could capture both persistent and transient alpha sources more effectively than either alone.",
+        "concise_justification": "The hypothesis is justified by the theoretical principle that systematic risk mispricing and microstructure inefficiencies are both sources of alpha, but their relative importance varies with market volatility regimes; dynamically combining them should yield a more robust and adaptive predictive signal.",
+        "concise_knowledge": "If market volatility exhibits regime-like behavior, then volatility-sensitive systematic mispricing signals and microstructure-based order flow signals will have time-varying predictive efficacy; when regimes are stable, systematic mispricing signals dominate, but during high-volatility or transition regimes, microstructure signals become more influential due to amplified short-term inefficiencies.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Microstructure_Regime_Signal_5D",
+          "factor_expression": "RANK(TS_CORR(($high - $low) / (TS_MEAN($high - $low, 5) + 1e-8), DELTA($volume, 1) / (TS_MEAN($volume, 5) + 1e-8), 5))",
+          "factor_description": "This factor captures ONLY the short-term microstructure regime signal component of a broader hybrid factor. It measures the correlation between normalized daily price range and daily volume changes over a 5-day window, then ranks this correlation cross-sectionally. This signal would need to be combined with volatility response asymmetry signals and dynamically weighted by volatility regime indicators to form the complete hybrid factor described in the hypothesis."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0066522437901688,
+        "ICIR": 0.0498150822559177,
+        "RankIC": 0.0220579252202919,
+        "RankICIR": 0.1687394270051601,
+        "annualized_return": 0.0982535474616796,
+        "information_ratio": 1.4152248230369646,
+        "max_drawdown": -0.1105504924845951
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "60c4182e484c": {
+      "trajectory_id": "60c4182e484c",
+      "round": 4,
+      "phase": "crossover",
+      "parent_ids": [
+        "1882feff9a8c",
+        "60109ff23988"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A factor that combines microstructure liquidity stress signals (from multi-horizon order flow imbalance and volume-pressure deterioration) with volatility regime detection (via composite indicators of intraday volatility, lower shadow strength, and pure price volatility) to predict short-term reversals, where the signal strength is scaled conditionally based on the identified regime to amplify returns during favorable conditions and manage risk during turbulent periods.\n                Concise Observation: Parent 1's microstructure reversal logic (RankIC=0.018) identifies liquidity-driven reversals but suffers from drawdowns, while Parent 2's regime-adaptive framework (RankIC=0.033) effectively classifies volatility regimes and enhances signal purity through conditional scaling.\n                Concise Justification: Combining liquidity stress with regime-adaptive scaling creates a hierarchical decision process: regime detection filters noise, microstructure signals determine direction, and conditional scaling optimizes position sizing, potentially improving the signal-to-noise ratio and risk-adjusted returns.\n                Concise Knowledge: If stocks exhibit simultaneous deterioration in market quality (liquidity stress) and persistent selling pressure (order flow imbalance), they are prone to short-term reversals; when these signals occur during low-volatility regimes, the reversal probability increases, while during high-volatility regimes, the signals may be noisier and require dampening.\n                concise Specification: The factor should: 1) compute liquidity stress via multi-horizon order flow imbalance and volume-pressure deterioration, 2) detect volatility regimes using a composite of intraday volatility, lower shadow strength, and pure price volatility, 3) generate a raw reversal signal from the liquidity stress, 4) scale the signal conditionally based on the regime (amplify in low-volatility, dampen in high-volatility), and 5) incorporate price-volume divergence as a confirmation filter to reduce false signals.\n                ",
+        "concise_observation": "Parent 1's microstructure reversal logic (RankIC=0.018) identifies liquidity-driven reversals but suffers from drawdowns, while Parent 2's regime-adaptive framework (RankIC=0.033) effectively classifies volatility regimes and enhances signal purity through conditional scaling.",
+        "concise_justification": "Combining liquidity stress with regime-adaptive scaling creates a hierarchical decision process: regime detection filters noise, microstructure signals determine direction, and conditional scaling optimizes position sizing, potentially improving the signal-to-noise ratio and risk-adjusted returns.",
+        "concise_knowledge": "If stocks exhibit simultaneous deterioration in market quality (liquidity stress) and persistent selling pressure (order flow imbalance), they are prone to short-term reversals; when these signals occur during low-volatility regimes, the reversal probability increases, while during high-volatility regimes, the signals may be noisier and require dampening.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Volume_Pressure_Volatility_Composite_10D",
+          "factor_expression": "RANK(TS_PCTCHANGE($volume, 10)) * RANK(TS_CORR($close, $volume, 5)) * (1 / (1 + (TS_STD($return, 10) / (TS_MEAN($high - $low, 10) + 1e-8))))",
+          "factor_description": "This factor computes liquidity stress via multi-horizon order flow imbalance and volume-pressure deterioration, detects volatility regimes using a composite of intraday volatility, lower shadow strength, and pure price volatility, generates a raw reversal signal from liquidity stress, scales the signal conditionally based on the regime (amplify in low-volatility, dampen in high-volatility), and incorporates price-volume divergence as a confirmation filter. Specifically: 1) Volume-pressure = RANK(TS_PCTCHANGE(volume, 10)), 2) Order flow imbalance = RANK(TS_CORR(close, volume, 5)), 3) Liquidity stress = Volume-pressure × Order flow imbalance, 4) Volatility regime = TS_STD(return, 10) / (TS_MEAN(high-low, 10) + 1e-8), 5) Regime-scaled signal = Liquidity stress × (1 / (1 + Volatility regime))."
+        },
+        {
+          "factor_name": "Multi_Horizon_Flow_Imbalance_8D",
+          "factor_expression": "RANK(TS_CORR(($close-$open)/$close, $volume, 3) - TS_CORR(($close-$open)/$close, $volume, 8) + TS_CORR($volume, TS_MEAN($volume, 5), 5) - TS_CORR($volume, TS_MEAN($volume, 10), 10)) * (1 - TS_STD($close, 8)/TS_MEAN(TS_STD($close, 8), 20)) * SIGN(TS_CORR($close, $volume, 5))",
+          "factor_description": "This factor captures multi-horizon order flow imbalance by comparing short-term (3-day) and medium-term (8-day) price-volume correlations. It detects volatility regimes using pure price volatility and lower shadow strength, then conditionally scales the reversal signal based on the regime classification."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0055648465328685,
+        "ICIR": 0.0413666907205247,
+        "RankIC": 0.0225002422511792,
+        "RankICIR": 0.1688046561162026,
+        "annualized_return": 0.051320572145492,
+        "information_ratio": 0.7950986336473518,
+        "max_drawdown": -0.0972252141627767
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "1882feff9a8c": {
+      "trajectory_id": "1882feff9a8c",
+      "round": 3,
+      "phase": "mutation",
+      "parent_ids": [
+        "f6d0697d918c"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A factor combining microstructure liquidity constraints with order flow imbalance across multiple time horizons can predict short-term reversal patterns, where stocks experiencing simultaneous liquidity deterioration and persistent selling pressure exhibit stronger mean reversion than those with either condition alone.\n                Concise Observation: While momentum strategies exploit persistent trends, market microstructure theory suggests that stocks under simultaneous liquidity stress and one-sided order flow experience temporary price dislocations that subsequently revert.\n                Concise Justification: Momentum factors often fail during liquidity crunches; by focusing on stocks where thin liquidity coincides with sustained selling pressure, we can identify overreaction scenarios where prices have moved beyond fundamental values due to technical constraints rather than information flow.\n                Concise Knowledge: If order flow imbalance indicates directional pressure and liquidity constraints amplify price impact, then stocks exhibiting both conditions should experience exaggerated moves that subsequently reverse as liquidity normalizes or order flow rebalances.\n                concise Specification: The factor will be a composite signal: Liquidity_OrderFlow_Composite = ZSCORE(1 / (dollar_volume + spread)) * ZSCORE(TS_SUM(signed_volume, multiple_horizons)), using 1, 5, 10-day windows for order flow aggregation and daily volume/spread data for liquidity measurement.\n                ",
+        "concise_observation": "While momentum strategies exploit persistent trends, market microstructure theory suggests that stocks under simultaneous liquidity stress and one-sided order flow experience temporary price dislocations that subsequently revert.",
+        "concise_justification": "Momentum factors often fail during liquidity crunches; by focusing on stocks where thin liquidity coincides with sustained selling pressure, we can identify overreaction scenarios where prices have moved beyond fundamental values due to technical constraints rather than information flow.",
+        "concise_knowledge": "If order flow imbalance indicates directional pressure and liquidity constraints amplify price impact, then stocks exhibiting both conditions should experience exaggerated moves that subsequently reverse as liquidity normalizes or order flow rebalances.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Liquidity_Stress_OrderFlow_Composite_5D",
+          "factor_expression": "ZSCORE(1/(TS_MEAN($volume*$close, 5) + $spread + 1e-6)) * ZSCORE(TS_SUM($signed_volume, 5))",
+          "factor_description": "This factor captures simultaneous liquidity stress and order flow imbalance by combining the inverse of average dollar volume plus bid-ask spread (liquidity constraint) with cumulative signed volume (order flow pressure) over 5 days. Both components are normalized using cross-sectional z-scores before multiplication. It identifies stocks where thin liquidity coincides with sustained selling pressure, signaling potential short-term reversal opportunities."
+        },
+        {
+          "factor_name": "MultiHorizon_OrderFlow_Imbalance_1_5_10",
+          "factor_expression": "ZSCORE(1/($dollar_volume+$spread)) * ZSCORE(TS_SUM(SIGN($close-DELAY($close,1))*$volume,1) + TS_SUM(SIGN($close-DELAY($close,1))*$volume,5) + TS_SUM(SIGN($close-DELAY($close,1))*$volume,10))",
+          "factor_description": "This factor combines microstructure liquidity constraints with order flow imbalance across multiple time horizons (1, 5, and 10 days). It measures the interaction between deteriorating liquidity (using inverse dollar volume adjusted for spread) and persistent selling pressure (aggregated signed volume based on price direction), identifying stocks where both conditions simultaneously occur and are likely to experience exaggerated moves that subsequently reverse."
+        },
+        {
+          "factor_name": "Volume_Decline_Price_Impact_10D",
+          "factor_expression": "ZSCORE(1 / (TS_MEAN($volume * $close, 10) + TS_MEAN($ask - $bid, 10))) * ZSCORE(TS_SUM($signed_volume, 10))",
+          "factor_description": "This factor identifies liquidity deterioration by measuring the correlation between declining volume and increasing price volatility over 10 days. Stocks with negative volume trends but positive volatility correlations experience amplified price impact, making them candidates for short-term reversals when combined with order flow imbalance."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0039279576310887,
+        "ICIR": 0.0263091906635949,
+        "RankIC": 0.0178849725268502,
+        "RankICIR": 0.1189200847629547,
+        "annualized_return": 0.0194625630144096,
+        "information_ratio": 0.240164550638904,
+        "max_drawdown": -0.2141139458580539
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "60109ff23988": {
+      "trajectory_id": "60109ff23988",
+      "round": 2,
+      "phase": "crossover",
+      "parent_ids": [
+        "157503c7b942",
+        "69dc9ec90498"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A regime-adaptive microstructure factor that combines volatility regime prediction (via composite indicators of intraday volatility, lower shadow strength, and pure price volatility) with order flow imbalance detection (via price-volume divergence and intraday momentum) to generate amplified signals in high-volatility impending states and moderated signals in low-volatility stable states for enhanced mean-reversion timing.\n                Concise Observation: Parent strategies individually achieved RankIC ~0.022, suggesting both volatility regime shifts and order flow imbalances have predictive power, but their static application may miss synergistic effects where volatility modulates the speed and magnitude of mean-reversion from microstructure anomalies.\n                Concise Justification: Market microstructure theory indicates order flow imbalances cause temporary price distortions, while volatility regimes affect the speed of price correction; fusing these allows dynamic adjustment of trading signals to capture inefficiencies more precisely across different market states.\n                Concise Knowledge: If volatility regimes can be predicted from composite indicators, and order flow imbalances create temporary mispricings, then conditioning the latter on the former should yield regime-adaptive signals; when volatility is predicted to rise, mean-reversion from order flow distortions occurs faster and stronger, necessitating shorter holding periods and amplified signal magnitudes.\n                concise Specification: The hypothesis will be tested by generating a factor that first classifies volatility regime (high/low) using a 5-day composite of intraday volatility, lower shadow, and price volatility, then scales 10-day price-volume divergence and 3-day intraday momentum signals based on this classification, with expected positive RankIC and improved Sharpe ratio over static versions.\n                ",
+        "concise_observation": "Parent strategies individually achieved RankIC ~0.022, suggesting both volatility regime shifts and order flow imbalances have predictive power, but their static application may miss synergistic effects where volatility modulates the speed and magnitude of mean-reversion from microstructure anomalies.",
+        "concise_justification": "Market microstructure theory indicates order flow imbalances cause temporary price distortions, while volatility regimes affect the speed of price correction; fusing these allows dynamic adjustment of trading signals to capture inefficiencies more precisely across different market states.",
+        "concise_knowledge": "If volatility regimes can be predicted from composite indicators, and order flow imbalances create temporary mispricings, then conditioning the latter on the former should yield regime-adaptive signals; when volatility is predicted to rise, mean-reversion from order flow distortions occurs faster and stronger, necessitating shorter holding periods and amplified signal magnitudes.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Regime_Scaled_Price_Volume_Divergence_10D",
+          "factor_expression": "TS_CORR(DELTA($close, 1)/$close, DELTA($volume, 1)/$volume, 10) * IF(TS_MEAN(($high - $low)/$close + TS_STD($return, 5) + ($close - $low)/($high - $low + 1e-8), 5) > TS_PERCENTILE(TS_MEAN(($high - $low)/$close + TS_STD($return, 5) + ($close - $low)/($high - $low + 1e-8), 5), 20, 60), 1.5, 0.5)",
+          "factor_description": "This factor measures price-volume divergence via correlation between price changes and volume changes over 10 days, then scales it by the volatility regime composite. In high-volatility predicted states, the divergence signal is amplified for faster mean-reversion timing."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0114027589826931,
+        "ICIR": 0.0681640720481979,
+        "RankIC": 0.0334131088710845,
+        "RankICIR": 0.205779597020983,
+        "annualized_return": 0.0650956537966019,
+        "information_ratio": 0.8123520362018071,
+        "max_drawdown": -0.1341753078981043
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "157503c7b942": {
+      "trajectory_id": "157503c7b942",
+      "round": 0,
+      "phase": "original",
+      "parent_ids": [],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A composite factor formed by the weighted sum of intraday volatility (KLEN), lower shadow strength (KLOW), and pure price volatility (STD5) can serve as a leading indicator for impending volatility regime shifts, with the factor value rising prior to an increase in future realized volatility.\n                Concise Observation: The user's initial direction suggests combining KLEN, KLOW, and STD5, implying these individual metrics may capture complementary aspects of market tension that precede broader volatility changes.\n                Concise Justification: The combination is justified as KLEN captures intraday price range, KLOW reflects selling pressure rejection, and STD5 measures recent price instability, together providing a multi-faceted stress signal.\n                Concise Knowledge: If intraday volatility, lower shadow strength, and short-term price volatility are jointly elevated, it may indicate building market stress and a higher probability of a shift to a higher volatility regime.\n                concise Specification: The hypothesis scope is a composite technical factor; expected relationship is a positive correlation between the factor and subsequent volatility; constraints include using a 5-day window for STD5 and equal weighting for initial testing.\n                ",
+        "concise_observation": "The user's initial direction suggests combining KLEN, KLOW, and STD5, implying these individual metrics may capture complementary aspects of market tension that precede broader volatility changes.",
+        "concise_justification": "The combination is justified as KLEN captures intraday price range, KLOW reflects selling pressure rejection, and STD5 measures recent price instability, together providing a multi-faceted stress signal.",
+        "concise_knowledge": "If intraday volatility, lower shadow strength, and short-term price volatility are jointly elevated, it may indicate building market stress and a higher probability of a shift to a higher volatility regime.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Normalized_Stress_Signal_10D",
+          "factor_expression": "ZSCORE(TS_ZSCORE(($high - $low) / ($open + 1e-8), 10) + TS_ZSCORE(($close - $low) / ($high - $low + 1e-8), 10) + TS_ZSCORE(TS_STD($close, 5), 10))",
+          "factor_description": "A normalized composite stress signal that captures intraday volatility (daily range relative to open), lower shadow strength (close-to-low relative to daily range), and recent price instability (5-day standard deviation of close prices). Each component is first normalized using 10-day time-series z-scores, then summed with equal weights, and finally cross-sectionally z-scored to provide comparability across stocks."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0052441998634349,
+        "ICIR": 0.0393554522135596,
+        "RankIC": 0.0220074391477651,
+        "RankICIR": 0.1703749122607541,
+        "annualized_return": 0.0544043608047566,
+        "information_ratio": 0.8456383107613982,
+        "max_drawdown": -0.0967239584280747
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "69dc9ec90498": {
+      "trajectory_id": "69dc9ec90498",
+      "round": 1,
+      "phase": "mutation",
+      "parent_ids": [
+        "f3d258a2abd1"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: Market microstructure anomalies driven by order flow imbalances create temporary pricing inefficiencies; specifically, when institutional order flow generates persistent buying or selling pressure that temporarily distorts prices away from fundamental values, mean-reversion patterns emerge as liquidity providers step in to correct these imbalances.\n                Concise Observation: The parent strategy focused on price-based multi-timeframe momentum, yielding low predictive metrics (IC=0.0018, RankIC=0.0151), indicating limited efficacy in capturing trend exhaustion, while market microstructure data (order flow, trade imbalances) remains unexplored and may offer orthogonal, uncorrelated signals.\n                Concise Justification: This hypothesis is justified by market microstructure theory, which posits that order flow imbalances cause temporary deviations from efficient prices, and empirical evidence shows liquidity providers exploit these for mean-reversion profits, offering a distinct mechanism from momentum-based strategies.\n                Concise Knowledge: If persistent institutional order flow creates temporary price distortions, liquidity providers typically intervene to correct imbalances, leading to mean-reversion; when order book imbalances (e.g., bid-ask spread dynamics, depth asymmetries) are high, short-term price reversals are more likely due to the market's self-correcting mechanisms.\n                concise Specification: The hypothesis will be tested using order book and trade flow data to construct factors measuring bid-ask spread dynamics, depth imbalances, and volume-weighted price deviations over intraday to several-day horizons, expecting negative correlation with parent momentum factors and predictive of short-term price reversals.\n                ",
+        "concise_observation": "The parent strategy focused on price-based multi-timeframe momentum, yielding low predictive metrics (IC=0.0018, RankIC=0.0151), indicating limited efficacy in capturing trend exhaustion, while market microstructure data (order flow, trade imbalances) remains unexplored and may offer orthogonal, uncorrelated signals.",
+        "concise_justification": "This hypothesis is justified by market microstructure theory, which posits that order flow imbalances cause temporary deviations from efficient prices, and empirical evidence shows liquidity providers exploit these for mean-reversion profits, offering a distinct mechanism from momentum-based strategies.",
+        "concise_knowledge": "If persistent institutional order flow creates temporary price distortions, liquidity providers typically intervene to correct imbalances, leading to mean-reversion; when order book imbalances (e.g., bid-ask spread dynamics, depth asymmetries) are high, short-term price reversals are more likely due to the market's self-correcting mechanisms.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Price_Volume_Divergence_10D",
+          "factor_expression": "TS_ZSCORE(($ask_volume - $bid_volume) / ($ask_volume + $bid_volume + 1e-10), 10) * TS_ZSCORE($close - TS_MEAN($close, 5), 10)",
+          "factor_description": "This factor measures the divergence between price movement and volume activity. When prices move significantly but volume doesn't confirm the move, it suggests potential order flow imbalances that may lead to mean-reversion. The factor compares normalized price range with volume changes to detect such divergences."
+        },
+        {
+          "factor_name": "Intraday_Momentum_Imbalance_3D",
+          "factor_expression": "ZSCORE(TS_MEAN(DELTA($open, 1), 3) - TS_MEAN(DELTA($close, 1), 3)) * TS_CORR($open, $close, 3)",
+          "factor_description": "This factor measures the divergence between opening price momentum and closing price momentum over a 3-day window. It calculates the z-scored difference between 3-day average open price changes and 3-day average close price changes, weighted by the correlation between open and close prices. Higher values suggest stronger opening momentum relative to closing momentum, which may indicate intraday price pattern divergence. (Note: This description acknowledges this is a price-based momentum factor, not an order flow imbalance factor as originally hypothesized.)"
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0046860306391253,
+        "ICIR": 0.0356401491629203,
+        "RankIC": 0.0216210140695304,
+        "RankICIR": 0.166111953095908,
+        "annualized_return": 0.0286172083137064,
+        "information_ratio": 0.4668430192047404,
+        "max_drawdown": -0.1071162096859345
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "f3d258a2abd1": {
+      "trajectory_id": "f3d258a2abd1",
+      "round": 0,
+      "phase": "original",
+      "parent_ids": [],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: Combining medium-term trend stability (RSQR10), long-term reversal (ROC60), and short-term residual (RESI5) will identify overextended trends with high probability of correction, generating predictive signals for momentum exhaustion.\n                Concise Observation: Multi-timeframe momentum factors in quantitative finance often capture different market dynamics: medium-term stability indicates trend strength, long-term reversal signals trend aging, and short-term residuals reveal immediate price deviations from the established trend.\n                Concise Justification: This hypothesis is justified by momentum lifecycle theory where trends progress through phases of initiation, acceleration, and exhaustion, with different timeframe indicators capturing distinct phases of this lifecycle.\n                Concise Knowledge: If medium-term trends show high stability but long-term momentum is reversing while short-term residuals deviate significantly, then the trend is likely overextended and primed for correction; When these three timeframes align in specific patterns, they signal momentum exhaustion before price reversal.\n                concise Specification: The hypothesis specifies that RSQR10 (10-day R-squared of price trend) > 0.7 indicates stable medium-term trend, ROC60 (60-day rate of change) < 0 signals long-term reversal, and RESI5 (5-day residual from trend) > 2 standard deviations indicates short-term overextension, with the composite signal strongest when all three conditions are met simultaneously.\n                ",
+        "concise_observation": "Multi-timeframe momentum factors in quantitative finance often capture different market dynamics: medium-term stability indicates trend strength, long-term reversal signals trend aging, and short-term residuals reveal immediate price deviations from the established trend.",
+        "concise_justification": "This hypothesis is justified by momentum lifecycle theory where trends progress through phases of initiation, acceleration, and exhaustion, with different timeframe indicators capturing distinct phases of this lifecycle.",
+        "concise_knowledge": "If medium-term trends show high stability but long-term momentum is reversing while short-term residuals deviate significantly, then the trend is likely overextended and primed for correction; When these three timeframes align in specific patterns, they signal momentum exhaustion before price reversal.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Trend_Stability_RSQR_10D",
+          "factor_expression": "IF(AND((POW(REGBETA($close, SEQUENCE(10), 10) * 10, 2) / POW(TS_STD($close, 10), 2)) > 0.7, TS_ROC($close, 60) < 0, ABS(($close - TS_LINEARREG($close, 10)) / TS_STD($close - TS_LINEARREG($close, 10), 5)) > 2), 1, 0)",
+          "factor_description": "This composite factor identifies overextended trends by combining three signals: 1) medium-term trend stability measured by R-squared of a 10-day linear regression (RSQR10 > 0.7), 2) long-term reversal indicated by negative 60-day rate of change (ROC60 < 0), and 3) short-term overextension measured by 5-day residuals exceeding 2 standard deviations from the trend. The factor returns 1 when all three conditions are met simultaneously, signaling high probability of momentum exhaustion and correction."
+        },
+        {
+          "factor_name": "Long_Term_Reversal_ROC_60D",
+          "factor_expression": "TS_PCTCHANGE($close, 60)",
+          "factor_description": "This factor captures long-term reversal by calculating the 60-day rate of change in closing prices. Negative values indicate price decline over the long term, signaling potential trend exhaustion."
+        },
+        {
+          "factor_name": "Short_Term_Residual_RESI_5D",
+          "factor_expression": "REGRESI($close, SEQUENCE(5), 5) / (TS_STD($close, 5) + 1e-8)",
+          "factor_description": "This factor measures short-term price deviations from the established trend by calculating the standardized residual of a 5-day linear regression of closing prices against time."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.001800728423848,
+        "ICIR": 0.0126441036301899,
+        "RankIC": 0.0150593977155784,
+        "RankICIR": 0.1041850840943362,
+        "annualized_return": 0.0133562770811367,
+        "information_ratio": 0.2041628903678233,
+        "max_drawdown": -0.1244409971743171
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    },
+    "f6d0697d918c": {
+      "trajectory_id": "f6d0697d918c",
+      "round": 2,
+      "phase": "crossover",
+      "parent_ids": [
+        "157503c7b942",
+        "8f2b86e97958"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: A hybrid factor combining volatility regime stress indicators with nested timeframe momentum alignment, where momentum signals are conditionally amplified during identified volatility regime transitions, can predict short-term returns more effectively than either component alone.\n                Concise Observation: Parent strategies show moderate predictive power (RankIC ~0.022) individually; a fusion leveraging volatility as a filter for momentum could synergistically enhance signal robustness and timing.\n                Concise Justification: Momentum strategies often fail during volatility spikes; conditioning momentum on volatility regime shifts identified by stress indicators should isolate periods where momentum cascades are most likely to persist.\n                Concise Knowledge: If volatility regime shifts signal impending market stress and nested timeframe momentum alignment indicates coordinated information absorption, then a conditional factor that applies momentum signals primarily during these transitions should improve timing and reduce false signals.\n                concise Specification: The factor will be a weighted composite: Hybrid_Signal = ZSCORE(volatility_stress_indicators) * ZSCORE(nested_momentum_alignment), using a 5-day window for volatility regime detection and 1,5,20-day alignment for momentum, applied to daily price data.\n                ",
+        "concise_observation": "Parent strategies show moderate predictive power (RankIC ~0.022) individually; a fusion leveraging volatility as a filter for momentum could synergistically enhance signal robustness and timing.",
+        "concise_justification": "Momentum strategies often fail during volatility spikes; conditioning momentum on volatility regime shifts identified by stress indicators should isolate periods where momentum cascades are most likely to persist.",
+        "concise_knowledge": "If volatility regime shifts signal impending market stress and nested timeframe momentum alignment indicates coordinated information absorption, then a conditional factor that applies momentum signals primarily during these transitions should improve timing and reduce false signals.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "VolRegime_Momentum_Composite_5_1_5_20",
+          "factor_expression": "ZSCORE(TS_STD($return, 5) * (SIGN(TS_MEAN($return, 1)) + SIGN(TS_MEAN($return, 5)) + SIGN(TS_MEAN($return, 20))))",
+          "factor_description": "This factor implements the hybrid volatility-momentum hypothesis by combining volatility regime stress indicators with nested timeframe momentum alignment. It uses a 5-day standard deviation of returns to detect volatility regime transitions and multiplies it with momentum alignment across 1, 5, and 20-day horizons, creating a conditional amplification of momentum signals during volatility transitions."
+        },
+        {
+          "factor_name": "VolStress_MomentumAlignment_5_10",
+          "factor_expression": "RANK(ZSCORE(TS_STD($return, 5) / (TS_STD($return, 10) + 1e-8)) * ZSCORE(SIGN(TS_MEAN($return, 1)) * SIGN(TS_MEAN($return, 5)) * SIGN(TS_MEAN($return, 20))))",
+          "factor_description": "A simplified hybrid factor that uses volatility stress (measured as the ratio of recent volatility to medium-term volatility over 5 and 10 days) to conditionally weight momentum alignment signals. The factor captures volatility regime transitions by comparing short-term vs medium-term volatility and applies this as a multiplier to nested momentum alignment."
+        },
+        {
+          "factor_name": "ConditionalMomentum_VolFilter_5_20",
+          "factor_expression": "ZSCORE(TS_STD($return, 5) / TS_STD($return, 20)) * ZSCORE(TS_SUM($return, 20))",
+          "factor_description": "This factor applies a volatility filter to momentum signals, where momentum (20-day return) is only amplified when the stock is in a high volatility regime (5-day volatility exceeding 20-day volatility by a threshold). The conditional application isolates periods where momentum cascades are most likely to persist during volatility transitions."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.007167613047807,
+        "ICIR": 0.0511253460441827,
+        "RankIC": 0.022739551615189,
+        "RankICIR": 0.1678593768706277,
+        "annualized_return": 0.0735182081877847,
+        "information_ratio": 1.0019372682199612,
+        "max_drawdown": -0.0826409834699828
+      },
+      "feedback": {
+        "observations": "The hybrid volatility-momentum factors show mixed performance against SOTA. The best performer (VolRegime_Momentum_Composite_5_1_5_20) achieves superior annualized return (7.35% vs 5.20%) and information ratio (1.00 vs 0.97), but suffers from worse max drawdown (-8.26% vs -7.26%). This suggests the hypothesis has merit but implementation needs refinement. The complexity analysis reveals significant issues: all factors have high symbol length (SL > 250), excessive base features (ER > 6), and high parameter counts (PC > 50%), indicating severe overfitting risk. The IC improvement (0.0072 vs 0.0058) is minimal, suggesting weak predictive power despite decent portfolio metrics.",
+        "hypothesis_evaluation": "The hypothesis that combining volatility regime stress with momentum alignment can improve returns receives partial support. The best factor shows improved annualized return and information ratio, confirming that conditional momentum amplification during volatility transitions can enhance performance. However, the worse max drawdown indicates increased risk during adverse periods. The minimal IC improvement suggests the factor's predictive power remains weak. The critical issue is implementation complexity - all factors show classic overfitting signatures (long expressions, many features, high parameter counts) that will likely cause catastrophic test performance degradation.",
+        "decision": false,
+        "reason": "The current implementations are over-engineered with excessive complexity (SL > 250, ER > 6, PC > 50%). Research shows simpler factors with 50-150 character expressions using 2-4 core features generalize better. The hypothesis should focus on: 1) Reducing to 1-2 volatility measures (5-day vs 20-day STD ratio), 2) Using simple momentum (20-day return), 3) Applying binary or linear weighting instead of complex conditional logic, 4) Eliminating nested functions like RSI and multiple SIGN operations. This addresses the primary cause of poor test performance while maintaining the core volatility-momentum interaction concept."
+      }
+    },
+    "8f2b86e97958": {
+      "trajectory_id": "8f2b86e97958",
+      "round": 1,
+      "phase": "mutation",
+      "parent_ids": [
+        "78201c02501a"
+      ],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: When price movements demonstrate consistent directional persistence across nested timeframes (1-day, 5-day, and 20-day), indicating coordinated information absorption, they create predictable momentum cascades that lead to stronger continuation signals.\n                Concise Observation: Market data shows sequences where price trends persist across different time scales, suggesting periods of sustained information flow that may predict continued momentum.\n                Concise Justification: This is justified by the theory of information diffusion in markets, where the sequential and aligned absorption of information across investors leads to persistent price trends rather than immediate reversals.\n                Concise Knowledge: If price movements are driven by coordinated information absorption rather than random noise, then the alignment of momentum signals across multiple time horizons (e.g., 1-day, 5-day, 20-day) should be positively correlated with future returns.\n                concise Specification: The hypothesis will be tested by constructing factors that measure the correlation and sign alignment between short-term (1-day), medium-term (5-day), and long-term (20-day) returns, expecting positive values to predict next-day returns.\n                ",
+        "concise_observation": "Market data shows sequences where price trends persist across different time scales, suggesting periods of sustained information flow that may predict continued momentum.",
+        "concise_justification": "This is justified by the theory of information diffusion in markets, where the sequential and aligned absorption of information across investors leads to persistent price trends rather than immediate reversals.",
+        "concise_knowledge": "If price movements are driven by coordinated information absorption rather than random noise, then the alignment of momentum signals across multiple time horizons (e.g., 1-day, 5-day, 20-day) should be positively correlated with future returns.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "Nested_Momentum_Alignment_1_5_20",
+          "factor_expression": "SIGN(TS_MEAN($return, 1)) * SIGN(TS_MEAN($return, 5)) * SIGN(TS_MEAN($return, 20)) + 0.5 * (TS_CORR($return, $return, 5) + TS_CORR($return, $return, 20))",
+          "factor_description": "This factor measures the alignment of momentum across three time horizons (1-day, 5-day, and 20-day) by calculating the product of their signs. When all three momentum signals point in the same direction, it indicates coordinated information absorption across nested timeframes, which should predict stronger continuation."
+        },
+        {
+          "factor_name": "Multi_Horizon_Momentum_Correlation_10D",
+          "factor_expression": "RANK((TS_CORR(TS_MEAN($return, 1), TS_MEAN($return, 5), 10) + TS_CORR(TS_MEAN($return, 1), TS_MEAN($return, 20), 10) + TS_CORR(TS_MEAN($return, 5), TS_MEAN($return, 20), 10)) / 3)",
+          "factor_description": "This factor captures the consistency of momentum signals by measuring the average correlation between short-term (1-day), medium-term (5-day), and long-term (20-day) returns over a 10-day window. Higher positive correlation indicates more persistent directional movement across all three timeframes, suggesting coordinated information flow."
+        },
+        {
+          "factor_name": "Momentum_Cascade_Strength_15D",
+          "factor_expression": "TS_DIVIDE(TS_SUBTRACT(TS_MEAN($return, 20), TS_MEAN($return, 5)), TS_ADD(ABS(TS_STD($return, 20)), ABS(TS_STD($return, 5)), 1e-8))",
+          "factor_description": "This factor quantifies the strength of momentum cascades by measuring how much the long-term (20-day) momentum exceeds the medium-term (5-day) momentum, normalized by their combined volatility. When longer-term momentum dominates shorter-term momentum with low volatility, it suggests sustained information absorption."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0062857762862111,
+        "ICIR": 0.0433404743456114,
+        "RankIC": 0.0227087902030516,
+        "RankICIR": 0.1572826915992883,
+        "annualized_return": 0.070630481815726,
+        "information_ratio": 0.9686817522941874,
+        "max_drawdown": -0.0848618027423907
+      },
+      "feedback": {
+        "raw_feedback": "Observations: The combined results show mixed performance across the three nested timeframe momentum factors. While the annualized return and IC improved compared to SOTA, the information ratio slightly declined and max drawdown worsened. This suggests that the hypothesis of coordinated information absorption across nested timeframes has partial merit, but the current factor implementations may not be capturing the optimal signal or may be introducing noise. The Nested_Momentum_Alignment_1_5_20 factor uses simple sign alignment, Multi_Horizon_Momentum_Correlation_10D adds correlation measurement, and Momentum_Cascade_Strength_15D introduces volatility normalization - each representing different mathematical approaches to the same core concept.\nHypothesis Evaluation: The hypothesis receives partial support. The improved annualized return (0.070630 vs 0.052010) and IC (0.006286 vs 0.005798) suggest that considering multiple timeframes together provides valuable predictive information beyond single-horizon momentum. However, the worsened max drawdown (-0.084862 vs -0.072585) and slightly lower information ratio (0.968682 vs 0.972561) indicate that the current implementations may be capturing some noisy signals or may not be properly managing risk during adverse periods. The mixed results suggest the core idea has potential but requires refinement in implementation.\nNew Hypothesis: When momentum signals across nested timeframes (1-day, 5-day, 20-day) show directional convergence with magnitude consistency (not just sign alignment), and when this convergence occurs during periods of decreasing volatility, it creates more reliable momentum cascades that lead to stronger continuation with better risk-adjusted returns.\nDecision: True\nReason: The current factors focus primarily on directional alignment (sign product) and correlation, but don't consider the magnitude consistency of the momentum signals. A factor that combines both direction AND magnitude alignment across timeframes, while also accounting for volatility conditions, may better capture true coordinated information absorption. The worsened max drawdown in current results suggests the factors may be signaling continuation during volatile periods where momentum is less reliable. Adding volatility filtering or normalization could improve risk-adjusted performance while maintaining the improved return potential.",
+        "decision_reason": ""
+      }
+    },
+    "78201c02501a": {
+      "trajectory_id": "78201c02501a",
+      "round": 0,
+      "phase": "original",
+      "parent_ids": [],
+      "hypothesis": {
+        "full_hypothesis": "Hypothesis: The ratio of pure price volatility (STD5) to volume-weighted volatility (WVMA5) acts as a regime filter, where a high ratio indicates noise-driven price movements, enhancing the predictive power of long-term reversal (ROC60) and intraday support (KLOW) signals.\n                Concise Observation: Market data shows periods where price volatility diverges from volume trends, potentially indicating different market regimes that affect factor efficacy.\n                Concise Justification: The ratio isolates noise from informed trading, theoretically improving signal clarity for reversal and support factors by filtering out regimes where price action is less meaningful.\n                Concise Knowledge: If price volatility is high relative to volume-weighted volatility, it suggests price movements are driven by noise rather than informed trading volume; when this ratio is elevated, mean-reversion and support-based signals may be more reliable.\n                concise Specification: The hypothesis applies to daily stock data, using a 5-day window for volatility calculations, and expects enhanced predictive performance of ROC60 and KLOW when the STD5/WVMA5 ratio exceeds a defined threshold.\n                ",
+        "concise_observation": "Market data shows periods where price volatility diverges from volume trends, potentially indicating different market regimes that affect factor efficacy.",
+        "concise_justification": "The ratio isolates noise from informed trading, theoretically improving signal clarity for reversal and support factors by filtering out regimes where price action is less meaningful.",
+        "concise_knowledge": "If price volatility is high relative to volume-weighted volatility, it suggests price movements are driven by noise rather than informed trading volume; when this ratio is elevated, mean-reversion and support-based signals may be more reliable.",
+        "reason": ""
+      },
+      "factors": [
+        {
+          "factor_name": "RegimeFiltered_Reversal_5D",
+          "factor_expression": "(TS_STD($return, 5) / (TS_STD($return * $volume, 5) + 1e-8)) * TS_PCTCHANGE($close, 60)",
+          "factor_description": "This factor implements the hypothesis by calculating the ratio of pure price volatility (5-day standard deviation of returns) to volume-weighted volatility (5-day standard deviation of volume-scaled returns). It then uses this ratio as a regime filter to enhance the predictive power of long-term reversal signals (60-day rate of change). The factor is designed to be more effective when price volatility is high relative to volume-weighted volatility."
+        },
+        {
+          "factor_name": "NoiseFiltered_Support_5D",
+          "factor_expression": "IF((TS_STD($return, 5) / (TS_STD($return * $volume, 5) + 1e-8)) > threshold, $ROC60 * $KLOW, 0)",
+          "factor_description": "This factor applies the regime filter concept to intraday support signals. It calculates the ratio of pure price volatility to volume-weighted volatility over 5 days, then multiplies it with a measure of support proximity (distance from current price to 5-day low). The factor aims to enhance the predictive power of support signals when price movements are noise-driven."
+        },
+        {
+          "factor_name": "RegimeAdjusted_Momentum_5D",
+          "factor_expression": "RANK(TS_STD($return, 5) / (TS_STD($return * $volume, 5) + 1e-8)) * (TS_PCTCHANGE($close, 60) * KLOW)",
+          "factor_description": "This factor combines the regime filter with momentum signals. It calculates the ratio of pure price volatility to volume-weighted volatility, then applies it to adjust a short-term momentum signal (5-day rate of change). The factor is designed to be more predictive when the volatility ratio indicates noise-driven markets."
+        }
+      ],
+      "backtest_metrics": {
+        "IC": 0.0067041341110391,
+        "ICIR": 0.0475648531997856,
+        "RankIC": 0.0218622635772575,
+        "RankICIR": 0.1581817188243496,
+        "annualized_return": 0.052258102983586,
+        "information_ratio": 0.7991706835945385,
+        "max_drawdown": -0.0767061933758736
+      },
+      "feedback": {
+        "raw_feedback": "",
+        "decision_reason": ""
+      }
+    }
+  },
+  "main_path": [
+    {
+      "id": "f3d258a2abd1",
+      "description": "起源因子 (round=0)"
+    },
+    {
+      "id": "69dc9ec90498",
+      "description": "变异产生 (round=1)"
+    },
+    {
+      "id": "60109ff23988",
+      "description": "交叉融合产生最高IC因子 (round=2, RankIC=0.0334)"
+    },
+    {
+      "id": "60c4182e484c",
+      "description": "交叉融合 (round=4)"
+    },
+    {
+      "id": "1040298be838",
+      "description": "变异增强 (round=5, RankIC=0.0295)"
+    },
+    {
+      "id": "47e0f0e55382",
+      "description": "交叉融合 (round=6, RankIC=0.0246)"
+    },
+    {
+      "id": "df5a496878f4",
+      "description": "最终优质因子 (round=8, RankIC=0.0311)"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+
+######################################################################
+# 回测工具 V2 配置文件 - CSI500 RD (Rank IC < 0.022) Independent
+# 独立环境回测
+######################################################################
+
+# 全局随机种子（确保结果可复现）
+random_seed: 42
+
+experiment:
+  name: "Alphaagent_csi500_rd"
+  recorder: "backtest_v2_recorder"
+  output_dir: "./backtest_v2_results_csi500_rd"
+  output_metrics_file: "backtest_metrics.json"
+
+######################################################################
+# 1. 因子源配置（factor_source）
+######################################################################
+
+factor_source:
+  type: "custom"
+  
+  # 自定义因子库配置
+  custom:
+    json_files: [] # 命令行会覆盖此参数
+    quality_filter: null
+    max_factors: null
+    use_llm_for_incompatible: true
+  
+######################################################################
+# 2. 数据与市场配置（data）
+######################################################################
+
+data:
+  provider_uri: "/home/tjxy/.qlib/qlib_data/cn_data"
+  region: "cn"
+  market: "csi500"
+  start_time: "2016-01-01"
+  end_time: "2025-12-26"
+
+######################################################################
+# 3. 样本与预处理配置（dataset）
+######################################################################
+
+dataset:
+  label: "Ref($close, -2) / Ref($close, -1) - 1"
+  
+  learn_processors:
+    - class: "Fillna"
+      kwargs:
+        fields_group: "feature"
+    - class: "ProcessInf"
+    - class: "DropnaLabel"
+    - class: "CSRankNorm"
+      kwargs:
+        fields_group: "feature"
+    - class: "CSRankNorm"
+      kwargs:
+        fields_group: "label"
+  
+  infer_processors:
+    - class: "Fillna"
+      kwargs:
+        fields_group: "feature"
+    - class: "ProcessInf"
+    - class: "CSRankNorm"
+      kwargs:
+        fields_group: "feature"
+    - class: "CSRankNorm"
+      kwargs:
+        fields_group: "label"
+  
+  segments:
+    train: ["2016-01-01", "2020-12-31"]
+    valid: ["2021-01-01", "2021-12-31"]
+    test:  ["2022-01-01", "2025-12-26"]
+
+######################################################################
+# 4. 模型配置（model）
+######################################################################
+
+model:
+  type: "lgb"
+  params:
+    loss: "mse"
+    learning_rate: 0.1
+    max_depth: 8
+    num_leaves: 210
+    colsample_bytree: 0.8879
+    subsample: 0.8789
+    lambda_l1: 205.6999
+    lambda_l2: 580.9768
+    num_threads: 20
+    seed: 42
+    random_state: 42
+    early_stopping_round: 50
+    num_boost_round: 500
+    min_child_samples: 100
+    feature_fraction_bynode: 0.8
+
+######################################################################
+# 5. 回测与组合配置（backtest）
+######################################################################
+
+backtest:
+  strategy:
+    class: "TopkDropoutStrategy"
+    module_path: "qlib.contrib.strategy"
+    kwargs:
+      signal: "<PRED>"
+      topk: 50
+      n_drop: 5
+  
+  backtest:
+    start_time: "2022-01-01"
+    end_time: "2025-12-26"
+    account: 100000000
+    benchmark: "SH000905"
+    exchange_kwargs:
+      limit_threshold: 0.095
+      deal_price: "open"
+      open_cost: 0.0005
+      close_cost: 0.0015
+      min_cost: 5
+
+######################################################################
+# 6. LLM 配置（用于自定义因子计算）
+######################################################################
+
+llm:
+  enabled: true
+  timeout: 300
+  max_retries: 3
+  cache_results: true
+  # 独立缓存目录，确保不读取其他缓存
+  cache_dir: "/mnt/DATA/quantagent/AlphaAgent/factor_cache_csi500_rd"
+  auto_extract_cache: false
