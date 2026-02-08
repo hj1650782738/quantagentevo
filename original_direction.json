@@ -18,7 +18,7 @@
       },
       {
         "portfolio_id": 5,
-        "description": "参考以下组合给出假设,假设不需要太复杂。包含RSQR20（表达式：Rsquare($close, 20)，含义：20日价格线性回归R²，中期趋势稳定性）、VSUMP5（表达式：Sum(Greater($volume-Ref($volume, 1), 0), 5)/(Sum(Abs($volume-Ref($volume, 1)), 5)+1e-12)，含义：5日成交量上涨幅度占比，反映资金流入强度）、RSV5（表达式：($close-Min($low, 5))/(Max($high, 5)-Min($low, 5)+1e-12)，含义：5日价格相对位置，类似KDJ未成熟随机值）。"
+        "description": "参考以下组合给出假设,组合5包含RSQR20（表达式：Rsquare($close, 20)，含义：20日价格线性回归R²，中期趋势稳定性）、VSUMP5（表达式：Sum(Greater($volume-Ref($volume, 1), 0), 5)/(Sum(Abs($volume-Ref($volume, 1)), 5)+1e-12)，含义：5日成交量上涨幅度占比，反映资金流入强度）、RSV5（表达式：($close-Min($low, 5))/(Max($high, 5)-Min($low, 5)+1e-12)，含义：5日价格相对位置，类似KDJ未成熟随机值）。"
       },
       {
         "portfolio_id": 6,
@@ -34,7 +34,7 @@
       },
       {
         "portfolio_id": 9,
-        "description": "参考以下组合给出假设。RESI10（表达式：Resi($close, 10)/$close，含义：10日线性回归残差，中期价格偏离趋势度）、KMID2（表达式：($close-$open)/($high-$low+1e-12)，含义：K线实体占总长度比，反映涨跌有效性）、QTLU5（表达式：Quantile($close, 5, 0.8)/$close，含义：5日价格80分位数，反映价格相对高位）。"
+        "description": "参考以下组合给出假设。组合9包含RESI10（表达式：Resi($close, 10)/$close，含义：10日线性回归残差，中期价格偏离趋势度）、KMID2（表达式：($close-$open)/($high-$low+1e-12)，含义：K线实体占总长度比，反映涨跌有效性）、QTLU5（表达式：Quantile($close, 5, 0.8)/$close，含义：5日价格80分位数，反映价格相对高位）。"
       },
       {
         "portfolio_id": 10,
